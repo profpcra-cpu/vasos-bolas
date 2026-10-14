@@ -1,0 +1,57 @@
+{
+  "name": "Ball Sort Puzzle — Chaos Edition",
+  "short_name": "Ball Sort",
+  "description": "Puzzle de ordenação de bolas com geração procedural, seeds compartilháveis e modos Caos e Diário.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a0b2e",
+  "theme_color": "#1a0b2e",
+  "categories": ["games", "puzzle", "entertainment"],
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tabuleiro do Ball Sort"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Jogar Diário",
+      "short_name": "Diário",
+      "url": "./?mode=daily",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Modo Caos",
+      "short_name": "Caos",
+      "url": "./?mode=chaos",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
