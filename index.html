@@ -994,7 +994,12 @@ class Renderer {
   document.getElementById('btn-zen').addEventListener('click', () => controller.toggleZen());
   document.getElementById('btn-theme').addEventListener('click', () => renderer.toggleTheme());
   document.getElementById('btn-restart').addEventListener('click', () => controller.restart());
-  document.getElementById('btn-next-level').addEventListener('click', () => controller.nextLevel());
+  
+  // Correção aplicada para fechar o modal e carregar o próximo nível perfeitamente
+  document.getElementById('btn-next-level').addEventListener('click', () => {
+    renderer.closeModal();
+    controller.nextLevel();
+  });
 
   document.addEventListener('keydown', (e) => {
     if (e.target.matches('input, textarea')) return;
