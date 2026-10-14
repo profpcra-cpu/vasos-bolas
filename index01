@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a0b2e">
+<title>Ball Sort Puzzle — Chaos Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root{
+  --bg-1:#1a0b2e; --bg-2:#2d1b4e; --bg-3:#0f0520;
+  --text:#f5f0ff; --text-muted:#a78bfa; --text-dim:#6b5b8a;
+  --surface:rgba(255,255,255,.06);
+  --surface-hover:rgba(255,255,255,.12);
+  --border:rgba(255,255,255,.15);
+  --tube-border:rgba(255,255,255,.85);
+  --tube-bg:rgba(255,255,255,.06);
+  --tube-shadow:inset 0 0 20px rgba(255,255,255,.15),inset 0 -10px 30px rgba(0,0,0,.4);
+  --accent-1:#a855f7; --accent-2:#ec4899; --accent-3:#06b6d4;
+  --success:#4ade80; --warning:#f59e0b; --danger:#ef4444;
+  --btn-bg:linear-gradient(135deg,#a855f7,#ec4899);
+  --btn-accent:linear-gradient(135deg,#06b6d4,#3b82f6);
+  --shadow-sm:0 4px 12px rgba(0,0,0,.25);
+  --shadow-md:0 8px 24px rgba(0,0,0,.35);
+  --shadow-lg:0 16px 48px rgba(0,0,0,.5);
+  --glow-purple:0 0 24px rgba(168,85,247,.55);
+  --glow-green:0 0 24px rgba(74,222,128,.55);
+  --glow-gold:0 0 24px rgba(251,191,36,.7);
+  --t-fast:.15s cubic-bezier(.16,1,.3,1);
+  --t-base:.25s cubic-bezier(.16,1,.3,1);
+  --t-slow:.4s cubic-bezier(.16,1,.3,1);
+  --radius-sm:8px; --radius-md:12px; --radius-lg:16px; --radius-xl:24px;
+  --radius-full:999px;
+}
+[data-theme="light"]{
+  --bg-1:#f5f0ff; --bg-2:#e0e7ff; --bg-3:#ffffff;
+  --text:#1a0b2e; --text-muted:#7c3aed; --text-dim:#a89bc4;
+  --surface:rgba(30,20,60,.05);
+  --surface-hover:rgba(30,20,60,.1);
+  --border:rgba(30,20,60,.15);
+  --tube-border:rgba(30,20,60,.9);
+  --tube-bg:rgba(30,20,60,.04);
+  --tube-shadow:inset 0 0 20px rgba(0,0,0,.05),inset 0 -10px 30px rgba(0,0,0,.08);
+  --shadow-sm:0 4px 12px rgba(30,20,60,.1);
+  --shadow-md:0 8px 24px rgba(30,20,60,.15);
+  --shadow-lg:0 16px 48px rgba(30,20,60,.2);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+html,body{
+  height:100%; margin:0;
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;
+  color:var(--text);
+  overflow:hidden;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button:focus-visible{outline:2px solid var(--accent-1);outline-offset:3px;border-radius:var(--radius-sm)}
+
+body{
+  background:radial-gradient(circle at 30% 20%,var(--bg-2) 0%,var(--bg-1) 45%,var(--bg-3) 100%);
+  display:flex; flex-direction:column; min-height:100dvh;
+}
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.top-bar{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 16px; gap:12px;
+}
+.top-bar-actions{display:flex; gap:8px}
+.btn-icon{
+  width:44px; height:44px;
+  border-radius:50%;
+  background:var(--surface);
+  border:1px solid var(--border);
+  font-size:20px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all var(--t-base);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.btn-icon:hover{background:var(--surface-hover); transform:translateY(-2px)}
+.btn-icon:active{transform:translateY(0) scale(.95)}
+
+.stats{display:flex; gap:16px; align-items:center; flex-wrap:wrap; justify-content:center}
+.stat{display:flex; flex-direction:column; align-items:center; gap:2px; min-width:44px}
+.stat-value{
+  font-size:18px; font-weight:800;
+  font-variant-numeric:tabular-nums;
+  color:var(--text);
+}
+.stat-label{
+  font-size:9px; text-transform:uppercase;
+  letter-spacing:1px; color:var(--text-muted); font-weight:600;
+}
+
+/* ============================================================
+   MODE BAR
+   ============================================================ */
+.mode-bar{
+  display:flex; gap:6px; padding:6px 16px 0;
+  justify-content:center; flex-wrap:wrap;
+}
+.mode-btn{
+  font-size:11px; font-weight:700;
+  padding:6px 12px;
+  border-radius:var(--radius-full);
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--text-muted);
+  transition:all var(--t-base);
+  text-transform:uppercase; letter-spacing:.5px;
+}
+.mode-btn:hover{background:var(--surface-hover)}
+.mode-btn.active{
+  background:var(--btn-bg);
+  border-color:transparent;
+  color:#fff;
+  box-shadow:0 4px 12px rgba(168,85,247,.4);
+}
+
+/* ============================================================
+   SEED BAR
+   ============================================================ */
+.seed-bar{
+  display:flex; gap:6px; padding:8px 16px 0;
+  justify-content:center; align-items:center;
+  font-size:11px; color:var(--text-dim);
+}
+.seed-display{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  padding:4px 10px;
+  background:var(--surface);
+  border-radius:var(--radius-full);
+  border:1px solid var(--border);
+  cursor:pointer;
+  transition:all var(--t-base);
+}
+.seed-display:hover{background:var(--surface-hover); color:var(--text)}
+
+/* ============================================================
+   LEVEL SELECTOR
+   ============================================================ */
+.level-selector{
+  display:flex; gap:6px; padding:8px 16px;
+  overflow-x:auto; justify-content:center; flex-wrap:wrap;
+  scrollbar-width:none;
+}
+.level-selector::-webkit-scrollbar{display:none}
+.level-btn{
+  min-width:38px; height:38px;
+  border-radius:var(--radius-md);
+  background:var(--surface);
+  border:2px solid var(--border);
+  font-size:12px; font-weight:700;
+  transition:all var(--t-base);
+  flex-shrink:0;
+  position:relative;
+}
+.level-btn:hover{background:var(--surface-hover); transform:translateY(-2px)}
+.level-btn.active{
+  background:var(--btn-bg); border-color:transparent;
+  box-shadow:var(--glow-purple); transform:translateY(-2px);
+}
+.level-btn.completed::after{
+  content:'✓'; position:absolute; top:-2px; right:2px;
+  color:var(--success); font-size:10px; font-weight:800;
+  background:var(--bg-1); border-radius:50%; width:14px; height:14px;
+  display:flex; align-items:center; justify-content:center;
+  line-height:1;
+}
+.level-btn.spike{border-color:var(--warning)}
+.level-btn.spike::before{
+  content:'🔥'; position:absolute; top:-8px; left:50%;
+  transform:translateX(-50%); font-size:10px;
+}
+
+/* ============================================================
+   GAME AREA
+   ============================================================ */
+.game-area{
+  flex:1; display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  padding:12px 16px; gap:16px; overflow:hidden;
+}
+.tubes-container{
+  display:flex; flex-wrap:wrap;
+  gap:12px 8px;
+  max-width:100%; width:100%;
+  justify-content:center; align-items:end;
+}
+
+/* ============================================================
+   TUBE — altura dinâmica via variável CSS --h
+   ============================================================ */
+.tube{
+  position:relative;
+  width:var(--tw,42px);
+  height:var(--th,190px);
+  background:var(--tube-bg);
+  border:2px solid var(--tube-border);
+  border-top:none;
+  border-radius:0 0 21px 21px;
+  box-shadow:var(--tube-shadow);
+  display:flex; flex-direction:column-reverse; align-items:center;
+  padding:4px 4px 0;
+  cursor:pointer;
+  transition:transform var(--t-base), filter var(--t-base), border-color var(--t-base);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  overflow:hidden;
+}
+.tube::before{
+  content:''; position:absolute;
+  top:0; left:4px; right:4px; height:8px;
+  background:linear-gradient(to bottom,rgba(255,255,255,.3),transparent);
+  border-radius:0 0 50% 50%;
+  pointer-events:none; z-index:5;
+  transition:background var(--t-base);
+}
+.tube:not(.complete):not(.selected):hover{transform:translateY(-3px)}
+.tube.selected{transform:translateY(-12px); filter:drop-shadow(var(--glow-purple))}
+.tube.destination{filter:drop-shadow(var(--glow-green))}
+.tube.destination::before{background:linear-gradient(to bottom,rgba(74,222,128,.6),transparent)}
+.tube.complete{border-color:var(--success); filter:drop-shadow(0 0 12px rgba(74,222,128,.5))}
+.tube.complete::after{
+  content:'✓';
+  position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+  color:var(--success); font-size:14px; font-weight:800;
+}
+.tube.invalid{animation:shake .35s cubic-bezier(.36,.07,.19,.97)}
+.tube.hint{filter:drop-shadow(0 0 16px var(--glow-gold)); animation:hintPulse .6s ease-in-out 2}
+@keyframes hintPulse{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+.tube.locked{
+  opacity:.5;
+  cursor:not-allowed;
+  border-color:var(--text-dim);
+}
+.tube.locked::after{
+  content:'🔒';
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  font-size:32px; z-index:10;
+  filter:drop-shadow(0 0 8px rgba(0,0,0,.8));
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-5px)}
+  40%{transform:translateX(5px)}
+  60%{transform:translateX(-3px)}
+  80%{transform:translateX(3px)}
+}
+
+/* ============================================================
+   BALL — tamanho dinâmico
+   ============================================================ */
+.ball{
+  width:var(--bw,32px); height:var(--bw,32px);
+  border-radius:50%; margin-bottom:2px;
+  position:relative;
+  box-shadow:
+    inset -3px -3px 8px rgba(0,0,0,.4),
+    inset 3px 3px 8px rgba(255,255,255,.4),
+    0 2px 6px rgba(0,0,0,.4);
+  flex-shrink:0;
+  transition:transform var(--t-base), filter var(--t-base);
+  animation:ballDrop .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes ballDrop{
+  from{transform:translateY(-20px) scale(.8); opacity:0}
+  to{transform:translateY(0) scale(1); opacity:1}
+}
+.ball::before{
+  content:''; position:absolute;
+  top:12%; left:18%; width:30%; height:30%;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.9),transparent 70%);
+  pointer-events:none;
+}
+.ball.red{background:radial-gradient(circle at 35% 30%,#ff6b6b,#dc2626 60%,#991b1b)}
+.ball.green{background:radial-gradient(circle at 35% 30%,#86efac,#22c55e 60%,#15803d)}
+.ball.blue{background:radial-gradient(circle at 35% 30%,#93c5fd,#3b82f6 60%,#1e40af)}
+.ball.yellow{background:radial-gradient(circle at 35% 30%,#fde68a,#eab308 60%,#a16207)}
+.ball.purple{background:radial-gradient(circle at 35% 30%,#d8b4fe,#a855f7 60%,#6b21a8)}
+.ball.orange{background:radial-gradient(circle at 35% 30%,#fdba74,#f97316 60%,#c2410c)}
+.ball.pink{background:radial-gradient(circle at 35% 30%,#f9a8d4,#ec4899 60%,#9d174d)}
+.ball.cyan{background:radial-gradient(circle at 35% 30%,#a5f3fc,#06b6d4 60%,#0e7490)}
+.ball.brown{background:radial-gradient(circle at 35% 30%,#d6b896,#8b5a2b 60%,#5a3a17)}
+.ball.gray{background:radial-gradient(circle at 35% 30%,#d4d4d8,#71717a 60%,#3f3f46)}
+.ball.lime{background:radial-gradient(circle at 35% 30%,#d9f99d,#84cc16 60%,#3f6212)}
+.ball.teal{background:radial-gradient(circle at 35% 30%,#99f6e4,#14b8a6 60%,#0f766e)}
+.ball.magenta{background:radial-gradient(circle at 35% 30%,#f0abfc,#d946ef 60%,#86198f)}
+
+/* Rainbow ball — coringa */
+.ball.rainbow{
+  background:conic-gradient(from 0deg,
+    #ff6b6b, #fde68a, #86efac, #93c5fd,
+    #d8b4fe, #f9a8d4, #ff6b6b);
+  animation:rainbowSpin 4s linear infinite;
+  box-shadow:
+    inset -3px -3px 8px rgba(0,0,0,.3),
+    inset 3px 3px 8px rgba(255,255,255,.6),
+    0 0 16px rgba(236,72,153,.8),
+    0 2px 6px rgba(0,0,0,.4);
+}
+@keyframes rainbowSpin{
+  from{filter:hue-rotate(0deg)}
+  to{filter:hue-rotate(360deg)}
+}
+
+/* Blind ball */
+.ball.blind{
+  background:radial-gradient(circle at 35% 30%,#4a4a4a,#1a1a1a 60%,#000);
+}
+.ball.blind::after{
+  content:'?';
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  color:#fbbf24; font-weight:900; font-size:16px;
+  text-shadow:0 0 8px rgba(251,191,36,.8);
+}
+
+/* ============================================================
+   BOTTOM BAR
+   ============================================================ */
+.bottom-bar{
+  display:flex; justify-content:center; gap:8px;
+  padding:12px 16px; flex-wrap:wrap;
+}
+.btn{
+  padding:10px 18px;
+  border-radius:var(--radius-full);
+  background:var(--btn-bg);
+  color:#fff; font-size:13px; font-weight:700;
+  display:inline-flex; align-items:center; gap:6px;
+  transition:all var(--t-base);
+  box-shadow:0 6px 18px rgba(168,85,247,.4);
+}
+.btn:hover:not(:disabled){transform:translateY(-2px); box-shadow:0 10px 24px rgba(168,85,247,.55)}
+.btn:active:not(:disabled){transform:translateY(0) scale(.98)}
+.btn.secondary{background:var(--btn-accent); box-shadow:0 6px 18px rgba(59,130,246,.4)}
+.btn.secondary:hover:not(:disabled){box-shadow:0 10px 24px rgba(59,130,246,.55)}
+.btn:disabled{opacity:.35; cursor:not-allowed; transform:none!important; box-shadow:none!important}
+.btn.full{width:100%; justify-content:center}
+
+.zen-toggle{
+  display:flex; align-items:center; gap:6px;
+  font-size:11px; font-weight:600;
+  color:var(--text-muted);
+  padding:8px 14px;
+  background:var(--surface);
+  border-radius:var(--radius-full);
+  cursor:pointer;
+  border:1px solid var(--border);
+  transition:all var(--t-base);
+}
+.zen-toggle:hover{background:var(--surface-hover)}
+.zen-toggle.active{
+  background:rgba(74,222,128,.2);
+  border-color:rgba(74,222,128,.5);
+  color:var(--success);
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.75);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  display:flex; align-items:center; justify-content:center;
+  z-index:1000; padding:20px;
+  opacity:0; pointer-events:none;
+  transition:opacity var(--t-base);
+}
+.modal-overlay.active{opacity:1; pointer-events:auto}
+.modal-card{
+  background:linear-gradient(135deg,rgba(45,27,78,.98),rgba(26,11,46,.98));
+  border:1px solid rgba(168,85,247,.4);
+  border-radius:var(--radius-xl);
+  padding:28px 22px;
+  max-width:380px; width:100%;
+  text-align:center;
+  box-shadow:var(--shadow-lg),0 0 60px rgba(168,85,247,.3);
+  transform:scale(.9);
+  transition:transform var(--t-slow);
+}
+.modal-overlay.active .modal-card{transform:scale(1)}
+[data-theme="light"] .modal-card{
+  background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(245,240,255,.98));
+  border:1px solid rgba(168,85,247,.3);
+}
+.modal-emoji{font-size:56px; margin-bottom:10px; line-height:1}
+.modal-overlay.active .modal-emoji{animation:bounceIn .6s cubic-bezier(.16,1,.3,1)}
+@keyframes bounceIn{
+  0%{transform:scale(0) rotate(-20deg)}
+  60%{transform:scale(1.2) rotate(10deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+.modal-title{
+  font-size:22px; font-weight:800; margin:0 0 8px;
+  background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.modal-message{color:var(--text-muted); font-size:13px; margin:0 0 18px; line-height:1.5}
+.modal-stats{
+  display:flex; justify-content:space-around;
+  padding:14px; background:rgba(168,85,247,.1);
+  border-radius:var(--radius-md); margin-bottom:18px;
+}
+.modal-stat-value{font-size:20px; font-weight:800; color:var(--accent-1); font-variant-numeric:tabular-nums}
+.modal-stat-label{font-size:10px; text-transform:uppercase; color:var(--text-muted); letter-spacing:1px}
+.modal-badge{
+  display:inline-block; padding:4px 12px;
+  background:linear-gradient(135deg,var(--warning),#d97706);
+  border-radius:var(--radius-full);
+  font-size:10px; font-weight:800;
+  text-transform:uppercase; letter-spacing:1px;
+  color:#fff; margin-bottom:12px;
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast-container{
+  position:fixed; top:70px; left:50%; transform:translateX(-50%);
+  z-index:2000; display:flex; flex-direction:column;
+  gap:8px; align-items:center; pointer-events:none;
+}
+.toast{
+  color:#fff; padding:10px 18px;
+  border-radius:var(--radius-full);
+  font-weight:700; font-size:12px;
+  box-shadow:var(--shadow-md);
+  animation:toastIn .3s cubic-bezier(.16,1,.3,1);
+  white-space:nowrap;
+}
+.toast.info{background:linear-gradient(135deg,var(--accent-1),var(--accent-2))}
+.toast.warn{background:linear-gradient(135deg,var(--warning),#d97706)}
+.toast.success{background:linear-gradient(135deg,var(--success),#15803d)}
+.toast.removing{animation:toastOut .3s ease forwards}
+@keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-20px)}}
+
+/* ============================================================
+   MODIFIER PILLS
+   ============================================================ */
+.modifier-bar{
+  display:flex; gap:6px; justify-content:center;
+  flex-wrap:wrap; padding:0 16px;
+  min-height:0;
+}
+.mod-pill{
+  font-size:10px; font-weight:700;
+  padding:4px 10px;
+  border-radius:var(--radius-full);
+  background:rgba(168,85,247,.15);
+  border:1px solid rgba(168,85,247,.4);
+  color:var(--text-muted);
+  text-transform:uppercase; letter-spacing:.5px;
+  display:inline-flex; align-items:center; gap:4px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:600px){
+  .game-area{padding:8px 10px; gap:10px}
+  .btn{padding:9px 14px; font-size:12px}
+  .btn-icon{width:38px; height:38px; font-size:17px}
+  .stat-value{font-size:15px}
+  .stat-label{font-size:8px}
+  .tubes-container{gap:8px 6px}
+  .mode-btn{font-size:10px; padding:5px 10px}
+  .seed-bar{font-size:10px}
+}
+@media (max-height:700px){
+  .game-area{gap:8px; padding:8px}
+  .top-bar{padding:8px 12px}
+  .bottom-bar{padding:8px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<header class="top-bar">
+  <div class="top-bar-actions">
+    <button class="btn-icon" id="btn-theme" type="button" aria-label="Alternar tema" title="Tema">🌙</button>
+    <button class="btn-icon" id="btn-sound" type="button" aria-label="Alternar som" title="Som">🔊</button>
+  </div>
+  <div class="stats" role="status" aria-live="polite">
+    <div class="stat">
+      <div class="stat-value" id="stat-moves">0</div>
+      <div class="stat-label">Movs</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-level">1</div>
+      <div class="stat-label">Nível</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-colors">0</div>
+      <div class="stat-label">Cores</div>
+    </div>
+  </div>
+  <button class="btn-icon" id="btn-restart" type="button" aria-label="Reiniciar nível" title="Reiniciar">🔄</button>
+</header>
+
+<!-- ============ MODE BAR ============ -->
+<nav class="mode-bar" id="mode-bar" aria-label="Modo de jogo"></nav>
+
+<!-- ============ SEED BAR ============ -->
+<div class="seed-bar">
+  <span>SEED:</span>
+  <span class="seed-display" id="seed-display" title="Clique para copiar">—</span>
+  <button class="btn-icon" id="btn-shuffle-seed" style="width:26px;height:26px;font-size:12px" title="Nova seed">🎲</button>
+</div>
+
+<!-- ============ MODIFIER PILLS ============ -->
+<div class="modifier-bar" id="modifier-bar"></div>
+
+<!-- ============ LEVEL SELECTOR ============ -->
+<nav class="level-selector" id="level-selector" aria-label="Seleção de nível"></nav>
+
+<!-- ============ GAME AREA ============ -->
+<main class="game-area">
+  <div class="tubes-container" id="tubes-container" role="grid" aria-label="Tabuleiro"></div>
+</main>
+
+<!-- ============ BOTTOM BAR ============ -->
+<footer class="bottom-bar">
+  <button class="btn secondary" id="btn-undo" type="button" disabled>↶</button>
+  <button class="btn secondary" id="btn-hint" type="button">💡</button>
+  <button class="btn secondary" id="btn-add-tube" type="button">➕</button>
+  <button class="zen-toggle" id="btn-zen" type="button" aria-pressed="false">🧘 Zen</button>
+</footer>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-card">
+    <div class="modal-badge" id="modal-badge" style="display:none">🔥 Spike</div>
+    <div class="modal-emoji">🎉</div>
+    <h2 class="modal-title" id="modal-title">Nível Completo!</h2>
+    <p class="modal-message" id="modal-message">Parabéns! Conseguiste ordenar todas as bolas.</p>
+    <div class="modal-stats">
+      <div>
+        <div class="modal-stat-value" id="modal-moves">0</div>
+        <div class="modal-stat-label">Movs</div>
+      </div>
+      <div>
+        <div class="modal-stat-value" id="modal-level">1</div>
+        <div class="modal-stat-label">Nível</div>
+      </div>
+      <div>
+        <div class="modal-stat-value" id="modal-time">0s</div>
+        <div class="modal-stat-label">Tempo</div>
+      </div>
+    </div>
+    <button class="btn full" id="btn-next-level" type="button">▶️ Próximo Nível</button>
+  </div>
+</div>
+
+<!-- ============ TOASTS ============ -->
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   BALL SORT PUZZLE v5 — Chaos Edition
+   Procedural generation · Seeds · Modifiers · Palettes
+   ============================================================ */
+'use strict';
+
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const CONFIG = Object.freeze({
+  COLORS: ['red','green','blue','yellow','purple','orange','pink','cyan','brown','gray','lime','teal','magenta'],
+  MAX_LEVEL: 30,
+  MAX_EXTRA_TUBES: 2,
+  MAX_HISTORY: 100,
+  TOAST_DURATION: 1800,
+  WIN_MODAL_DELAY: 400,
+  STORAGE_KEYS: Object.freeze({
+    THEME: 'ballsort.theme',
+    LEVEL: 'ballsort.level',
+    COMPLETED: 'ballsort.completed',
+    SAVE: 'ballsort.save',
+    SOUND: 'ballsort.sound',
+    MODE: 'ballsort.mode',
+    SEED: 'ballsort.seed'
+  })
+});
+
+/* ============================================================
+   SEEDED RANDOM (Mulberry32)
+   ============================================================ */
+class SeededRandom {
+  constructor(seed) {
+    this._seed = (seed | 0) >>> 0;
+    this._state = this._seed;
+  }
+  next() {
+    let t = (this._state += 0x6D2B79F5) >>> 0;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+  int(min, max) { return Math.floor(this.next() * (max - min + 1)) + min; }
+  pick(arr) { return arr[this.int(0, arr.length - 1)]; }
+  shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = this.int(0, i);
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  weighted(items) {
+    // items: [{item, weight}]
+    const total = items.reduce((s, it) => s + it.weight, 0);
+    let r = this.next() * total;
+    for (const it of items) {
+      r -= it.weight;
+      if (r <= 0) return it.item;
+    }
+    return items[items.length - 1].item;
+  }
+  clone() { const c = new SeededRandom(0); c._state = this._state; return c; }
+}
+
+/* ============================================================
+   SEED UTILS
+   ============================================================ */
+const SeedUtils = {
+  fromString(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  },
+  toString(seed) {
+    // Base36 compacto, 6-7 chars
+    return (seed >>> 0).toString(36).toUpperCase().padStart(6, '0');
+  },
+  fromURL() {
+    const m = location.hash.match(/seed=([A-Z0-9]+)/i);
+    if (m) return parseInt(m[1], 36) >>> 0;
+    return null;
+  },
+  toURL(seed) {
+    const s = SeedUtils.toString(seed);
+    history.replaceState(null, '', `#seed=${s}`);
+  },
+  daily() {
+    const d = new Date();
+    return SeedUtils.fromString(`daily-${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`);
+  },
+  random() {
+    return (Math.random() * 0xFFFFFFFF) >>> 0;
+  }
+};
+
+/* ============================================================
+   EVENT BUS
+   ============================================================ */
+const EventBus = (() => {
+  const listeners = new Map();
+  return {
+    on(event, handler) {
+      if (!listeners.has(event)) listeners.set(event, new Set());
+      listeners.get(event).add(handler);
+      return () => listeners.get(event).delete(handler);
+    },
+    emit(event, payload) {
+      const set = listeners.get(event);
+      if (!set) return;
+      set.forEach(fn => { try { fn(payload); } catch (e) { console.error(e); } });
+    }
+  };
+})();
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
+const Storage = {
+  get(key, fallback = null) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw === null ? fallback : raw;
+    } catch { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(key, String(value)); } catch {}
+  },
+  getJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw === null ? fallback : JSON.parse(raw);
+    } catch { return fallback; }
+  },
+  setJSON(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+  },
+  remove(key) {
+    try { localStorage.removeItem(key); } catch {}
+  }
+};
+
+/* ============================================================
+   AUDIO
+   ============================================================ */
+const Sound = (() => {
+  let ctx = null;
+  let enabled = Storage.get(CONFIG.STORAGE_KEYS.SOUND, '1') === '1';
+
+  const ensure = () => {
+    try {
+      if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume();
+      return ctx;
+    } catch { return null; }
+  };
+
+  const tone = (freq, type, duration, volume) => {
+    if (!enabled) return;
+    const ac = ensure(); if (!ac) return;
+    const now = ac.currentTime;
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.frequency.value = freq;
+    osc.type = type;
+    gain.gain.setValueAtTime(volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.start(now); osc.stop(now + duration);
+  };
+
+  return {
+    isEnabled: () => enabled,
+    toggle() {
+      enabled = !enabled;
+      Storage.set(CONFIG.STORAGE_KEYS.SOUND, enabled ? '1' : '0');
+      if (enabled) tone(880, 'sine', .1, .1);
+      return enabled;
+    },
+    select() { tone(600, 'sine', .08, .06); },
+    move() { tone(400, 'triangle', .12, .08); },
+    invalid() { tone(180, 'sawtooth', .15, .06); },
+    unlock() { tone(1200, 'sine', .2, .1); },
+    win() {
+      if (!enabled) return;
+      const ac = ensure(); if (!ac) return;
+      const now = ac.currentTime;
+      [523, 659, 784, 1046].forEach((freq, i) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.frequency.value = freq; o.type = 'sine';
+        const t = now + i * .1;
+        g.gain.setValueAtTime(.001, t);
+        g.gain.exponentialRampToValueAtTime(.12, t + .02);
+        g.gain.exponentialRampToValueAtTime(.001, t + .35);
+        o.connect(g); g.connect(ac.destination);
+        o.start(t); o.stop(t + .35);
+      });
+    }
+  };
+})();
+
+/* ============================================================
+   TOASTER
+   ============================================================ */
+const Toaster = (() => {
+  const container = document.getElementById('toast-container');
+  const queue = [];
+  let active = false;
+
+  const show = ({ msg, type }) => {
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('removing');
+      setTimeout(() => {
+        el.remove();
+        active = false;
+        next();
+      }, 300);
+    }, CONFIG.TOAST_DURATION);
+  };
+
+  const next = () => {
+    if (active || queue.length === 0) return;
+    active = true;
+    show(queue.shift());
+  };
+
+  return {
+    info(msg) { queue.push({ msg, type: 'info' }); next(); },
+    warn(msg) { queue.push({ msg, type: 'warn' }); next(); },
+    success(msg) { queue.push({ msg, type: 'success' }); next(); }
+  };
+})();
+
+/* ============================================================
+   GAME MODES
+   ============================================================ */
+const GameModes = {
+  classic: {
+    id: 'classic',
+    label: 'Clássico',
+    icon: '🎯',
+    noUndo: false,
+    noExtraTube: false,
+    chaos: false
+  },
+  challenge: {
+    id: 'challenge',
+    label: 'Desafio',
+    icon: '⚔️',
+    noUndo: true,
+    noExtraTube: true,
+    chaos: false
+  },
+  chaos: {
+    id: 'chaos',
+    label: 'Caos',
+    icon: '🎲',
+    noUndo: false,
+    noExtraTube: false,
+    chaos: true
+  },
+  daily: {
+    id: 'daily',
+    label: 'Diário',
+    icon: '📅',
+    noUndo: false,
+    noExtraTube: false,
+    chaos: false,
+    useDailySeed: true
+  }
+};
+
+/* ============================================================
+   COLOR PALETTES
+   ============================================================ */
+const Palettes = {
+  classic: { colors: ['red','green','blue','yellow','purple','orange','pink','cyan','brown','gray','lime','teal','magenta'] },
+  warm:    { colors: ['red','orange','yellow','pink','magenta'] },
+  cool:    { colors: ['blue','cyan','green','purple','teal'] },
+  earth:   { colors: ['brown','gray','lime','yellow','orange'] },
+  neon:    { colors: ['pink','cyan','lime','magenta','purple'] }
+};
+
+/* ============================================================
+   DIFFICULTY CURVE — Serrilhada com picos
+   ============================================================ */
+const DifficultyCurve = {
+  /**
+   * Retorna parâmetros de dificuldade para o nível.
+   * Estratégia: base cresce linearmente, mas a cada 5 níveis há um "spike"
+   * que aumenta cores/tubos dramaticamente. Níveis pós-spike relaxam um pouco.
+   */
+  compute(level, mode, rng) {
+    // Base
+    const baseColors = 4 + Math.floor((level - 1) * 0.7);
+    const isSpike = level % 5 === 0 && level >= 5;
+    const spikeBonus = isSpike ? 2 : 0;
+
+    const numColors = Math.min(13, baseColors + spikeBonus);
+
+    // Bolas por tubo: weighted (3 é raro, 6 é épico)
+    const ballWeighted = rng.weighted([
+      { item: 3, weight: level < 3 ? 0 : 1 },
+      { item: 4, weight: 6 },
+      { item: 5, weight: level < 4 ? 1 : 3 },
+      { item: 6, weight: level < 8 ? 0 : 2 }
+    ]);
+
+    // Tubos vazios: base 2, spike reduz para 1
+    const emptyTubes = isSpike ? 1 : rng.weighted([
+      { item: 1, weight: level < 3 ? 0 : 2 },
+      { item: 2, weight: 5 },
+      { item: 3, weight: level < 5 ? 0 : 2 }
+    ]);
+
+    // Palette selection
+    const paletteKeys = mode.chaos
+      ? ['classic','warm','cool','earth','neon']
+      : ['classic','warm','cool','earth'];
+    const palette = rng.pick(paletteKeys);
+
+    // Reverse-move multiplier (dificuldade de "embaralhamento")
+    const reverseMultiplier = 8 + Math.floor(level * 0.5) + (isSpike ? 6 : 0);
+
+    // Modifiers
+    const modifiers = [];
+    if (mode.chaos) {
+      // No caos, sempre pelo menos 1 modifier
+      if (numColors >= 6 && rng.next() < 0.5) modifiers.push('blind');
+      if (numColors >= 5 && rng.next() < 0.4) modifiers.push('rainbow');
+    } else {
+      // Modo normal: modifiers só após nível 8, com baixa chance
+      if (level >= 8 && rng.next() < 0.15) modifiers.push('blind');
+      if (level >= 6 && rng.next() < 0.2) modifiers.push('rainbow');
+    }
+
+    return {
+      numColors,
+      ballsPerTube: ballWeighted,
+      emptyTubes,
+      palette,
+      isSpike,
+      reverseMultiplier,
+      modifiers
+    };
+  }
+};
+
+/* ============================================================
+   LEVEL GENERATOR — Procedural
+   ============================================================ */
+const LevelGenerator = (() => {
+
+  const isSolved = (tubes) => tubes.every(t =>
+    t.length === 0 || (t.length > 0 && t.every(c => c === t[0]))
+  );
+
+  /**
+   * Movimentos reversos válidos — para o estado com BPT variável.
+   */
+  const validReverseMoves = (tubes, bpt, last) => {
+    const moves = [];
+    for (let from = 0; from < tubes.length; from++) {
+      if (tubes[from].length === 0) continue;
+      const color = tubes[from][tubes[from].length - 1];
+      if (color === '__RAINBOW__') continue; // rainbow nunca é source de reverse-move (é coringa)
+      for (let to = 0; to < tubes.length; to++) {
+        if (from === to) continue;
+        if (tubes[to].length >= bpt) continue;
+        if (tubes[to].length > 0) {
+          const top = tubes[to][tubes[to].length - 1];
+          if (top !== color && top !== '__RAINBOW__') continue;
+        }
+        if (last && last.from === to && last.to === from) continue;
+        moves.push({ from, to });
+      }
+    }
+    return moves;
+  };
+
+  /**
+   * Gera nível proceduralmente usando seed.
+   */
+  const generate = (level, modeId, seed) => {
+    const mode = GameModes[modeId] || GameModes.classic;
+    const rng = new SeededRandom(seed);
+
+    // Computa difficulty
+    const diff = DifficultyCurve.compute(level, mode, rng);
+    const { numColors, ballsPerTube: bpt, emptyTubes, palette, isSpike, reverseMultiplier, modifiers } = diff;
+
+    // Escolhe cores da palette
+    const paletteColors = Palettes[palette].colors;
+    const shuffledPalette = rng.shuffle(paletteColors);
+    const usedColors = shuffledPalette.slice(0, Math.min(numColors, shuffledPalette.length));
+
+    // Estado solucionado
+    const full = usedColors.map(c => Array(bpt).fill(c));
+    const empty = Array.from({ length: emptyTubes }, () => []);
+
+    // Aplica rainbow (substitui uma bola aleatória em cada tubo cheio?)
+    // Estratégia: substitui a 2ª bola de alguns tubos por rainbow
+    if (modifiers.includes('rainbow')) {
+      const maxRainbows = Math.min(2, Math.floor(numColors / 3));
+      const rainbowCount = rng.int(1, maxRainbows);
+      const usedTubes = new Set();
+      for (let i = 0; i < rainbowCount; i++) {
+        let idx;
+        let attempts = 0;
+        do { idx = rng.int(0, full.length - 1); attempts++; } while (usedTubes.has(idx) && attempts < 20);
+        usedTubes.add(idx);
+        const ballIdx = rng.int(0, bpt - 1);
+        full[idx][ballIdx] = '__RAINBOW__';
+      }
+    }
+
+    let tubes = [...shuffleBalls(full, rng), ...empty];
+
+    // Aplica reverse-moves
+    const steps = usedColors.length * reverseMultiplier + level * 4;
+    let last = null;
+    let stuck = 0;
+    for (let i = 0; i < steps; i++) {
+      const moves = validReverseMoves(tubes, bpt, last);
+      if (moves.length === 0) {
+        stuck++;
+        if (stuck > 5) break;
+        continue;
+      }
+      stuck = 0;
+      const m = moves[rng.int(0, moves.length - 1)];
+      tubes[m.to].push(tubes[m.from].pop());
+      last = m;
+    }
+
+    // Aplica blind em tubos (marca visualmente — efeito é puramente cosmético aqui)
+    const blindIndices = [];
+    if (modifiers.includes('blind')) {
+      const candidates = tubes.map((t, i) => i).filter(i => tubes[i].length > 1);
+      const blindCount = Math.min(2, Math.floor(candidates.length / 3));
+      for (let i = 0; i < blindCount && candidates.length > 0; i++) {
+        const pickIdx = rng.int(0, candidates.length - 1);
+        blindIndices.push(candidates.splice(pickIdx, 1)[0]);
+      }
+    }
+
+    // Se por azar ficou resolvido, retry com seed+1
+    if (isSolved(tubes) && level > 1) {
+      return generate(level, modeId, (seed + 1) >>> 0);
+    }
+
+    return {
+      tubes,
+      meta: {
+        seed,
+        mode: modeId,
+        level,
+        numColors: usedColors.length,
+        ballsPerTube: bpt,
+        emptyTubes,
+        palette,
+        isSpike,
+        modifiers,
+        blindIndices,
+        maxBalls: bpt
+      }
+    };
+  };
+
+  const shuffleBalls = (tubes, rng) => {
+    const allBalls = tubes.flat();
+    for (let i = allBalls.length - 1; i > 0; i--) {
+      const j = rng.int(0, i);
+      [allBalls[i], allBalls[j]] = [allBalls[j], allBalls[i]];
+    }
+    // Redistribui em tubos de tamanho variável (o bpt foi definido antes)
+    // Aqui todos os tubos têm o mesmo bpt
+    const bpt = tubes[0].length;
+    const result = [];
+    for (let i = 0; i < allBalls.length; i += bpt) {
+      result.push(allBalls.slice(i, i + bpt));
+    }
+    return result;
+  };
+
+  return { generate, isSolved };
+})();
+
+/* ============================================================
+   RULES
+   ============================================================ */
+const Rules = {
+  isRainbow(color) { return color === '__RAINBOW__'; },
+
+  isComplete(tube, bpt) {
+    if (tube.length === 0) return false;
+    const first = tube[0];
+    if (Rules.isRainbow(first)) return false;
+    if (tube.length !== bpt) return false;
+    return tube.every(c => c === first || Rules.isRainbow(c));
+  },
+
+  top(tube) {
+    return tube.length ? tube[tube.length - 1] : null;
+  },
+
+  canPlace(dest, color, bpt) {
+    if (dest.length >= bpt) return false;
+    if (dest.length === 0) return true;
+    const topColor = Rules.top(dest);
+    // Rainbow aceita qualquer coisa
+    if (Rules.isRainbow(topColor)) return true;
+    // Rainbow (a bola sendo movida) aceita qualquer destino
+    if (Rules.isRainbow(color)) return true;
+    return topColor === color;
+  },
+
+  allSolved(tubes, bpt) {
+    return tubes.every(t => t.length === 0 || Rules.isComplete(t, bpt));
+  },
+
+  hasAnyBall(tubes) {
+    return tubes.some(t => t.length > 0);
+  },
+
+  hasAnyMove(tubes, bpt) {
+    for (let from = 0; from < tubes.length; from++) {
+      const src = tubes[from];
+      if (src.length === 0 || Rules.isComplete(src, bpt)) continue;
+      const color = Rules.top(src);
+      for (let to = 0; to < tubes.length; to++) {
+        if (from === to) continue;
+        if (Rules.canPlace(tubes[to], color, bpt)) return true;
+      }
+    }
+    return false;
+  }
+};
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+class GameState {
+  constructor() {
+    this.level = 1;
+    this.moves = 0;
+    this.tubes = [];
+    this.bpt = 4; // balls per tube
+    this.meta = null;
+    this.extraTubes = 0;
+    this.selected = null;
+    this.history = [];
+    this.zenMode = false;
+    this.completed = false;
+    this.startTime = Date.now();
+    this.mode = Storage.get(CONFIG.STORAGE_KEYS.MODE, 'classic');
+    this.seed = SeedUtils.fromURL() || SeedUtils.random();
+    this.completedLevels = Storage.getJSON(CONFIG.STORAGE_KEYS.COMPLETED, []) || [];
+    this.theme = Storage.get(CONFIG.STORAGE_KEYS.THEME, 'dark');
+  }
+
+  snapshot() {
+    return {
+      tubes: this.tubes.map(t => t.slice()),
+      moves: this.moves,
+      selected: this.selected,
+      extraTubes: this.extraTubes,
+      completed: this.completed
+    };
+  }
+
+  pushHistory() {
+    this.history.push(this.snapshot());
+    if (this.history.length > CONFIG.MAX_HISTORY) this.history.shift();
+  }
+
+  popHistory() {
+    const snap = this.history.pop();
+    if (!snap) return false;
+    this.tubes = snap.tubes.map(t => t.slice());
+    this.moves = snap.moves;
+    this.selected = null;
+    this.extraTubes = snap.extraTubes;
+    this.completed = false;
+    return true;
+  }
+
+  markCompleted(level) {
+    if (!this.completedLevels.includes(level)) {
+      this.completedLevels.push(level);
+      Storage.setJSON(CONFIG.STORAGE_KEYS.COMPLETED, this.completedLevels);
+    }
+  }
+
+  saveLevel() {
+    Storage.set(CONFIG.STORAGE_KEYS.LEVEL, this.level);
+  }
+
+  saveMode() {
+    Storage.set(CONFIG.STORAGE_KEYS.MODE, this.mode);
+  }
+
+  saveGame() {
+    Storage.setJSON(CONFIG.STORAGE_KEYS.SAVE, {
+      level: this.level,
+      moves: this.moves,
+      tubes: this.tubes,
+      bpt: this.bpt,
+      meta: this.meta,
+      extraTubes: this.extraTubes,
+      history: this.history.slice(-20),
+      mode: this.mode,
+      seed: this.seed
+    });
+  }
+
+  loadSavedGame() {
+    const save = Storage.getJSON(CONFIG.STORAGE_KEYS.SAVE, null);
+    if (!save || !Array.isArray(save.tubes) || save.tubes.length === 0) return false;
+    this.level = save.level || 1;
+    this.moves = save.moves || 0;
+    this.tubes = save.tubes;
+    this.bpt = save.bpt || 4;
+    this.meta = save.meta || null;
+    this.extraTubes = save.extraTubes || 0;
+    this.history = save.history || [];
+    this.mode = save.mode || 'classic';
+    this.seed = save.seed || SeedUtils.random();
+    this.selected = null;
+    this.completed = false;
+    this.startTime = Date.now();
+    return true;
+  }
+
+  clearSave() {
+    Storage.remove(CONFIG.STORAGE_KEYS.SAVE);
+  }
+}
+
+/* ============================================================
+   GAME CONTROLLER
+   ============================================================ */
+class GameController {
+  constructor(state) {
+    this.state = state;
+  }
+
+  getMode() { return GameModes[this.state.mode] || GameModes.classic; }
+
+  loadLevel(level, { silent = false, seed = null } = {}) {
+    const s = this.state;
+    const mode = this.getMode();
+
+    if (mode.useDailySeed) {
+      seed = SeedUtils.daily();
+    } else if (seed === null) {
+      seed = SeedUtils.random();
+    }
+
+    s.level = level;
+    s.moves = 0;
+    s.seed = seed;
+    s.startTime = Date.now();
+
+    const generated = LevelGenerator.generate(level, s.mode, seed);
+    s.tubes = generated.tubes;
+    s.meta = generated.meta;
+    s.bpt = generated.meta.ballsPerTube;
+    s.extraTubes = 0;
+    s.selected = null;
+    s.history = [];
+    s.completed = false;
+
+    if (!silent) {
+      s.saveLevel();
+      s.saveGame();
+      SeedUtils.toURL(seed);
+    }
+
+    EventBus.emit('state:changed');
+    EventBus.emit('level:loaded', { level, meta: s.meta, seed });
+  }
+
+  restart() {
+    this.loadLevel(this.state.level, { silent: true, seed: this.state.seed });
+    EventBus.emit('toast:info', 'Nível reiniciado');
+  }
+
+  setMode(modeId) {
+    if (!GameModes[modeId]) return;
+    this.state.mode = modeId;
+    this.state.saveMode();
+    EventBus.emit('mode:changed', modeId);
+    this.loadLevel(this.state.level);
+    EventBus.emit('toast:info', `${GameModes[modeId].icon} ${GameModes[modeId].label}`);
+  }
+
+  newSeed() {
+    this.loadLevel(this.state.level, { seed: SeedUtils.random() });
+    EventBus.emit('toast:info', '🎲 Nova seed');
+  }
+
+  selectTube(idx) {
+    const s = this.state;
+    if (s.completed) return;
+
+    if (s.selected === idx) {
+      s.selected = null;
+      EventBus.emit('state:changed');
+      return;
+    }
+
+    if (s.selected !== null) {
+      const moved = this.tryMove(s.selected, idx);
+      if (moved) return;
+      const target = s.tubes[idx];
+      if (target.length > 0 && !Rules.isComplete(target, s.bpt)) {
+        s.selected = idx;
+        Sound.select();
+      } else {
+        s.selected = null;
+        EventBus.emit('tube:invalid', idx);
+      }
+      EventBus.emit('state:changed');
+      return;
+    }
+
+    const tube = s.tubes[idx];
+    if (tube.length === 0 || Rules.isComplete(tube, s.bpt)) {
+      EventBus.emit('tube:invalid', idx);
+      return;
+    }
+    s.selected = idx;
+    Sound.select();
+    EventBus.emit('state:changed');
+  }
+
+  tryMove(fromIdx, toIdx) {
+    const s = this.state;
+    const from = s.tubes[fromIdx];
+    const to = s.tubes[toIdx];
+
+    if (Rules.isComplete(from, s.bpt)) {
+      EventBus.emit('toast:warn', 'Este tubo já está completo');
+      s.selected = null;
+      EventBus.emit('state:changed');
+      return false;
+    }
+    if (from.length === 0) {
+      s.selected = null;
+      EventBus.emit('state:changed');
+      return false;
+    }
+
+    const color = Rules.top(from);
+    if (!Rules.canPlace(to, color, s.bpt)) {
+      Sound.invalid();
+      EventBus.emit('tube:invalid', toIdx);
+      return false;
+    }
+
+    s.pushHistory();
+
+    let count = 0;
+    while (from.length > 0 && Rules.top(from) === color && Rules.canPlace(to, color, s.bpt)) {
+      to.push(from.pop());
+      count++;
+    }
+
+    if (count > 0) {
+      s.moves++;
+      Sound.move();
+      EventBus.emit('ball:moved', { count });
+    }
+    s.selected = null;
+    this.checkWin();
+    s.saveGame();
+
+    setTimeout(() => {
+      if (!s.completed && Rules.hasAnyBall(s.tubes) && !Rules.hasAnyMove(s.tubes, s.bpt)) {
+        EventBus.emit('game:stuck');
+      }
+    }, 100);
+
+    EventBus.emit('state:changed');
+    return true;
+  }
+
+  checkWin() {
+    const s = this.state;
+    if (!Rules.allSolved(s.tubes, s.bpt) || !Rules.hasAnyBall(s.tubes)) return;
+
+    s.completed = true;
+    s.markCompleted(s.level);
+    s.clearSave();
+    Sound.win();
+    EventBus.emit('level:won', {
+      level: s.level,
+      moves: s.moves,
+      time: Math.round((Date.now() - s.startTime) / 1000),
+      isSpike: s.meta && s.meta.isSpike
+    });
+  }
+
+  undo() {
+    const mode = this.getMode();
+    if (mode.noUndo) {
+      EventBus.emit('toast:warn', 'Desafio não permite desfazer');
+      return;
+    }
+    if (this.state.history.length === 0) {
+      EventBus.emit('toast:info', 'Nada para desfazer');
+      return;
+    }
+    this.state.popHistory();
+    EventBus.emit('modal:close');
+    Sound.select();
+    this.state.saveGame();
+    EventBus.emit('state:changed');
+  }
+
+  addExtraTube() {
+    const mode = this.getMode();
+    if (mode.noExtraTube) {
+      EventBus.emit('toast:warn', 'Desafio não permite tubo extra');
+      return;
+    }
+    const s = this.state;
+    if (s.extraTubes >= CONFIG.MAX_EXTRA_TUBES) {
+      EventBus.emit('toast:warn', `Máximo de ${CONFIG.MAX_EXTRA_TUBES} tubos extras`);
+      return;
+    }
+    s.pushHistory();
+    s.tubes.push([]);
+    s.extraTubes++;
+    Sound.select();
+    s.saveGame();
+    EventBus.emit('state:changed');
+  }
+
+  toggleZen() {
+    this.state.zenMode = !this.state.zenMode;
+    EventBus.emit('zen:toggled', this.state.zenMode);
+    EventBus.emit('toast:info', this.state.zenMode ? '🧘 Modo Zen ativado' : 'Modo Zen desativado');
+  }
+
+  hint() {
+    const s = this.state;
+    const tubes = s.tubes;
+    const nonEmpties = [];
+    const empties = [];
+
+    for (let from = 0; from < tubes.length; from++) {
+      const src = tubes[from];
+      if (src.length === 0 || Rules.isComplete(src, s.bpt)) continue;
+      const color = Rules.top(src);
+      for (let to = 0; to < tubes.length; to++) {
+        if (from === to) continue;
+        if (!Rules.canPlace(tubes[to], color, s.bpt)) continue;
+        if (tubes[to].length === 0) empties.push({ from, to });
+        else nonEmpties.push({ from, to });
+      }
+    }
+
+    const pick = nonEmpties[0] || empties[0];
+    if (pick) EventBus.emit('hint:show', pick);
+    else EventBus.emit('toast:warn', 'Sem movimentos disponíveis');
+  }
+
+  nextLevel() {
+    const next = Math.min(this.state.level + 1, CONFIG.MAX_LEVEL);
+    this.loadLevel(next);
+  }
+}
+
+/* ============================================================
+   RENDERER
+   ============================================================ */
+class Renderer {
+  constructor(state) {
+    this.state = state;
+    this.tubesEl = document.getElementById('tubes-container');
+    this.levelSelectorEl = document.getElementById('level-selector');
+    this.modeBarEl = document.getElementById('mode-bar');
+    this.modifierBarEl = document.getElementById('modifier-bar');
+    this.seedDisplayEl = document.getElementById('seed-display');
+    this.statsEls = {
+      moves: document.getElementById('stat-moves'),
+      level: document.getElementById('stat-level'),
+      colors: document.getElementById('stat-colors')
+    };
+    this.btnUndo = document.getElementById('btn-undo');
+    this.btnAddTube = document.getElementById('btn-add-tube');
+    this.btnZen = document.getElementById('btn-zen');
+    this.btnTheme = document.getElementById('btn-theme');
+    this.btnSound = document.getElementById('btn-sound');
+    this.modal = document.getElementById('modal-overlay');
+    this.onTubeClick = null;
+  }
+
+  bindTubeClick(handler) { this.onTubeClick = handler; }
+
+  render() {
+    this.renderTubes();
+    this.renderStats();
+    this.renderControls();
+    this.renderLevelSelector();
+    this.renderModeBar();
+    this.renderModifierBar();
+    this.renderSeed();
+    this.renderTheme();
+  }
+
+  renderTubes() {
+    const s = this.state;
+    const frag = document.createDocumentFragment();
+    const maxBalls = s.meta ? s.meta.maxBalls : 6;
+    const ballSize = this.computeBallSize(maxBalls, s.tubes.length);
+    const tubeH = ballSize * maxBalls + 12;
+    const tubeW = ballSize + 10;
+
+    document.documentElement.style.setProperty('--bw', `${ballSize}px`);
+
+    s.tubes.forEach((tube, idx) => {
+      const el = document.createElement('div');
+      el.className = 'tube';
+      el.dataset.index = idx;
+      el.style.setProperty('--th', `${tubeH}px`);
+      el.style.setProperty('--tw', `${tubeW}px`);
+      el.setAttribute('role', 'button');
+      el.setAttribute('aria-label', `Tubo ${idx + 1}`);
+
+      const isBlind = s.meta && s.meta.blindIndices && s.meta.blindIndices.includes(idx);
+
+      if (s.selected === idx) el.classList.add('selected');
+      if (Rules.isComplete(tube, s.bpt)) el.classList.add('complete');
+
+      if (s.selected !== null && s.selected !== idx) {
+        const origin = s.tubes[s.selected];
+        if (origin.length > 0 && !Rules.isComplete(origin, s.bpt)) {
+          const color = Rules.top(origin);
+          if (Rules.canPlace(tube, color, s.bpt)) el.classList.add('destination');
+        }
+      }
+
+      tube.forEach((color, ballIdx) => {
+        const ball = document.createElement('div');
+        const isRainbow = Rules.isRainbow(color);
+        // Blind: só a bola do topo é revelada
+        const isTop = ballIdx === tube.length - 1;
+        const hideColor = isBlind && !isTop;
+
+        if (hideColor) {
+          ball.className = 'ball blind';
+        } else if (isRainbow) {
+          ball.className = 'ball rainbow';
+        } else {
+          ball.className = `ball ${color}`;
+        }
+        el.appendChild(ball);
+      });
+
+      el.addEventListener('click', () => this.onTubeClick && this.onTubeClick(idx));
+      el.tabIndex = 0;
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.onTubeClick && this.onTubeClick(idx);
+        }
+      });
+
+      frag.appendChild(el);
+    });
+
+    this.tubesEl.innerHTML = '';
+    this.tubesEl.appendChild(frag);
+  }
+
+  computeBallSize(maxBalls, numTubes) {
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+    const availH = vh * 0.52;
+    const availW = Math.min(vw * 0.95, 900);
+
+    // Altura: limitada pelo espaço vertical / maxBalls
+    const sizeByH = Math.floor((availH - 20) / maxBalls) - 4;
+
+    // Largura: tubos por linha (aproximado)
+    const perRow = Math.min(numTubes, Math.max(4, Math.floor(availW / 60)));
+    const sizeByW = Math.floor((availW / perRow) - 12);
+
+    const size = Math.max(18, Math.min(42, Math.min(sizeByH, sizeByW)));
+    return size;
+  }
+
+  renderStats() {
+    this.statsEls.moves.textContent = this.state.moves;
+    this.statsEls.level.textContent = this.state.level;
+    this.statsEls.colors.textContent = this.state.meta ? this.state.meta.numColors : 0;
+  }
+
+  renderControls() {
+    const mode = GameModes[this.state.mode] || GameModes.classic;
+    this.btnUndo.disabled = this.state.history.length === 0 || mode.noUndo;
+    this.btnAddTube.disabled = this.state.extraTubes >= CONFIG.MAX_EXTRA_TUBES || mode.noExtraTube;
+    this.btnZen.classList.toggle('active', this.state.zenMode);
+    this.btnZen.setAttribute('aria-pressed', String(this.state.zenMode));
+    if (this.btnSound) {
+      this.btnSound.textContent = Sound.isEnabled() ? '🔊' : '🔇';
+    }
+  }
+
+  renderLevelSelector() {
+    const s = this.state;
+    if (this.levelSelectorEl.children.length !== CONFIG.MAX_LEVEL) {
+      this.levelSelectorEl.innerHTML = '';
+      for (let i = 1; i <= CONFIG.MAX_LEVEL; i++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'level-btn';
+        btn.textContent = i;
+        btn.dataset.level = i;
+        if (i % 5 === 0 && i >= 5) btn.classList.add('spike');
+        this.levelSelectorEl.appendChild(btn);
+      }
+    }
+    Array.from(this.levelSelectorEl.children).forEach(btn => {
+      const lvl = Number(btn.dataset.level);
+      btn.classList.toggle('active', lvl === s.level);
+      btn.classList.toggle('completed', s.completedLevels.includes(lvl));
+    });
+  }
+
+  renderModeBar() {
+    const current = this.state.mode;
+    if (this.modeBarEl.children.length === 0) {
+      Object.values(GameModes).forEach(mode => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mode-btn';
+        btn.dataset.mode = mode.id;
+        btn.textContent = `${mode.icon} ${mode.label}`;
+        this.modeBarEl.appendChild(btn);
+      });
+    }
+    Array.from(this.modeBarEl.children).forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === current);
+    });
+  }
+
+  renderModifierBar() {
+    const meta = this.state.meta;
+    if (!meta || !meta.modifiers || meta.modifiers.length === 0) {
+      this.modifierBarEl.innerHTML = '';
+      return;
+    }
+    const labels = {
+      blind: '🕶️ Cegos',
+      rainbow: '🌈 Rainbow',
+      locked: '🔒 Travados'
+    };
+    const pills = meta.modifiers.map(m => `<span class="mod-pill">${labels[m] || m}</span>`);
+    if (meta.isSpike) pills.unshift('<span class="mod-pill" style="background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.5);color:#fbbf24">🔥 Spike</span>');
+    this.modifierBarEl.innerHTML = pills.join('');
+  }
+
+  renderSeed() {
+    if (this.seedDisplayEl) {
+      this.seedDisplayEl.textContent = SeedUtils.toString(this.state.seed);
+    }
+  }
+
+  renderTheme() {
+    document.documentElement.setAttribute('data-theme', this.state.theme);
+    this.btnTheme.textContent = this.state.theme === 'dark' ? '🌙' : '☀️';
+  }
+
+  flashInvalid(idx) {
+    const el = this.tubesEl.children[idx];
+    if (!el) return;
+    el.classList.remove('invalid');
+    void el.offsetWidth;
+    el.classList.add('invalid');
+    setTimeout(() => el.classList.remove('invalid'), 400);
+  }
+
+  flashHint(from, to) {
+    [from, to].forEach(i => {
+      const el = this.tubesEl.children[i];
+      if (!el) return;
+      el.classList.remove('hint');
+      void el.offsetWidth;
+      el.classList.add('hint');
+      setTimeout(() => el.classList.remove('hint'), 1300);
+    });
+  }
+
+  openModal({ level, moves, time, isSpike }) {
+    document.getElementById('modal-moves').textContent = moves;
+    document.getElementById('modal-level').textContent = level;
+    document.getElementById('modal-time').textContent = `${time}s`;
+    document.getElementById('modal-badge').style.display = isSpike ? 'inline-block' : 'none';
+    this.modal.classList.add('active');
+  }
+
+  closeModal() {
+    this.modal.classList.remove('active');
+  }
+
+  toggleTheme() {
+    this.state.theme = this.state.theme === 'dark' ? 'light' : 'dark';
+    Storage.set(CONFIG.STORAGE_KEYS.THEME, this.state.theme);
+    this.renderTheme();
+  }
+}
+
+/* ============================================================
+   APP BOOTSTRAP
+   ============================================================ */
+(function App() {
+  const state = new GameState();
+  const controller = new GameController(state);
+  const renderer = new Renderer(state);
+
+  renderer.bindTubeClick(idx => controller.selectTube(idx));
+
+  EventBus.on('state:changed', () => renderer.render());
+  EventBus.on('tube:invalid', idx => renderer.flashInvalid(idx));
+  EventBus.on('toast:info', msg => Toaster.info(msg));
+  EventBus.on('toast:warn', msg => Toaster.warn(msg));
+  EventBus.on('toast:success', msg => Toaster.success(msg));
+  EventBus.on('modal:close', () => renderer.closeModal());
+  EventBus.on('hint:show', ({ from, to }) => renderer.flashHint(from, to));
+  EventBus.on('level:won', ({ level, moves, time, isSpike }) => {
+    setTimeout(() => renderer.openModal({ level, moves, time, isSpike }), CONFIG.WIN_MODAL_DELAY);
+  });
+  EventBus.on('game:stuck', () => {
+    if (!state.zenMode) Toaster.warn('Sem movimentos! Tenta desfazer ↶');
+  });
+
+  // Level selector
+  document.getElementById('level-selector').addEventListener('click', (e) => {
+    const btn = e.target.closest('.level-btn');
+    if (!btn) return;
+    controller.loadLevel(Number(btn.dataset.level));
+  });
+
+  // Mode bar
+  document.getElementById('mode-bar').addEventListener('click', (e) => {
+    const btn = e.target.closest('.mode-btn');
+    if (!btn) return;
+    controller.setMode(btn.dataset.mode);
+  });
+
+  // Seed
+  document.getElementById('seed-display').addEventListener('click', () => {
+    const seedStr = SeedUtils.toString(state.seed);
+    const url = `${location.origin}${location.pathname}#seed=${seedStr}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => Toaster.success('🔗 Link copiado!')).catch(() => {});
+    } else {
+      Toaster.info(`Seed: ${seedStr}`);
+    }
+  });
+
+  document.getElementById('btn-shuffle-seed').addEventListener('click', () => controller.newSeed());
+
+  // Controls
+  document.getElementById('btn-undo').addEventListener('click', () => controller.undo());
+  document.getElementById('btn-add-tube').addEventListener('click', () => controller.addExtraTube());
+  document.getElementById('btn-zen').addEventListener('click', () => controller.toggleZen());
+  document.getElementById('btn-theme').addEventListener('click', () => renderer.toggleTheme());
+  document.getElementById('btn-restart').addEventListener('click', () => controller.restart());
+  document.getElementById('btn-sound').addEventListener('click', () => {
+    Sound.toggle();
+    renderer.renderControls();
+  });
+  document.getElementById('btn-hint').addEventListener('click', () => controller.hint());
+
+  document.getElementById('btn-next-level').addEventListener('click', () => {
+    renderer.closeModal();
+    controller.nextLevel();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input, textarea')) return;
+    const isUndo = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z';
+    if (isUndo) { e.preventDefault(); controller.undo(); }
+    else if (e.key.toLowerCase() === 'r') controller.restart();
+    else if (e.key.toLowerCase() === 't') controller.addExtraTube();
+    else if (e.key.toLowerCase() === 'h') controller.hint();
+    else if (e.key === 'Escape') {
+      if (state.selected !== null) {
+        state.selected = null;
+        EventBus.emit('state:changed');
+      } else {
+        renderer.closeModal();
+      }
+    }
+  });
+
+  // Resize: re-render para recalcular tamanhos
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => renderer.render(), 150);
+  });
+
+  // Boot
+  renderer.renderTheme();
+  renderer.renderModeBar();
+
+  const restored = state.loadSavedGame();
+  if (!restored) {
+    const savedLevel = Math.max(1, Math.min(
+      CONFIG.MAX_LEVEL,
+      parseInt(Storage.get(CONFIG.STORAGE_KEYS.LEVEL, '1'), 10) || 1
+    ));
+    controller.loadLevel(savedLevel);
+  } else {
+    EventBus.emit('state:changed');
+    Toaster.info(`Partida restaurada · Nível ${state.level}`);
+  }
+})();
+</script>
+</body>
+</html>
