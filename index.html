@@ -80,6 +80,7 @@ body{
   display:flex; justify-content:space-between; align-items:center;
   padding:16px 20px; gap:12px;
 }
+.top-bar-actions{display:flex; gap:8px}
 .btn-icon{
   width:48px; height:48px;
   border-radius:50%;
@@ -373,7 +374,10 @@ body{
 
 <!-- ============ TOP BAR ============ -->
 <header class="top-bar">
-  <button class="btn-icon" id="btn-theme" type="button" aria-label="Alternar tema" title="Tema">🌙</button>
+  <div class="top-bar-actions">
+    <button class="btn-icon" id="btn-theme" type="button" aria-label="Alternar tema" title="Tema">🌙</button>
+    <button class="btn-icon" id="btn-sound" type="button" aria-label="Alternar som" title="Som">🔊</button>
+  </div>
   <div class="stats" role="status" aria-live="polite">
     <div class="stat">
       <div class="stat-value" id="stat-moves">0</div>
@@ -398,6 +402,7 @@ body{
 <!-- ============ BOTTOM BAR ============ -->
 <footer class="bottom-bar">
   <button class="btn secondary" id="btn-undo" type="button" disabled>↶ Desfazer</button>
+  <button class="btn secondary" id="btn-hint" type="button">💡 Dica</button>
   <button class="btn secondary" id="btn-add-tube" type="button">➕ Tubo Extra</button>
   <button class="zen-toggle" id="btn-zen" type="button" aria-pressed="false">🧘 Zen</button>
 </footer>
@@ -427,8 +432,8 @@ body{
 
 <script>
 /* ============================================================
-   BALL SORT PUZZLE v3 — Professional Edition
-   Architecture: Modular, event-driven, testable
+   BALL SORT PUZZLE v4 — Professional Edition
+   Architecture: Modular, event-driven, testable, persistent
    ============================================================ */
 'use strict';
 
@@ -438,15 +443,20 @@ const CONFIG = Object.freeze({
   MAX_LEVEL: 12,
   MAX_EXTRA_TUBES: 2,
   MAX_HISTORY: 100,
-  TOAST_DURATION: 1600,
+  TOAST_DURATION: 1800,
   WIN_MODAL_DELAY: 400,
   STORAGE_KEYS: Object.freeze({
     THEME: 'ballsort.theme',
     LEVEL: 'ballsort.level',
-    COMPLETED: 'ballsort.completed'
+    COMPLETED: 'ballsort.completed',
+    SAVE: 'ballsort.save',
+    SOUND: 'ballsort.sound'
   })
 });
 
+/* ============================================================
+   EVENT BUS
+   ============================================================ */
 const EventBus = (() => {
   const listeners = new Map();
   return {
@@ -463,6 +473,9 @@ const EventBus = (() => {
   };
 })();
 
+/* ============================================================
+   STORAGE
+   ============================================================ */
 const Storage = {
   get(key, fallback = null) {
     try {
@@ -481,11 +494,19 @@ const Storage = {
   },
   setJSON(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+  },
+  remove(key) {
+    try { localStorage.removeItem(key); } catch {}
   }
 };
 
-const Audio = (() => {
+/* ============================================================
+   AUDIO — com toggle global
+   ============================================================ */
+const Sound = (() => {
   let ctx = null;
+  let enabled = Storage.get(CONFIG.STORAGE_KEYS.SOUND, '1') === '1';
+
   const ensure = () => {
     try {
       if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -493,7 +514,9 @@ const Audio = (() => {
       return ctx;
     } catch { return null; }
   };
+
   const tone = (freq, type, duration, volume) => {
+    if (!enabled) return;
     const ac = ensure(); if (!ac) return;
     const now = ac.currentTime;
     const osc = ac.createOscillator();
@@ -505,26 +528,39 @@ const Audio = (() => {
     osc.connect(gain); gain.connect(ac.destination);
     osc.start(now); osc.stop(now + duration);
   };
+
   return {
-    select() { tone(600, 'sine', .1, .08); },
-    move() { tone(400, 'triangle', .15, .1); },
+    isEnabled: () => enabled,
+    toggle() {
+      enabled = !enabled;
+      Storage.set(CONFIG.STORAGE_KEYS.SOUND, enabled ? '1' : '0');
+      if (enabled) tone(880, 'sine', .1, .1);
+      return enabled;
+    },
+    select() { tone(600, 'sine', .08, .06); },
+    move() { tone(400, 'triangle', .12, .08); },
+    invalid() { tone(180, 'sawtooth', .15, .06); },
     win() {
+      if (!enabled) return;
       const ac = ensure(); if (!ac) return;
       const now = ac.currentTime;
       [523, 659, 784, 1046].forEach((freq, i) => {
         const o = ac.createOscillator(), g = ac.createGain();
         o.frequency.value = freq; o.type = 'sine';
-        const t = now + i * .12;
+        const t = now + i * .1;
         g.gain.setValueAtTime(.001, t);
-        g.gain.exponentialRampToValueAtTime(.15, t + .02);
-        g.gain.exponentialRampToValueAtTime(.001, t + .4);
+        g.gain.exponentialRampToValueAtTime(.12, t + .02);
+        g.gain.exponentialRampToValueAtTime(.001, t + .35);
         o.connect(g); g.connect(ac.destination);
-        o.start(t); o.stop(t + .4);
+        o.start(t); o.stop(t + .35);
       });
     }
   };
 })();
 
+/* ============================================================
+   TOASTER
+   ============================================================ */
 const Toaster = (() => {
   const container = document.getElementById('toast-container');
   const queue = [];
@@ -557,6 +593,9 @@ const Toaster = (() => {
   };
 })();
 
+/* ============================================================
+   LEVEL GENERATOR — corrigido
+   ============================================================ */
 const LevelGenerator = (() => {
   const isSolved = (tubes) => tubes.every(t =>
     t.length === 0 || (t.length === CONFIG.BALLS_PER_TUBE && t.every(c => c === t[0]))
@@ -568,6 +607,9 @@ const LevelGenerator = (() => {
     return { numColors, emptyTubes };
   };
 
+  /**
+   * Movimentos reversos válidos — com bloqueio correto do inverso direto.
+   */
   const validReverseMoves = (tubes, last) => {
     const moves = [];
     for (let from = 0; from < tubes.length; from++) {
@@ -577,6 +619,7 @@ const LevelGenerator = (() => {
         if (from === to) continue;
         if (tubes[to].length >= CONFIG.BALLS_PER_TUBE) continue;
         if (tubes[to].length > 0 && tubes[to][tubes[to].length - 1] !== color) continue;
+        // Bloquear inverso direto: se último move foi (to → from), bloqueia (from → to)
         if (last && last.from === to && last.to === from) continue;
         moves.push({ from, to });
       }
@@ -584,28 +627,38 @@ const LevelGenerator = (() => {
     return moves;
   };
 
-  const shuffle = (arr) => {
-    const a = arr.slice();
-    for (let i = a.length - 1; i > 0; i--) {
+  const shuffleBalls = (tubes) => {
+    const allBalls = tubes.flat();
+    for (let i = allBalls.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
+      [allBalls[i], allBalls[j]] = [allBalls[j], allBalls[i]];
     }
-    return a;
+    const result = [];
+    const numFullTubes = allBalls.length / CONFIG.BALLS_PER_TUBE;
+    for (let i = 0; i < numFullTubes; i++) {
+      result.push(allBalls.slice(i * CONFIG.BALLS_PER_TUBE, (i + 1) * CONFIG.BALLS_PER_TUBE));
+    }
+    return result;
   };
 
   const generate = (level) => {
     const { numColors, emptyTubes } = config(level);
     const colors = CONFIG.COLORS.slice(0, numColors);
     const full = colors.map(c => Array(CONFIG.BALLS_PER_TUBE).fill(c));
-    const shuffled = shuffle(full);
     const empty = Array.from({ length: emptyTubes }, () => []);
-    let tubes = [...shuffled, ...empty];
+    let tubes = [...shuffleBalls(full), ...empty];
 
     const steps = numColors * 8 + level * 4;
     let last = null;
+    let stuck = 0;
     for (let i = 0; i < steps; i++) {
       const moves = validReverseMoves(tubes, last);
-      if (moves.length === 0) break;
+      if (moves.length === 0) {
+        stuck++;
+        if (stuck > 3) break;
+        continue;
+      }
+      stuck = 0;
       const m = moves[Math.floor(Math.random() * moves.length)];
       tubes[m.to].push(tubes[m.from].pop());
       last = m;
@@ -618,6 +671,44 @@ const LevelGenerator = (() => {
   return { generate, config, isSolved };
 })();
 
+/* ============================================================
+   RULES
+   ============================================================ */
+const Rules = {
+  isComplete(tube) {
+    return tube.length === CONFIG.BALLS_PER_TUBE && tube.every(c => c === tube[0]);
+  },
+  top(tube) {
+    return tube.length ? tube[tube.length - 1] : null;
+  },
+  canPlace(dest, color) {
+    if (dest.length >= CONFIG.BALLS_PER_TUBE) return false;
+    if (dest.length === 0) return true;
+    return Rules.top(dest) === color;
+  },
+  allSolved(tubes) {
+    return tubes.every(t => t.length === 0 || Rules.isComplete(t));
+  },
+  hasAnyBall(tubes) {
+    return tubes.some(t => t.length > 0);
+  },
+  hasAnyMove(tubes) {
+    for (let from = 0; from < tubes.length; from++) {
+      const src = tubes[from];
+      if (src.length === 0 || Rules.isComplete(src)) continue;
+      const color = Rules.top(src);
+      for (let to = 0; to < tubes.length; to++) {
+        if (from === to) continue;
+        if (Rules.canPlace(tubes[to], color)) return true;
+      }
+    }
+    return false;
+  }
+};
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
 class GameState {
   constructor() {
     this.level = 1;
@@ -668,28 +759,38 @@ class GameState {
   saveLevel() {
     Storage.set(CONFIG.STORAGE_KEYS.LEVEL, this.level);
   }
+
+  saveGame() {
+    Storage.setJSON(CONFIG.STORAGE_KEYS.SAVE, {
+      level: this.level,
+      moves: this.moves,
+      tubes: this.tubes,
+      extraTubes: this.extraTubes,
+      history: this.history.slice(-20)
+    });
+  }
+
+  loadSavedGame() {
+    const save = Storage.getJSON(CONFIG.STORAGE_KEYS.SAVE, null);
+    if (!save || !Array.isArray(save.tubes) || save.tubes.length === 0) return false;
+    this.level = save.level || 1;
+    this.moves = save.moves || 0;
+    this.tubes = save.tubes;
+    this.extraTubes = save.extraTubes || 0;
+    this.history = save.history || [];
+    this.selected = null;
+    this.completed = false;
+    return true;
+  }
+
+  clearSave() {
+    Storage.remove(CONFIG.STORAGE_KEYS.SAVE);
+  }
 }
 
-const Rules = {
-  isComplete(tube) {
-    return tube.length === CONFIG.BALLS_PER_TUBE && tube.every(c => c === tube[0]);
-  },
-  top(tube) {
-    return tube.length ? tube[tube.length - 1] : null;
-  },
-  canPlace(dest, color) {
-    if (dest.length >= CONFIG.BALLS_PER_TUBE) return false;
-    if (dest.length === 0) return true;
-    return Rules.top(dest) === color;
-  },
-  allSolved(tubes) {
-    return tubes.every(t => t.length === 0 || Rules.isComplete(t));
-  },
-  hasAnyBall(tubes) {
-    return tubes.some(t => t.length > 0);
-  }
-};
-
+/* ============================================================
+   GAME CONTROLLER
+   ============================================================ */
 class GameController {
   constructor(state) {
     this.state = state;
@@ -703,7 +804,10 @@ class GameController {
     this.state.selected = null;
     this.state.history = [];
     this.state.completed = false;
-    if (!silent) this.state.saveLevel();
+    if (!silent) {
+      this.state.saveLevel();
+      this.state.saveGame();
+    }
     EventBus.emit('state:changed');
     EventBus.emit('level:loaded', level);
   }
@@ -729,7 +833,7 @@ class GameController {
       const target = state.tubes[idx];
       if (target.length > 0 && !Rules.isComplete(target)) {
         state.selected = idx;
-        Audio.select();
+        Sound.select();
       } else {
         state.selected = null;
         EventBus.emit('tube:invalid', idx);
@@ -744,7 +848,7 @@ class GameController {
       return;
     }
     state.selected = idx;
-    Audio.select();
+    Sound.select();
     EventBus.emit('state:changed');
   }
 
@@ -766,7 +870,11 @@ class GameController {
     }
 
     const color = Rules.top(from);
-    if (!Rules.canPlace(to, color)) return false;
+    if (!Rules.canPlace(to, color)) {
+      Sound.invalid();
+      EventBus.emit('tube:invalid', toIdx);
+      return false;
+    }
 
     state.pushHistory();
 
@@ -778,11 +886,20 @@ class GameController {
 
     if (count > 0) {
       state.moves++;
-      Audio.move();
+      Sound.move();
       EventBus.emit('ball:moved', { count });
     }
     state.selected = null;
     this.checkWin();
+    state.saveGame();
+
+    // Detectar "sem movimentos possíveis"
+    setTimeout(() => {
+      if (!state.completed && Rules.hasAnyBall(state.tubes) && !Rules.hasAnyMove(state.tubes)) {
+        EventBus.emit('game:stuck');
+      }
+    }, 100);
+
     EventBus.emit('state:changed');
     return true;
   }
@@ -793,7 +910,8 @@ class GameController {
 
     state.completed = true;
     state.markCompleted(state.level);
-    Audio.win();
+    state.clearSave();
+    Sound.win();
     EventBus.emit('level:won', { level: state.level, moves: state.moves });
   }
 
@@ -804,7 +922,8 @@ class GameController {
     }
     this.state.popHistory();
     EventBus.emit('modal:close');
-    Audio.select();
+    Sound.select();
+    this.state.saveGame();
     EventBus.emit('state:changed');
   }
 
@@ -817,7 +936,8 @@ class GameController {
     state.pushHistory();
     state.tubes.push([]);
     state.extraTubes++;
-    Audio.select();
+    Sound.select();
+    state.saveGame();
     EventBus.emit('state:changed');
   }
 
@@ -827,12 +947,42 @@ class GameController {
     EventBus.emit('toast:info', this.state.zenMode ? '🧘 Modo Zen ativado' : 'Modo Zen desativado');
   }
 
+  hint() {
+    const tubes = this.state.tubes;
+    // Prioridade 1: mover para tubo não-vazio (junta grupos)
+    // Prioridade 2: mover para tubo vazio
+    const empties = [];
+    const nonEmpties = [];
+
+    for (let from = 0; from < tubes.length; from++) {
+      const src = tubes[from];
+      if (src.length === 0 || Rules.isComplete(src)) continue;
+      const color = Rules.top(src);
+      for (let to = 0; to < tubes.length; to++) {
+        if (from === to) continue;
+        if (!Rules.canPlace(tubes[to], color)) continue;
+        if (tubes[to].length === 0) empties.push({ from, to });
+        else nonEmpties.push({ from, to });
+      }
+    }
+
+    const pick = nonEmpties[0] || empties[0];
+    if (pick) {
+      EventBus.emit('hint:show', pick);
+    } else {
+      EventBus.emit('toast:warn', 'Sem movimentos disponíveis');
+    }
+  }
+
   nextLevel() {
     const next = Math.min(this.state.level + 1, CONFIG.MAX_LEVEL);
     this.loadLevel(next);
   }
 }
 
+/* ============================================================
+   RENDERER
+   ============================================================ */
 class Renderer {
   constructor(state) {
     this.state = state;
@@ -846,6 +996,7 @@ class Renderer {
     this.btnAddTube = document.getElementById('btn-add-tube');
     this.btnZen = document.getElementById('btn-zen');
     this.btnTheme = document.getElementById('btn-theme');
+    this.btnSound = document.getElementById('btn-sound');
     this.modal = document.getElementById('modal-overlay');
     this.onTubeClick = null;
   }
@@ -914,6 +1065,9 @@ class Renderer {
     this.btnAddTube.disabled = this.state.extraTubes >= CONFIG.MAX_EXTRA_TUBES;
     this.btnZen.classList.toggle('active', this.state.zenMode);
     this.btnZen.setAttribute('aria-pressed', String(this.state.zenMode));
+    if (this.btnSound) {
+      this.btnSound.textContent = Sound.isEnabled() ? '🔊' : '🔇';
+    }
   }
 
   renderLevelSelector() {
@@ -950,6 +1104,16 @@ class Renderer {
     setTimeout(() => el.classList.remove('invalid'), 400);
   }
 
+  flashHint(from, to) {
+    [from, to].forEach(i => {
+      const el = this.tubesEl.children[i];
+      if (!el) return;
+      el.style.transition = 'filter .3s';
+      el.style.filter = 'drop-shadow(0 0 16px #fbbf24)';
+      setTimeout(() => { el.style.filter = ''; }, 1200);
+    });
+  }
+
   openModal({ level, moves }) {
     document.getElementById('modal-moves').textContent = moves;
     document.getElementById('modal-level').textContent = level;
@@ -967,6 +1131,9 @@ class Renderer {
   }
 }
 
+/* ============================================================
+   APP BOOTSTRAP
+   ============================================================ */
 (function App() {
   const state = new GameState();
   const controller = new GameController(state);
@@ -979,34 +1146,46 @@ class Renderer {
   EventBus.on('toast:info', msg => Toaster.info(msg));
   EventBus.on('toast:warn', msg => Toaster.warn(msg));
   EventBus.on('modal:close', () => renderer.closeModal());
+  EventBus.on('hint:show', ({ from, to }) => renderer.flashHint(from, to));
   EventBus.on('level:won', ({ level, moves }) => {
     setTimeout(() => renderer.openModal({ level, moves }), CONFIG.WIN_MODAL_DELAY);
   });
+  EventBus.on('game:stuck', () => {
+    if (!state.zenMode) Toaster.warn('Sem movimentos! Tenta desfazer ↶');
+  });
 
+  // Level selector
   document.getElementById('level-selector').addEventListener('click', (e) => {
     const btn = e.target.closest('.level-btn');
     if (!btn) return;
     controller.loadLevel(Number(btn.dataset.level));
   });
 
+  // Controles
   document.getElementById('btn-undo').addEventListener('click', () => controller.undo());
   document.getElementById('btn-add-tube').addEventListener('click', () => controller.addExtraTube());
   document.getElementById('btn-zen').addEventListener('click', () => controller.toggleZen());
   document.getElementById('btn-theme').addEventListener('click', () => renderer.toggleTheme());
   document.getElementById('btn-restart').addEventListener('click', () => controller.restart());
-  
-  // Correção aplicada para fechar o modal e carregar o próximo nível perfeitamente
+  document.getElementById('btn-sound').addEventListener('click', () => {
+    Sound.toggle();
+    renderer.renderControls();
+  });
+  document.getElementById('btn-hint').addEventListener('click', () => controller.hint());
+
   document.getElementById('btn-next-level').addEventListener('click', () => {
     renderer.closeModal();
     controller.nextLevel();
   });
 
+  // Atalhos de teclado
   document.addEventListener('keydown', (e) => {
     if (e.target.matches('input, textarea')) return;
     const isUndo = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z';
     if (isUndo) { e.preventDefault(); controller.undo(); }
     else if (e.key.toLowerCase() === 'r') controller.restart();
     else if (e.key.toLowerCase() === 't') controller.addExtraTube();
+    else if (e.key.toLowerCase() === 'h') controller.hint();
     else if (e.key === 'Escape') {
       if (state.selected !== null) {
         state.selected = null;
@@ -1017,12 +1196,21 @@ class Renderer {
     }
   });
 
+  // Boot
   renderer.renderTheme();
-  const savedLevel = Math.max(1, Math.min(
-    CONFIG.MAX_LEVEL,
-    parseInt(Storage.get(CONFIG.STORAGE_KEYS.LEVEL, '1'), 10) || 1
-  ));
-  controller.loadLevel(savedLevel);
+
+  // Tentar restaurar partida salva, senão carregar último nível
+  const restored = state.loadSavedGame();
+  if (!restored) {
+    const savedLevel = Math.max(1, Math.min(
+      CONFIG.MAX_LEVEL,
+      parseInt(Storage.get(CONFIG.STORAGE_KEYS.LEVEL, '1'), 10) || 1
+    ));
+    controller.loadLevel(savedLevel);
+  } else {
+    EventBus.emit('state:changed');
+    Toaster.info(`Partida restaurada · Nível ${state.level}`);
+  }
 })();
 </script>
 </body>
