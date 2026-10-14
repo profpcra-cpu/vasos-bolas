@@ -21,6 +21,8 @@
   --btn-accent:linear-gradient(135deg,#06b6d4,#3b82f6);
   --radius:16px;
   --t:.25s cubic-bezier(.16,1,.3,1);
+  --danger:#ef4444;
+  --success:#4ade80;
 }
 [data-theme="light"]{
   --bg-1:#f5f0ff;--bg-2:#e0e7ff;--bg-3:#fff;
@@ -32,27 +34,55 @@
 *,*::before,*::after{box-sizing:border-box}
 html,body{height:100%;margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);overflow:hidden;user-select:none;-webkit-tap-highlight-color:transparent}
 body{background:radial-gradient(circle at 30% 20%,var(--bg-2) 0%,var(--bg-1) 45%,var(--bg-3) 100%);display:flex;flex-direction:column;min-height:100dvh}
-.top-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;gap:12px}
+
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;gap:12px;flex-shrink:0}
 .btn-icon{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:var(--text);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--t);backdrop-filter:blur(10px)}
 .btn-icon:hover{background:rgba(255,255,255,.18);transform:translateY(-2px)}
 .btn-icon:active{transform:translateY(0) scale(.95)}
+.btn-icon:focus-visible{outline:2px solid var(--text-muted);outline-offset:3px}
 .stats{display:flex;gap:16px;align-items:center}
 .stat{display:flex;flex-direction:column;align-items:center;gap:2px}
-.stat-value{font-family:'Plus Jakarta Sans',monospace;font-size:20px;font-weight:800;color:var(--text)}
+.stat-value{font-size:20px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
 .stat-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)}
-.game-area{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;gap:24px;overflow:hidden}
-.tubes-container{display:grid;grid-template-columns:repeat(7,1fr);gap:12px 8px;max-width:720px;width:100%;justify-items:center;align-items:end}
-.tube{position:relative;width:42px;height:190px;background:var(--tube-bg);border:2px solid var(--tube-border);border-top:none;border-radius:0 0 21px 21px;box-shadow:var(--tube-shadow);display:flex;flex-direction:column-reverse;align-items:center;padding:4px 4px 0;cursor:pointer;transition:transform var(--t),filter var(--t);backdrop-filter:blur(4px);overflow:hidden}
-.tube::before{content:'';position:absolute;top:0;left:4px;right:4px;height:8px;background:linear-gradient(to bottom,rgba(255,255,255,.3),transparent);border-radius:0 0 50% 50%;pointer-events:none;z-index:5}
+
+.game-area{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;gap:24px;overflow:hidden;min-height:0}
+.tubes-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(42px,1fr));gap:12px 8px;max-width:720px;width:100%;justify-items:center;align-items:end}
+
+.tube{
+  position:relative;width:42px;height:190px;
+  background:var(--tube-bg);border:2px solid var(--tube-border);border-top:none;
+  border-radius:0 0 21px 21px;box-shadow:var(--tube-shadow);
+  display:flex;flex-direction:column-reverse;align-items:center;
+  padding:4px 4px 0;cursor:pointer;
+  transition:transform var(--t),filter var(--t);
+  backdrop-filter:blur(4px);overflow:visible;
+}
+.tube::before{
+  content:'';position:absolute;top:0;left:4px;right:4px;height:8px;
+  background:linear-gradient(to bottom,rgba(255,255,255,.3),transparent);
+  border-radius:0 0 50% 50%;pointer-events:none;z-index:5;
+}
 .tube.selected{transform:translateY(-12px);filter:drop-shadow(0 0 20px rgba(168,85,247,.8))}
 .tube.destination{filter:drop-shadow(0 0 16px rgba(74,222,128,.7))}
 .tube.destination::before{background:linear-gradient(to bottom,rgba(74,222,128,.6),transparent)}
-.tube.complete{border-color:#4ade80;filter:drop-shadow(0 0 12px rgba(74,222,128,.5))}
-.tube.complete::after{content:'✓';position:absolute;top:-14px;left:50%;transform:translateX(-50%);color:#4ade80;font-size:14px;font-weight:800}
+.tube.complete{border-color:var(--success);filter:drop-shadow(0 0 12px rgba(74,222,128,.5))}
+.tube.complete::after{
+  content:'✓';position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  color:var(--success);font-size:14px;font-weight:800;
+}
 .tube.invalid{animation:shake .3s}
+.tube:focus-visible{outline:2px solid var(--text-muted);outline-offset:4px;border-radius:0 0 21px 21px}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-.ball{width:32px;height:32px;border-radius:50%;margin-bottom:2px;position:relative;box-shadow:inset -3px -3px 8px rgba(0,0,0,.4),inset 3px 3px 8px rgba(255,255,255,.4),0 2px 6px rgba(0,0,0,.4);flex-shrink:0;transition:transform var(--t)}
-.ball::before{content:'';position:absolute;top:12%;left:18%;width:30%;height:30%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.9),transparent 70%);pointer-events:none}
+
+.ball{
+  width:32px;height:32px;border-radius:50%;margin-bottom:2px;position:relative;
+  box-shadow:inset -3px -3px 8px rgba(0,0,0,.4),inset 3px 3px 8px rgba(255,255,255,.4),0 2px 6px rgba(0,0,0,.4);
+  flex-shrink:0;transition:transform var(--t);will-change:transform;
+}
+.ball::before{
+  content:'';position:absolute;top:12%;left:18%;width:30%;height:30%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.9),transparent 70%);pointer-events:none;
+}
 .ball.red{background:radial-gradient(circle at 35% 30%,#ff6b6b,#dc2626 60%,#991b1b)}
 .ball.green{background:radial-gradient(circle at 35% 30%,#86efac,#22c55e 60%,#15803d)}
 .ball.blue{background:radial-gradient(circle at 35% 30%,#93c5fd,#3b82f6 60%,#1e40af)}
@@ -66,32 +96,88 @@ body{background:radial-gradient(circle at 30% 20%,var(--bg-2) 0%,var(--bg-1) 45%
 .ball.lime{background:radial-gradient(circle at 35% 30%,#d9f99d,#84cc16 60%,#3f6212)}
 .ball.pop{animation:ballJump .3s cubic-bezier(.16,1,.3,1)}
 @keyframes ballJump{0%{transform:scale(1) translateY(0)}50%{transform:scale(1.15) translateY(-8px)}100%{transform:scale(1) translateY(0)}}
-.bottom-bar{display:flex;justify-content:center;gap:12px;padding:20px;flex-wrap:wrap}
-.btn{padding:12px 24px;border-radius:999px;border:none;background:var(--btn-bg);color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all var(--t);box-shadow:0 8px 24px rgba(168,85,247,.4)}
+
+.bottom-bar{display:flex;justify-content:center;gap:12px;padding:20px;flex-wrap:wrap;flex-shrink:0}
+.btn{
+  padding:12px 24px;border-radius:999px;border:none;background:var(--btn-bg);color:#fff;
+  font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;transition:all var(--t);
+  box-shadow:0 8px 24px rgba(168,85,247,.4);
+}
 .btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(168,85,247,.55)}
 .btn:active{transform:translateY(0)}
+.btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .btn.secondary{background:var(--btn-accent);box-shadow:0 8px 24px rgba(59,130,246,.4)}
-.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .3s;padding:20px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none}
+
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;z-index:1000;
+  opacity:0;pointer-events:none;transition:opacity .3s;padding:20px;
+}
 .modal-overlay.active{opacity:1;pointer-events:auto}
-.modal-card{background:linear-gradient(135deg,rgba(45,27,78,.98),rgba(26,11,46,.98));border:1px solid rgba(168,85,247,.4);border-radius:24px;padding:32px 24px;max-width:380px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 60px rgba(168,85,247,.3);animation:modalIn .4s cubic-bezier(.16,1,.3,1)}
+.modal-card{
+  background:linear-gradient(135deg,rgba(45,27,78,.98),rgba(26,11,46,.98));
+  border:1px solid rgba(168,85,247,.4);border-radius:24px;padding:32px 24px;
+  max-width:380px;width:100%;text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 60px rgba(168,85,247,.3);
+  animation:modalIn .4s cubic-bezier(.16,1,.3,1);
+}
 [data-theme="light"] .modal-card{background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(245,240,255,.98));border:1px solid rgba(168,85,247,.3)}
 @keyframes modalIn{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
 .modal-emoji{font-size:64px;margin-bottom:12px;animation:bounceIn .6s cubic-bezier(.16,1,.3,1)}
 @keyframes bounceIn{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
-.modal-title{font-size:24px;font-weight:800;margin:0 0 8px;background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.modal-title{
+  font-size:24px;font-weight:800;margin:0 0 8px;color:#a855f7;
+  background:linear-gradient(135deg,#a855f7,#ec4899);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
 .modal-message{color:var(--text-muted);font-size:14px;margin:0 0 20px;line-height:1.5}
 .modal-stats{display:flex;justify-content:space-around;padding:16px;background:rgba(168,85,247,.1);border-radius:12px;margin-bottom:20px}
-.modal-stat-value{font-size:22px;font-weight:800;color:#a855f7}
+.modal-stat-value{font-size:22px;font-weight:800;color:#a855f7;font-variant-numeric:tabular-nums}
 .modal-stat-label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:1px}
-.level-selector{display:flex;gap:8px;padding:12px 20px;overflow-x:auto;justify-content:center;flex-wrap:wrap;scrollbar-width:none}
+
+.level-selector{
+  display:flex;gap:8px;padding:12px 20px;overflow-x:auto;
+  justify-content:center;flex-wrap:wrap;scrollbar-width:none;flex-shrink:0;
+}
 .level-selector::-webkit-scrollbar{display:none}
-.level-btn{min-width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all var(--t);flex-shrink:0}
+.level-btn{
+  min-width:44px;height:44px;border-radius:12px;
+  background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);
+  color:var(--text);font-family:inherit;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all var(--t);flex-shrink:0;position:relative;
+}
 .level-btn:hover{background:rgba(255,255,255,.15)}
 .level-btn.active{background:var(--btn-bg);border-color:transparent;box-shadow:0 0 20px rgba(168,85,247,.6)}
-.level-btn.completed::after{content:'✓';margin-left:4px;color:#4ade80}
-.zen-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);padding:8px 16px;background:rgba(255,255,255,.06);border-radius:999px;cursor:pointer;border:1px solid rgba(255,255,255,.1);transition:all var(--t)}
-.zen-toggle.active{background:rgba(74,222,128,.2);border-color:rgba(74,222,128,.5);color:#4ade80}
+.level-btn.completed::after{
+  content:'✓';position:absolute;top:-4px;right:-4px;
+  width:16px;height:16px;border-radius:50%;background:var(--success);
+  color:#000;font-size:10px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+}
+.zen-toggle{
+  display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);
+  padding:8px 16px;background:rgba(255,255,255,.06);border-radius:999px;
+  cursor:pointer;border:1px solid rgba(255,255,255,.1);transition:all var(--t);
+  user-select:none;
+}
+.zen-toggle.active{background:rgba(74,222,128,.2);border-color:rgba(74,222,128,.5);color:var(--success)}
+
+.toast{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%);
+  padding:12px 20px;border-radius:999px;color:#fff;
+  font-weight:700;font-size:13px;z-index:2000;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  pointer-events:none;white-space:nowrap;
+  animation:toastIn .3s cubic-bezier(.16,1,.3,1);
+}
+.toast.warn{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.toast.info{background:linear-gradient(135deg,#a855f7,#ec4899)}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(-50%) translateY(0)}to{opacity:0;transform:translateX(-50%) translateY(-20px)}}
+
 @media (max-width:600px){
   .tube{width:36px;height:160px}
   .ball{width:26px;height:26px}
@@ -104,35 +190,38 @@ body{background:radial-gradient(circle at 30% 20%,var(--bg-2) 0%,var(--bg-1) 45%
   .tube{height:140px}
   .game-area{gap:12px}
 }
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
 </style>
 </head>
 <body>
 
 <div class="top-bar">
-  <button class="btn-icon" id="btn-theme" type="button" title="Tema">🌙</button>
-  <div class="stats">
+  <button class="btn-icon" id="btn-theme" type="button" title="Alternar tema" aria-label="Alternar tema">🌙</button>
+  <div class="stats" role="status" aria-live="polite">
     <div class="stat"><div class="stat-value" id="stat-moves">0</div><div class="stat-label">Movimentos</div></div>
     <div class="stat"><div class="stat-value" id="stat-level">1</div><div class="stat-label">Nível</div></div>
   </div>
-  <button class="btn-icon" id="btn-restart" type="button" title="Reiniciar">🔄</button>
+  <button class="btn-icon" id="btn-restart" type="button" title="Reiniciar nível" aria-label="Reiniciar nível">🔄</button>
 </div>
 
-<div class="level-selector" id="level-selector"></div>
+<div class="level-selector" id="level-selector" role="tablist" aria-label="Seletor de nível"></div>
 
 <div class="game-area">
-  <div class="tubes-container" id="tubes-container"></div>
+  <div class="tubes-container" id="tubes-container" role="group" aria-label="Tubos do jogo"></div>
 </div>
 
 <div class="bottom-bar">
   <button class="btn secondary" id="btn-undo" type="button">↶ Desfazer</button>
   <button class="btn secondary" id="btn-add-tube" type="button">➕ Tubo Extra</button>
-  <div class="zen-toggle" id="btn-zen">🧘 Zen</div>
+  <div class="zen-toggle" id="btn-zen" role="switch" aria-checked="false" tabindex="0">🧘 Zen</div>
 </div>
 
-<div class="modal-overlay" id="modal-overlay">
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-card">
     <div class="modal-emoji">🎉</div>
-    <h2 class="modal-title">Nível Completo!</h2>
+    <h2 class="modal-title" id="modal-title">Nível Completo!</h2>
     <p class="modal-message">Parabéns! Conseguiste ordenar todas as bolas.</p>
     <div class="modal-stats">
       <div><div class="modal-stat-value" id="modal-moves">0</div><div class="modal-stat-label">Movimentos</div></div>
@@ -143,13 +232,32 @@ body{background:radial-gradient(circle at 30% 20%,var(--bg-2) 0%,var(--bg-1) 45%
 </div>
 
 <script>
+'use strict';
+
 // ============================================================
-// BALL SORT PUZZLE — Motor v2 (corrigido e aprimorado)
+// BALL SORT PUZZLE — Motor v3 (profissional)
 // ============================================================
 
 const CORES = ['red','green','blue','yellow','purple','orange','pink','cyan','brown','gray','lime'];
 const BOLAS_POR_TUBO = 4;
 const NIVEL_MAXIMO = 12;
+const MAX_TUBOS_EXTRAS = 2;
+const MAX_HISTORICO = 100;
+
+// ---------- Storage seguro ----------
+const storage = {
+  get(k, fallback) {
+    try { const v = localStorage.getItem(k); return v === null ? fallback : v; }
+    catch { return fallback; }
+  },
+  set(k, v) {
+    try { localStorage.setItem(k, v); return true; }
+    catch (e) {
+      if (e && e.name === 'QuotaExceededError') console.warn('[storage] quota excedida');
+      return false;
+    }
+  }
+};
 
 // ---------- Estado ----------
 const estado = {
@@ -162,105 +270,161 @@ const estado = {
   modoZen: false,
   completo: false,
   tema: 'dark',
-  niveisCompletos: []
+  niveisCompletos: new Set()
 };
 
-// ---------- Storage seguro ----------
-const storage = {
-  get(k, fallback) {
-    try { const v = localStorage.getItem(k); return v === null ? fallback : v; }
-    catch { return fallback; }
-  },
-  set(k, v) { try { localStorage.setItem(k, v); } catch {} }
-};
+let vitoriaTimeoutId = null;
 
-// ---------- Configuração por nível ----------
-// Níveis 1-2: 3 cores | 3-4: 4 | 5-6: 5 | 7-8: 6 | 9-10: 7 | 11-12: 8
+// ============================================================
+// GERADOR DE NÍVEL — construção reversa CORRETA
+// ============================================================
+// A ideia: começamos de um estado RESOLVIDO e aplicamos movimentos
+// que são *legitimamente reversíveis* — ou seja, movemos TODAS as bolas
+// de uma cor contígua de um tubo para outro. Assim, qualquer estado
+// resultante é solucionável desfazendo a sequência.
+
 function configNivel(nivel) {
   const numCores = Math.min(3 + Math.floor((nivel - 1) / 2), 8);
-  // Tubos vazios: níveis baixos → 2 (mais fácil), altos → 1 (desafio)
   const tubosVazios = nivel <= 2 ? 2 : 1;
   return { numCores, tubosVazios };
 }
 
-// ---------- Geração por construção reversa (sempre solúvel) ----------
-// Estratégia: começa com o estado RESOLVIDO e faz movimentos reversos aleatórios.
-// Resultado: puzzle garantidamente solúvel.
+function shuffleArray(arr, rng = Math.random) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Aplica um movimento VÁLIDO do jogo (topo de origem → destino).
+// Retorna o número de bolas movidas (0 se inválido).
+function aplicarMovimento(tubos, de, para) {
+  if (de === para) return 0;
+  const origem = tubos[de];
+  const destino = tubos[para];
+  if (!origem || !destino) return 0;
+  if (origem.length === 0) return 0;
+  if (destino.length >= BOLAS_POR_TUBO) return 0;
+
+  const cor = origem[origem.length - 1];
+  if (destino.length > 0 && destino[destino.length - 1] !== cor) return 0;
+
+  let movidas = 0;
+  while (
+    origem.length > 0 &&
+    origem[origem.length - 1] === cor &&
+    destino.length < BOLAS_POR_TUBO
+  ) {
+    destino.push(origem.pop());
+    movidas++;
+  }
+  return movidas;
+}
+
+// Verifica se o estado está resolvido (cada tubo vazio OU cheio com 1 cor).
+// Retorna false para puzzle totalmente vazio (não conta como vitória).
+function estaResolvido(tubos) {
+  if (tubos.length === 0) return false;
+  let temBola = false;
+  for (const t of tubos) {
+    if (t.length === 0) continue;
+    temBola = true;
+    if (t.length !== BOLAS_POR_TUBO) return false;
+    const cor = t[0];
+    for (let i = 1; i < t.length; i++) if (t[i] !== cor) return false;
+  }
+  return temBola;
+}
+
 function gerarNivel(nivel) {
   const { numCores, tubosVazios } = configNivel(nivel);
   const cores = CORES.slice(0, numCores);
 
-  // Estado resolvido: cada tubo cheio de uma cor + N tubos vazios
-  let tubos = [];
-  cores.forEach(cor => tubos.push(Array(BOLAS_POR_TUBO).fill(cor)));
+  // Estado inicial RESOLVIDO
+  let tubos = cores.map(cor => Array(BOLAS_POR_TUBO).fill(cor));
   for (let i = 0; i < tubosVazios; i++) tubos.push([]);
 
-  // Embaralha a ordem dos tubos cheios para não ficar óbvio
-  // (mantém os vazios por último)
-  const cheios = tubos.slice(0, numCores);
-  for (let i = cheios.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [cheios[i], cheios[j]] = [cheios[j], cheios[i]];
-  }
+  // Embaralha a ORDEM dos tubos cheios (não o conteúdo)
+  const cheios = shuffleArray(tubos.slice(0, numCores));
   tubos = [...cheios, ...tubos.slice(numCores)];
 
-  // Aplica movimentos reversos para embaralhar mantendo solubilidade
-  const numPassos = numCores * 8 + nivel * 4;
-  let ultimoMovimento = null;
+  // Aplica movimentos válidos aleatórios repetidamente.
+  // Como cada movimento é válido, o inverso também é — o puzzle final
+  // é sempre solucionável (basta reverter a sequência).
+  const totalTubos = tubos.length;
+  const passosAlvo = numCores * 12 + nivel * 6;
+  let passos = 0;
+  let tentativas = 0;
+  const maxTentativas = passosAlvo * 20;
 
-  for (let passo = 0; passo < numPassos; passo++) {
-    const movimentos = movimentosReversosValidos(tubos, ultimoMovimento);
-    if (movimentos.length === 0) break;
-    const m = movimentos[Math.floor(Math.random() * movimentos.length)];
-    // Executa movimento reverso: move topo de A → B (mesmas regras do jogo)
-    tubos[m.para].push(tubos[m.de].pop());
-    ultimoMovimento = m;
+  // Guarda o último movimento para evitar ping-pong trivial
+  let ultimo = null;
+
+  while (passos < passosAlvo && tentativas < maxTentativas) {
+    tentativas++;
+
+    const candidatos = [];
+    for (let de = 0; de < totalTubos; de++) {
+      if (tubos[de].length === 0) continue;
+      // Não desfaz o último movimento
+      if (ultimo && ultimo.para === de) continue;
+      for (let para = 0; para < totalTubos; para++) {
+        if (de === para) continue;
+        // Simulação leve: verifica se o movimento é válido
+        const origem = tubos[de];
+        const destino = tubos[para];
+        if (destino.length >= BOLAS_POR_TUBO) continue;
+        const cor = origem[origem.length - 1];
+        if (destino.length > 0 && destino[destino.length - 1] !== cor) continue;
+        // Evita mover uma pilha inteira para um tubo vazio (mantém "sujeira")
+        if (destino.length === 0 && origem.length === BOLAS_POR_TUBO) continue;
+        candidatos.push({ de, para });
+      }
+    }
+
+    if (candidatos.length === 0) break;
+
+    // Prioriza movimentos que NÃO vão para tubo vazio (criam entropia)
+    const preferidos = candidatos.filter(c => tubos[c.para].length > 0);
+    const pool = preferidos.length > 0 && Math.random() < 0.7 ? preferidos : candidatos;
+    const mov = pool[Math.floor(Math.random() * pool.length)];
+
+    const movidas = aplicarMovimento(tubos, mov.de, mov.para);
+    if (movidas > 0) {
+      passos++;
+      ultimo = mov;
+    }
   }
 
-  // Verificação final: se por acaso ficou já resolvido, re-gera
+  // Se por azar ficou resolvido, tenta de novo (raro)
   if (estaResolvido(tubos)) return gerarNivel(nivel);
 
   return tubos;
 }
 
-// Movimentos válidos para embaralhar (reverso = mesmo que forward no ball sort,
-// já que qualquer movimento válido pode ser desfeito)
-function movimentosReversosValidos(tubos, ultimo) {
-  const movs = [];
-  for (let de = 0; de < tubos.length; de++) {
-    if (tubos[de].length === 0) continue;
-    const cor = tubos[de][tubos[de].length - 1];
-    for (let para = 0; para < tubos.length; para++) {
-      if (de === para) continue;
-      if (tubos[para].length >= BOLAS_POR_TUBO) continue;
-      if (tubos[para].length > 0 && tubos[para][tubos[para].length - 1] !== cor) continue;
-      // Evita desfazer o último movimento
-      if (ultimo && ultimo.de === para && ultimo.para === de) continue;
-      // Prefere não mover para tubo vazio se já tiver opção (evita voltar ao estado inicial)
-      movs.push({ de, para });
-    }
-  }
-  return movs;
-}
-
-function estaResolvido(tubos) {
-  return tubos.every(t => t.length === 0 || (t.length === BOLAS_POR_TUBO && t.every(c => c === t[0])));
-}
-
-// ---------- Regras ----------
+// ============================================================
+// REGRAS DO JOGO
+// ============================================================
 function tuboEstaCompleto(t) {
-  return t.length === BOLAS_POR_TUBO && t.every(c => c === t[0]);
+  if (t.length !== BOLAS_POR_TUBO) return false;
+  const cor = t[0];
+  for (let i = 1; i < t.length; i++) if (t[i] !== cor) return false;
+  return true;
 }
 function topoDoTubo(t) { return t.length ? t[t.length - 1] : null; }
 function podeColocarBola(destino, cor) {
   if (destino.length >= BOLAS_POR_TUBO) return false;
   if (destino.length === 0) return true;
-  return topoDoTubo(destino) === cor;
+  return destino[destino.length - 1] === cor;
 }
 
-// ---------- Interação ----------
+// ============================================================
+// INTERAÇÃO
+// ============================================================
 function selecionarTubo(idx) {
   if (estado.completo) return;
+  if (idx < 0 || idx >= estado.tubos.length) return;
 
   // Clique no mesmo tubo → deseleciona
   if (estado.selecionado === idx) {
@@ -271,7 +435,8 @@ function selecionarTubo(idx) {
 
   // Se há selecionado → tenta mover
   if (estado.selecionado !== null) {
-    const origem = estado.tubos[estado.selecionado];
+    const origemIdx = estado.selecionado;
+    const origem = estado.tubos[origemIdx];
     const destino = estado.tubos[idx];
 
     if (tuboEstaCompleto(origem)) {
@@ -289,8 +454,8 @@ function selecionarTubo(idx) {
     const cor = topoDoTubo(origem);
 
     if (!podeColocarBola(destino, cor)) {
-      // Movimento inválido → tenta selecionar o novo tubo (se aplicável)
-      if (estado.tubos[idx].length > 0 && !tuboEstaCompleto(estado.tubos[idx])) {
+      // Movimento inválido → tenta selecionar o novo tubo se aplicável
+      if (destino.length > 0 && !tuboEstaCompleto(destino)) {
         estado.selecionado = idx;
         tocarSom('select');
       } else {
@@ -301,14 +466,9 @@ function selecionarTubo(idx) {
       return;
     }
 
-    // Move TODAS as bolas iguais consecutivas (comportamento clássico)
+    // Movimento válido
     guardarHistorico();
-    let movidas = 0;
-    while (origem.length > 0 && topoDoTubo(origem) === cor && podeColocarBola(destino, cor)) {
-      destino.push(origem.pop());
-      movidas++;
-    }
-
+    const movidas = aplicarMovimento(estado.tubos, origemIdx, idx);
     if (movidas > 0) {
       estado.movimentos++;
       tocarSom('move');
@@ -330,33 +490,41 @@ function selecionarTubo(idx) {
 }
 
 function piscarInvalido(idx) {
-  const el = document.querySelectorAll('.tube')[idx];
+  const el = document.querySelector(`.tube[data-idx="${idx}"]`);
   if (!el) return;
+  el.classList.remove('invalid');
+  // força reflow para reiniciar animação
+  void el.offsetWidth;
   el.classList.add('invalid');
   setTimeout(() => el.classList.remove('invalid'), 300);
 }
 
-// ---------- Vitória ----------
+// ============================================================
+// VITÓRIA
+// ============================================================
 function verificarVitoria() {
   if (!estaResolvido(estado.tubos)) return;
-  if (estado.tubos.every(t => t.length === 0)) return;
 
   estado.completo = true;
   tocarSom('win');
 
-  if (!estado.niveisCompletos.includes(estado.nivel)) {
-    estado.niveisCompletos.push(estado.nivel);
-    storage.set('ballsort_completos', JSON.stringify(estado.niveisCompletos));
+  if (!estado.niveisCompletos.has(estado.nivel)) {
+    estado.niveisCompletos.add(estado.nivel);
+    storage.set('ballsort_completos', JSON.stringify([...estado.niveisCompletos]));
   }
 
-  setTimeout(() => {
+  if (vitoriaTimeoutId) clearTimeout(vitoriaTimeoutId);
+  vitoriaTimeoutId = setTimeout(() => {
+    vitoriaTimeoutId = null;
     document.getElementById('modal-moves').textContent = estado.movimentos;
     document.getElementById('modal-level').textContent = estado.nivel;
     document.getElementById('modal-overlay').classList.add('active');
   }, 400);
 }
 
-// ---------- Histórico ----------
+// ============================================================
+// HISTÓRICO
+// ============================================================
 function guardarHistorico() {
   estado.historico.push({
     tubos: estado.tubos.map(t => t.slice()),
@@ -364,7 +532,7 @@ function guardarHistorico() {
     selecionado: estado.selecionado,
     tubosExtras: estado.tubosExtras
   });
-  if (estado.historico.length > 100) estado.historico.shift();
+  if (estado.historico.length > MAX_HISTORICO) estado.historico.shift();
 }
 
 function desfazer() {
@@ -378,74 +546,105 @@ function desfazer() {
   estado.selecionado = null;
   estado.tubosExtras = ant.tubosExtras;
   estado.completo = false;
+
+  if (vitoriaTimeoutId) { clearTimeout(vitoriaTimeoutId); vitoriaTimeoutId = null; }
   document.getElementById('modal-overlay').classList.remove('active');
-  document.getElementById('btn-add-tube').disabled = estado.tubosExtras >= 2;
   tocarSom('select');
   renderizar();
 }
 
-// ---------- Render ----------
+// ============================================================
+// RENDER
+// ============================================================
 function renderizar() {
   const container = document.getElementById('tubes-container');
-  container.innerHTML = '';
+  // Limpa de forma segura
+  while (container.firstChild) container.removeChild(container.firstChild);
+
+  const selecionado = estado.selecionado;
+  const origem = selecionado !== null ? estado.tubos[selecionado] : null;
+  const origemCor = origem && origem.length > 0 && !tuboEstaCompleto(origem)
+    ? topoDoTubo(origem) : null;
 
   estado.tubos.forEach((tubo, idx) => {
     const tubeEl = document.createElement('div');
     tubeEl.className = 'tube';
+    tubeEl.dataset.idx = String(idx);
+    tubeEl.setAttribute('role', 'button');
+    tubeEl.setAttribute('tabindex', '0');
+    tubeEl.setAttribute('aria-label', `Tubo ${idx + 1} com ${tubo.length} bolas`);
 
-    if (estado.selecionado === idx) tubeEl.classList.add('selected');
+    if (selecionado === idx) tubeEl.classList.add('selected');
     if (tuboEstaCompleto(tubo)) tubeEl.classList.add('complete');
 
-    if (estado.selecionado !== null && estado.selecionado !== idx) {
-      const origem = estado.tubos[estado.selecionado];
-      if (origem.length > 0 && !tuboEstaCompleto(origem)) {
-        const cor = topoDoTubo(origem);
-        if (podeColocarBola(tubo, cor)) tubeEl.classList.add('destination');
-      }
+    if (origemCor && selecionado !== idx && podeColocarBola(tubo, origemCor)) {
+      tubeEl.classList.add('destination');
     }
 
-    tubo.forEach(cor => {
+    for (const cor of tubo) {
       const ballEl = document.createElement('div');
       ballEl.className = `ball ${cor}`;
       tubeEl.appendChild(ballEl);
-    });
+    }
 
     tubeEl.addEventListener('click', () => selecionarTubo(idx));
+    tubeEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selecionarTubo(idx);
+      }
+    });
+
     container.appendChild(tubeEl);
   });
 
   document.getElementById('stat-moves').textContent = estado.movimentos;
   document.getElementById('stat-level').textContent = estado.nivel;
   document.getElementById('btn-undo').disabled = estado.historico.length === 0;
-  document.getElementById('btn-add-tube').disabled = estado.tubosExtras >= 2;
+  document.getElementById('btn-add-tube').disabled = estado.tubosExtras >= MAX_TUBOS_EXTRAS;
 
   atualizarSelectorNiveis();
 }
 
+let selectorCache = null;
 function atualizarSelectorNiveis() {
   const selector = document.getElementById('level-selector');
-  if (selector.children.length !== NIVEL_MAXIMO) {
+  if (!selectorCache || selectorCache.parentElement !== selector) {
     selector.innerHTML = '';
+    selectorCache = [];
     for (let i = 1; i <= NIVEL_MAXIMO; i++) {
       const btn = document.createElement('button');
       btn.className = 'level-btn';
-      btn.textContent = i;
+      btn.textContent = String(i);
+      btn.dataset.nivel = String(i);
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-label', `Ir para o nível ${i}`);
       btn.addEventListener('click', () => carregarNivel(i));
       selector.appendChild(btn);
+      selectorCache.push(btn);
     }
   }
-  Array.from(selector.children).forEach((btn, i) => {
+  selectorCache.forEach((btn, i) => {
     const nivel = i + 1;
-    btn.classList.toggle('active', nivel === estado.nivel);
-    btn.classList.toggle('completed', estado.niveisCompletos.includes(nivel));
+    const isActive = nivel === estado.nivel;
+    const isDone = estado.niveisCompletos.has(nivel);
+    btn.classList.toggle('active', isActive);
+    btn.classList.toggle('completed', isDone);
+    btn.setAttribute('aria-selected', String(isActive));
   });
 }
 
-// ---------- Carregar nível ----------
+// ============================================================
+// CARREGAR NÍVEL
+// ============================================================
 function carregarNivel(nivel, opcoes = {}) {
-  estado.nivel = nivel;
+  const nivelValido = Math.max(1, Math.min(NIVEL_MAXIMO, Math.floor(nivel) || 1));
+
+  if (vitoriaTimeoutId) { clearTimeout(vitoriaTimeoutId); vitoriaTimeoutId = null; }
+
+  estado.nivel = nivelValido;
   estado.movimentos = 0;
-  estado.tubos = gerarNivel(nivel);
+  estado.tubos = gerarNivel(nivelValido);
   estado.tubosExtras = 0;
   estado.selecionado = null;
   estado.historico = [];
@@ -454,7 +653,7 @@ function carregarNivel(nivel, opcoes = {}) {
   document.getElementById('modal-overlay').classList.remove('active');
 
   if (!opcoes.silencioso) {
-    storage.set('ballsort_nivel', String(nivel));
+    storage.set('ballsort_nivel', String(nivelValido));
   }
 
   renderizar();
@@ -465,10 +664,12 @@ function reiniciarNivel() {
   toast('Nível reiniciado', 'info');
 }
 
-// ---------- Tubo extra ----------
+// ============================================================
+// TUBO EXTRA
+// ============================================================
 function adicionarTuboExtra() {
-  if (estado.tubosExtras >= 2) {
-    toast('Máximo de 2 tubos extras', 'warn');
+  if (estado.tubosExtras >= MAX_TUBOS_EXTRAS) {
+    toast(`Máximo de ${MAX_TUBOS_EXTRAS} tubos extras`, 'warn');
     return;
   }
   guardarHistorico();
@@ -478,14 +679,20 @@ function adicionarTuboExtra() {
   renderizar();
 }
 
-// ---------- Zen ----------
+// ============================================================
+// ZEN
+// ============================================================
 function toggleZen() {
   estado.modoZen = !estado.modoZen;
-  document.getElementById('btn-zen').classList.toggle('active', estado.modoZen);
+  const el = document.getElementById('btn-zen');
+  el.classList.toggle('active', estado.modoZen);
+  el.setAttribute('aria-checked', String(estado.modoZen));
   toast(estado.modoZen ? '🧘 Modo Zen ativado' : 'Modo Zen desativado', 'info');
 }
 
-// ---------- Tema ----------
+// ============================================================
+// TEMA
+// ============================================================
 function toggleTema() {
   estado.tema = estado.tema === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', estado.tema);
@@ -493,31 +700,44 @@ function toggleTema() {
   storage.set('ballsort_tema', estado.tema);
 }
 
-// ---------- Som ----------
+// ============================================================
+// SOM
+// ============================================================
 let audioCtx = null;
-function tocarSom(tipo) {
-  try {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const now = audioCtx.currentTime;
+function getAudioCtx() {
+  if (audioCtx) return audioCtx;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  try { audioCtx = new Ctx(); } catch { audioCtx = null; }
+  return audioCtx;
+}
 
+function tocarSom(tipo) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+
+  const now = ctx.currentTime;
+
+  try {
     if (tipo === 'win') {
       [523, 659, 784, 1046].forEach((freq, i) => {
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
         o.frequency.value = freq;
         o.type = 'sine';
         g.gain.setValueAtTime(0.001, now + i * 0.12);
         g.gain.exponentialRampToValueAtTime(0.15, now + i * 0.12 + 0.02);
         g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.4);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(now + i * 0.12); o.stop(now + i * 0.12 + 0.4);
+        o.connect(g).connect(ctx.destination);
+        o.start(now + i * 0.12);
+        o.stop(now + i * 0.12 + 0.4);
       });
       return;
     }
 
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
     if (tipo === 'select') {
       osc.frequency.value = 600; osc.type = 'sine';
@@ -529,36 +749,36 @@ function tocarSom(tipo) {
       gain.gain.setValueAtTime(0.1, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
       osc.start(now); osc.stop(now + 0.15);
-    } else return;
+    } else {
+      return;
+    }
 
-    osc.connect(gain); gain.connect(audioCtx.destination);
-  } catch {}
+    osc.connect(gain).connect(ctx.destination);
+  } catch { /* ignora falhas de áudio */ }
 }
 
-// ---------- Toast com fila ----------
-let toastAtivo = null;
-let toastFila = [];
+// ============================================================
+// TOAST (fila robusta)
+// ============================================================
+const toastFila = [];
+let toastAtivo = false;
+
 function toast(msg, tipo = 'info') {
   toastFila.push({ msg, tipo });
-  if (toastAtivo) return;
-  mostrarProximoToast();
+  if (!toastAtivo) mostrarProximoToast();
 }
+
 function mostrarProximoToast() {
-  if (toastFila.length === 0) { toastAtivo = null; return; }
+  if (toastFila.length === 0) { toastAtivo = false; return; }
   const { msg, tipo } = toastFila.shift();
   toastAtivo = true;
 
   const el = document.createElement('div');
+  el.className = `toast ${tipo}`;
   el.textContent = msg;
-  el.style.cssText = `
-    position:fixed;top:80px;left:50%;transform:translateX(-50%);
-    background:${tipo === 'warn' ? 'linear-gradient(135deg,#f59e0b,#d97706)' : 'linear-gradient(135deg,#a855f7,#ec4899)'};
-    color:#fff;padding:12px 20px;border-radius:999px;
-    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;
-    z-index:2000;box-shadow:0 8px 32px rgba(0,0,0,.4);
-    animation:toastIn .3s cubic-bezier(.16,1,.3,1);pointer-events:none;
-  `;
+  el.setAttribute('role', 'status');
   document.body.appendChild(el);
+
   setTimeout(() => {
     el.style.animation = 'toastOut .3s ease forwards';
     setTimeout(() => {
@@ -568,18 +788,17 @@ function mostrarProximoToast() {
     }, 300);
   }, 1500);
 }
-const styleEl = document.createElement('style');
-styleEl.textContent = `
-@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-@keyframes toastOut{from{opacity:1;transform:translateX(-50%) translateY(0)}to{opacity:0;transform:translateX(-50%) translateY(-20px)}}
-`;
-document.head.appendChild(styleEl);
 
-// ---------- Eventos ----------
+// ============================================================
+// EVENTOS
+// ============================================================
 document.getElementById('btn-restart').addEventListener('click', reiniciarNivel);
 document.getElementById('btn-undo').addEventListener('click', desfazer);
 document.getElementById('btn-add-tube').addEventListener('click', adicionarTuboExtra);
 document.getElementById('btn-zen').addEventListener('click', toggleZen);
+document.getElementById('btn-zen').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleZen(); }
+});
 document.getElementById('btn-theme').addEventListener('click', toggleTema);
 document.getElementById('btn-next-level').addEventListener('click', () => {
   const proximo = Math.min(estado.nivel + 1, NIVEL_MAXIMO);
@@ -587,27 +806,53 @@ document.getElementById('btn-next-level').addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'z' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); desfazer(); }
-  else if (e.key === 'r') reiniciarNivel();
-  else if (e.key === 't') adicionarTuboExtra();
-  else if (e.key === 'Escape') { estado.selecionado = null; renderizar(); }
+  // Ignora atalhos quando foco está em input (não temos, mas por segurança)
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+  if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    desfazer();
+  } else if (e.key === 'r' || e.key === 'R') {
+    reiniciarNivel();
+  } else if (e.key === 't' || e.key === 'T') {
+    adicionarTuboExtra();
+  } else if (e.key === 'Escape') {
+    if (estado.selecionado !== null) {
+      estado.selecionado = null;
+      renderizar();
+    } else {
+      document.getElementById('modal-overlay').classList.remove('active');
+    }
+  }
 });
 
-// ---------- Init ----------
+// Evita scroll de página em mobile ao tocar nos tubos
+document.getElementById('tubes-container').addEventListener('touchmove', (e) => {
+  if (e.cancelable) e.preventDefault();
+}, { passive: false });
+
+// ============================================================
+// INIT
+// ============================================================
 (function init() {
   const temaSalvo = storage.get('ballsort_tema', 'dark');
-  estado.tema = temaSalvo;
-  document.documentElement.setAttribute('data-theme', temaSalvo);
-  document.getElementById('btn-theme').textContent = temaSalvo === 'dark' ? '🌙' : '☀️';
+  estado.tema = temaSalvo === 'light' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', estado.tema);
+  document.getElementById('btn-theme').textContent = estado.tema === 'dark' ? '🌙' : '☀️';
 
   try {
-    estado.niveisCompletos = JSON.parse(storage.get('ballsort_completos', '[]')) || [];
-  } catch { estado.niveisCompletos = []; }
+    const raw = storage.get('ballsort_completos', '[]');
+    const arr = JSON.parse(raw);
+    estado.niveisCompletos = new Set(Array.isArray(arr) ? arr.filter(n => Number.isInteger(n) && n >= 1 && n <= NIVEL_MAXIMO) : []);
+  } catch {
+    estado.niveisCompletos = new Set();
+  }
 
-  const nivelSalvo = Math.max(1, Math.min(NIVEL_MAXIMO, parseInt(storage.get('ballsort_nivel', '1')) || 1));
+  const nivelSalvo = Math.max(1, Math.min(NIVEL_MAXIMO, parseInt(storage.get('ballsort_nivel', '1'), 10) || 1));
   carregarNivel(nivelSalvo);
 
-  console.log('[Ball Sort v2] Nível', nivelSalvo, '—', configNivel(nivelSalvo));
+  console.log('[Ball Sort v3] Nível', nivelSalvo, '—', configNivel(nivelSalvo));
 })();
 </script>
 </body>
