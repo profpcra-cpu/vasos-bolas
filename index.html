@@ -165,28 +165,90 @@ body{
 .seed-display:hover{background:var(--surface-hover); color:var(--text)}
 
 /* ============================================================
-   LEVEL SELECTOR
+   LEVEL SELECTOR — Colapsável + responsivo
    ============================================================ */
+.level-toggle-btn{
+  display:none;
+  align-items:center; gap:6px;
+  padding:7px 16px;
+  border-radius:var(--radius-full);
+  background:var(--surface);
+  border:1px solid var(--border);
+  font-size:11px; font-weight:700;
+  color:var(--text-muted);
+  text-transform:uppercase; letter-spacing:.5px;
+  cursor:pointer;
+  transition:all var(--t-base);
+  margin:6px auto 0;
+}
+.level-toggle-btn:hover{background:var(--surface-hover); color:var(--text)}
+.level-toggle-btn .chevron{
+  display:inline-block;
+  transition:transform var(--t-base);
+  font-size:9px;
+}
+.level-toggle-btn.open .chevron{transform:rotate(180deg)}
+
+.level-selector-wrapper{
+  display:flex; align-items:center; gap:6px;
+  padding:8px 12px;
+  justify-content:center;
+}
+.level-selector-arrow{
+  width:36px; height:36px; flex-shrink:0;
+  border-radius:50%;
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-size:18px; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+  transition:all var(--t-base);
+  cursor:pointer;
+  line-height:1;
+  padding-bottom:2px;
+}
+.level-selector-arrow:hover:not(:disabled){background:var(--surface-hover)}
+.level-selector-arrow:disabled{opacity:.3; cursor:not-allowed}
+
 .level-selector{
-  display:flex; gap:6px; padding:8px 16px;
-  overflow-x:auto; justify-content:center; flex-wrap:wrap;
+  display:flex; gap:6px;
+  overflow-x:auto; overflow-y:hidden;
   scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  scroll-behavior:smooth;
+  flex:1; max-width:100%;
+  padding:2px 4px;
+  justify-content:flex-start;
 }
 .level-selector::-webkit-scrollbar{display:none}
+
+/* Desktop: centraliza quando tudo cabe */
+@media (min-width:768px){
+  .level-selector{
+    justify-content:center;
+    flex-wrap:wrap;
+    overflow-x:visible;
+  }
+  .level-selector-arrow{display:none}
+  .level-selector-wrapper{padding:8px 16px}
+}
+
 .level-btn{
-  min-width:38px; height:38px;
+  min-width:40px; height:40px;
   border-radius:var(--radius-md);
   background:var(--surface);
   border:2px solid var(--border);
-  font-size:12px; font-weight:700;
+  font-size:13px; font-weight:700;
   transition:all var(--t-base);
   flex-shrink:0;
   position:relative;
+  color:var(--text);
 }
 .level-btn:hover{background:var(--surface-hover); transform:translateY(-2px)}
 .level-btn.active{
   background:var(--btn-bg); border-color:transparent;
   box-shadow:var(--glow-purple); transform:translateY(-2px);
+  color:#fff;
 }
 .level-btn.completed::after{
   content:'✓'; position:absolute; top:-2px; right:2px;
@@ -201,23 +263,31 @@ body{
   transform:translateX(-50%); font-size:10px;
 }
 
+@media (max-width:767px){
+  .level-toggle-btn{display:inline-flex}
+}
+
 /* ============================================================
    GAME AREA
    ============================================================ */
 .game-area{
-  flex:1; display:flex; flex-direction:column;
+  flex:1;
+  display:flex; flex-direction:column;
   justify-content:center; align-items:center;
-  padding:12px 16px; gap:16px; overflow:hidden;
+  padding:8px 12px; gap:12px;
+  overflow:hidden;
+  min-height:0;
 }
+
 .tubes-container{
   display:flex; flex-wrap:wrap;
-  gap:12px 8px;
+  gap:10px 6px;
   max-width:100%; width:100%;
   justify-content:center; align-items:end;
 }
 
 /* ============================================================
-   TUBE — altura dinâmica via variável CSS --h
+   TUBE
    ============================================================ */
 .tube{
   position:relative;
@@ -281,7 +351,7 @@ body{
 }
 
 /* ============================================================
-   BALL — tamanho dinâmico
+   BALL
    ============================================================ */
 .ball{
   width:var(--bw,32px); height:var(--bw,32px);
@@ -320,7 +390,6 @@ body{
 .ball.teal{background:radial-gradient(circle at 35% 30%,#99f6e4,#14b8a6 60%,#0f766e)}
 .ball.magenta{background:radial-gradient(circle at 35% 30%,#f0abfc,#d946ef 60%,#86198f)}
 
-/* Rainbow ball — coringa */
 .ball.rainbow{
   background:conic-gradient(from 0deg,
     #ff6b6b, #fde68a, #86efac, #93c5fd,
@@ -337,7 +406,6 @@ body{
   to{filter:hue-rotate(360deg)}
 }
 
-/* Blind ball */
 .ball.blind{
   background:radial-gradient(circle at 35% 30%,#4a4a4a,#1a1a1a 60%,#000);
 }
@@ -517,18 +585,31 @@ body{
 .pwa-update-banner button:hover{background:rgba(255,255,255,.4)}
 
 .pwa-install-btn{
-  position:fixed; bottom:16px; right:16px;
+  position:fixed;
+  bottom:calc(env(safe-area-inset-bottom) + 84px);
+  right:12px;
   background:linear-gradient(135deg,#06b6d4,#3b82f6);
-  color:#fff; padding:12px 20px;
+  color:#fff; padding:10px 16px;
   border-radius:var(--radius-full);
-  font-size:13px; font-weight:700;
-  box-shadow:var(--shadow-lg),0 0 40px rgba(6,182,212,.6);
+  font-size:12px; font-weight:700;
+  box-shadow:var(--shadow-lg),0 0 30px rgba(6,182,212,.6);
   z-index:3000;
   animation:toastIn .4s cubic-bezier(.16,1,.3,1);
-  transition:transform var(--t-base);
+  transition:transform var(--t-base), opacity var(--t-base);
 }
 .pwa-install-btn:hover{transform:translateY(-2px)}
 .pwa-install-btn:active{transform:translateY(0) scale(.97)}
+
+@media (max-width:600px){
+  .pwa-install-btn{
+    width:48px; height:48px; padding:0;
+    font-size:22px;
+    display:flex; align-items:center; justify-content:center;
+    bottom:calc(env(safe-area-inset-bottom) + 80px);
+    right:12px;
+  }
+  .pwa-install-btn .pwa-install-label{display:none}
+}
 
 .pwa-ios-hint{
   position:fixed; inset:0;
@@ -572,7 +653,6 @@ body{
   box-shadow:0 8px 24px rgba(168,85,247,.4);
 }
 
-/* Ajustes quando em modo standalone (app instalado) */
 .pwa-standalone .top-bar{padding-top:max(12px, env(safe-area-inset-top))}
 .pwa-standalone .bottom-bar{padding-bottom:max(12px, env(safe-area-inset-bottom))}
 
@@ -580,19 +660,26 @@ body{
    RESPONSIVE
    ============================================================ */
 @media (max-width:600px){
-  .game-area{padding:8px 10px; gap:10px}
+  .game-area{padding:6px 8px; gap:8px}
+  .tubes-container{gap:8px 5px}
   .btn{padding:9px 14px; font-size:12px}
   .btn-icon{width:38px; height:38px; font-size:17px}
   .stat-value{font-size:15px}
   .stat-label{font-size:8px}
-  .tubes-container{gap:8px 6px}
-  .mode-btn{font-size:10px; padding:5px 10px}
-  .seed-bar{font-size:10px}
+  .stats{gap:10px}
+  .mode-bar{padding:4px 10px 0; gap:4px}
+  .mode-btn{font-size:10px; padding:5px 9px}
+  .seed-bar{font-size:10px; padding:6px 12px 0}
+  .seed-display{padding:3px 8px}
+  .top-bar{padding:10px 12px; gap:8px}
+  .bottom-bar{padding:10px 12px; gap:6px}
 }
 @media (max-height:700px){
-  .game-area{gap:8px; padding:8px}
+  .game-area{gap:6px; padding:6px}
   .top-bar{padding:8px 12px}
   .bottom-bar{padding:8px}
+  .mode-bar{padding:4px 10px 0}
+  .seed-bar{padding:4px 12px 0}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -641,8 +728,18 @@ body{
 <!-- ============ MODIFIER PILLS ============ -->
 <div class="modifier-bar" id="modifier-bar"></div>
 
+<!-- ============ LEVEL TOGGLE (mobile) ============ -->
+<button class="level-toggle-btn" id="level-toggle" type="button" aria-expanded="false" aria-controls="level-selector-wrapper">
+  <span>📋 Níveis</span>
+  <span class="chevron">▼</span>
+</button>
+
 <!-- ============ LEVEL SELECTOR ============ -->
-<nav class="level-selector" id="level-selector" aria-label="Seleção de nível"></nav>
+<div class="level-selector-wrapper" id="level-selector-wrapper">
+  <button class="level-selector-arrow" id="level-prev" type="button" aria-label="Nível anterior">‹</button>
+  <nav class="level-selector" id="level-selector" aria-label="Seleção de nível"></nav>
+  <button class="level-selector-arrow" id="level-next" type="button" aria-label="Próximo nível">›</button>
+</div>
 
 <!-- ============ GAME AREA ============ -->
 <main class="game-area">
@@ -1639,7 +1736,7 @@ class Renderer {
   computeBallSize(maxBalls, numTubes) {
     const vh = window.innerHeight;
     const vw = window.innerWidth;
-    const availH = vh * 0.52;
+    const availH = vh * 0.5;
     const availW = Math.min(vw * 0.95, 900);
 
     const sizeByH = Math.floor((availH - 20) / maxBalls) - 4;
@@ -1686,6 +1783,24 @@ class Renderer {
       btn.classList.toggle('active', lvl === s.level);
       btn.classList.toggle('completed', s.completedLevels.includes(lvl));
     });
+
+    // Auto-scroll para o nível ativo (mobile)
+    const activeBtn = this.levelSelectorEl.querySelector('.level-btn.active');
+    if (activeBtn && this.levelSelectorEl.scrollWidth > this.levelSelectorEl.clientWidth) {
+      const btnLeft = activeBtn.offsetLeft;
+      const btnWidth = activeBtn.offsetWidth;
+      const containerWidth = this.levelSelectorEl.clientWidth;
+      this.levelSelectorEl.scrollTo({
+        left: btnLeft - (containerWidth / 2) + (btnWidth / 2),
+        behavior: 'smooth'
+      });
+    }
+
+    // Atualiza setas
+    const prevBtn = document.getElementById('level-prev');
+    const nextBtn = document.getElementById('level-next');
+    if (prevBtn) prevBtn.disabled = s.level <= 1;
+    if (nextBtn) nextBtn.disabled = s.level >= CONFIG.MAX_LEVEL;
   }
 
   renderModeBar() {
@@ -1839,6 +1954,50 @@ class Renderer {
     controller.nextLevel();
   });
 
+  // ---------- Level toggle (mobile) ----------
+  const levelToggle = document.getElementById('level-toggle');
+  const levelWrapper = document.getElementById('level-selector-wrapper');
+
+  if (levelToggle && levelWrapper) {
+    const syncLevelVisibility = () => {
+      const isMobile = window.matchMedia('(max-width: 767px)').matches;
+      if (isMobile) {
+        levelToggle.style.display = 'inline-flex';
+        // Respeita estado atual (aberto/fechado) via aria-expanded
+        const isOpen = levelToggle.getAttribute('aria-expanded') === 'true';
+        levelWrapper.style.display = isOpen ? 'flex' : 'none';
+      } else {
+        levelToggle.style.display = 'none';
+        levelWrapper.style.display = 'flex';
+      }
+    };
+
+    // Estado inicial: colapsado em mobile
+    syncLevelVisibility();
+
+    levelToggle.addEventListener('click', () => {
+      const isOpen = levelToggle.getAttribute('aria-expanded') === 'true';
+      const nextOpen = !isOpen;
+      levelToggle.setAttribute('aria-expanded', String(nextOpen));
+      levelToggle.classList.toggle('open', nextOpen);
+      levelWrapper.style.display = nextOpen ? 'flex' : 'none';
+    });
+
+    let resizeToggler;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeToggler);
+      resizeToggler = setTimeout(syncLevelVisibility, 150);
+    });
+  }
+
+  // ---------- Setas de navegação de nível ----------
+  document.getElementById('level-prev')?.addEventListener('click', () => {
+    if (state.level > 1) controller.loadLevel(state.level - 1);
+  });
+  document.getElementById('level-next')?.addEventListener('click', () => {
+    if (state.level < CONFIG.MAX_LEVEL) controller.loadLevel(state.level + 1);
+  });
+
   document.addEventListener('keydown', (e) => {
     if (e.target.matches('input, textarea')) return;
     const isUndo = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z';
@@ -1958,7 +2117,7 @@ class Renderer {
     const btn = document.createElement('button');
     btn.id = 'pwa-install-btn';
     btn.className = 'pwa-install-btn';
-    btn.innerHTML = '📲 Instalar App';
+    btn.innerHTML = '📲<span class="pwa-install-label" style="margin-left:6px">Instalar App</span>';
     btn.addEventListener('click', async () => {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
