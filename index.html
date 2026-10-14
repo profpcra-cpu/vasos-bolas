@@ -1,993 +1,614 @@
 <!DOCTYPE html>
 <html lang="pt" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1a0b2e">
-    <title>Ball Sort Puzzle</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --bg-1: #1a0b2e;
-            --bg-2: #2d1b4e;
-            --bg-3: #0f0520;
-            --text: #f5f0ff;
-            --text-muted: #a78bfa;
-            --tube-border: rgba(255, 255, 255, 0.85);
-            --tube-bg: rgba(255, 255, 255, 0.06);
-            --tube-shadow: inset 0 0 20px rgba(255, 255, 255, 0.15), inset 0 -10px 30px rgba(0, 0, 0, 0.4);
-            --btn-bg: linear-gradient(135deg, #a855f7, #ec4899);
-            --btn-accent: linear-gradient(135deg, #06b6d4, #3b82f6);
-            --radius: 16px;
-            --t: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        [data-theme="light"] {
-            --bg-1: #f5f0ff;
-            --bg-2: #e0e7ff;
-            --bg-3: #ffffff;
-            --text: #1a0b2e;
-            --text-muted: #7c3aed;
-            --tube-border: rgba(30, 20, 60, 0.9);
-            --tube-bg: rgba(30, 20, 60, 0.04);
-            --tube-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05), inset 0 -10px 30px rgba(0, 0, 0, 0.08);
-        }
-
-        *, *::before, *::after { box-sizing: border-box; }
-        html, body {
-            height: 100%;
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            color: var(--text);
-            overflow: hidden;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background: radial-gradient(circle at 30% 20%, var(--bg-2) 0%, var(--bg-1) 45%, var(--bg-3) 100%);
-            display: flex;
-            flex-direction: column;
-            min-height: 100dvh;
-        }
-
-        /* ===== TOPO ===== */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            gap: 12px;
-        }
-
-        .btn-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: var(--text);
-            font-size: 22px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--t);
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-icon:hover {
-            background: rgba(255, 255, 255, 0.18);
-            transform: translateY(-2px);
-        }
-
-        .btn-icon:active {
-            transform: translateY(0) scale(0.95);
-        }
-
-        .stats {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-        }
-
-        .stat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-        }
-
-        .stat-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text);
-        }
-
-        .stat-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-        }
-
-        /* ===== ÁREA DO JOGO ===== */
-        .game-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            gap: 24px;
-            overflow: hidden;
-        }
-
-        .tubes-container {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 12px 8px;
-            max-width: 720px;
-            width: 100%;
-            justify-items: center;
-            align-items: end;
-        }
-
-        .tube {
-            position: relative;
-            width: 42px;
-            height: 190px;
-            background: var(--tube-bg);
-            border: 2px solid var(--tube-border);
-            border-top: none;
-            border-radius: 0 0 21px 21px;
-            box-shadow: var(--tube-shadow);
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: center;
-            padding: 4px 4px 0;
-            cursor: pointer;
-            transition: transform var(--t), filter var(--t);
-            backdrop-filter: blur(4px);
-            overflow: hidden;
-        }
-
-        .tube::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 4px;
-            right: 4px;
-            height: 8px;
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
-            border-radius: 0 0 50% 50%;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .tube.selected {
-            transform: translateY(-12px);
-            filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.8));
-        }
-
-        .tube.destination {
-            filter: drop-shadow(0 0 16px rgba(74, 222, 128, 0.7));
-        }
-
-        .tube.complete {
-            border-color: #4ade80;
-            filter: drop-shadow(0 0 12px rgba(74, 222, 128, 0.5));
-        }
-
-        .tube.complete::after {
-            content: '✓';
-            position: absolute;
-            top: -14px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #4ade80;
-            font-size: 14px;
-            font-weight: 800;
-        }
-
-        /* Bola */
-        .ball {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            margin-bottom: 2px;
-            position: relative;
-            box-shadow:
-                inset -3px -3px 8px rgba(0, 0, 0, 0.4),
-                inset 3px 3px 8px rgba(255, 255, 255, 0.4),
-                0 2px 6px rgba(0, 0, 0, 0.4);
-            flex-shrink: 0;
-            transition: transform var(--t);
-        }
-
-        .ball::before {
-            content: '';
-            position: absolute;
-            top: 12%;
-            left: 18%;
-            width: 30%;
-            height: 30%;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.9), transparent 70%);
-            pointer-events: none;
-        }
-
-        /* Cores das bolas */
-        .ball.red { background: radial-gradient(circle at 35% 30%, #ff6b6b, #dc2626 60%, #991b1b); }
-        .ball.green { background: radial-gradient(circle at 35% 30%, #86efac, #22c55e 60%, #15803d); }
-        .ball.blue { background: radial-gradient(circle at 35% 30%, #93c5fd, #3b82f6 60%, #1e40af); }
-        .ball.yellow { background: radial-gradient(circle at 35% 30%, #fde68a, #eab308 60%, #a16207); }
-        .ball.purple { background: radial-gradient(circle at 35% 30%, #d8b4fe, #a855f7 60%, #6b21a8); }
-        .ball.orange { background: radial-gradient(circle at 35% 30%, #fdba74, #f97316 60%, #c2410c); }
-        .ball.pink { background: radial-gradient(circle at 35% 30%, #f9a8d4, #ec4899 60%, #9d174d); }
-        .ball.cyan { background: radial-gradient(circle at 35% 30%, #a5f3fc, #06b6d4 60%, #0e7490); }
-        .ball.brown { background: radial-gradient(circle at 35% 30%, #d6b896, #8b5a2b 60%, #5a3a17); }
-        .ball.gray { background: radial-gradient(circle at 35% 30%, #d4d4d8, #71717a 60%, #3f3f46); }
-        .ball.lime { background: radial-gradient(circle at 35% 30%, #d9f99d, #84cc16 60%, #3f6212); }
-
-        /* Animação de bola saltando */
-        .ball.moving {
-            animation: ballJump 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes ballJump {
-            0% { transform: scale(1) translateY(0); }
-            50% { transform: scale(1.15) translateY(-8px); }
-            100% { transform: scale(1) translateY(0); }
-        }
-
-        /* ===== BOTÕES INFERIORES ===== */
-        .bottom-bar {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            padding: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 999px;
-            border: none;
-            background: var(--btn-bg);
-            color: white;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all var(--t);
-            box-shadow: 0 8px 24px rgba(168, 85, 247, 0.4);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(168, 85, 247, 0.55);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn.secondary {
-            background: var(--btn-accent);
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* ===== MODAL VITÓRIA ===== */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-            padding: 20px;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-card {
-            background: linear-gradient(135deg, rgba(45, 27, 78, 0.98), rgba(26, 11, 46, 0.98));
-            border: 1px solid rgba(168, 85, 247, 0.4);
-            border-radius: 24px;
-            padding: 32px 24px;
-            max-width: 380px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(168, 85, 247, 0.3);
-            animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        [data-theme="light"] .modal-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 240, 255, 0.98));
-            border: 1px solid rgba(168, 85, 247, 0.3);
-        }
-
-        @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.85) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .modal-emoji {
-            font-size: 64px;
-            margin-bottom: 12px;
-            animation: bounceIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes bounceIn {
-            0% { transform: scale(0); }
-            60% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        .modal-title {
-            font-size: 24px;
-            font-weight: 800;
-            margin: 0 0 8px;
-            background: linear-gradient(135deg, #a855f7, #ec4899);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .modal-message {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin: 0 0 20px;
-            line-height: 1.5;
-        }
-
-        .modal-stats {
-            display: flex;
-            justify-content: space-around;
-            padding: 16px;
-            background: rgba(168, 85, 247, 0.1);
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        .modal-stat-value {
-            font-size: 22px;
-            font-weight: 800;
-            color: #a855f7;
-        }
-
-        .modal-stat-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-        }
-
-        /* ===== MENU DE NÍVEIS ===== */
-        .level-selector {
-            display: flex;
-            gap: 8px;
-            padding: 12px 20px;
-            overflow-x: auto;
-            justify-content: center;
-            flex-wrap: wrap;
-            scrollbar-width: none;
-        }
-
-        .level-selector::-webkit-scrollbar { display: none; }
-
-        .level-btn {
-            min-width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.15);
-            color: var(--text);
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all var(--t);
-            flex-shrink: 0;
-        }
-
-        .level-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .level-btn.active {
-            background: var(--btn-bg);
-            border-color: transparent;
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
-        }
-
-        .level-btn.completed::after {
-            content: '✓';
-            margin-left: 4px;
-            color: #4ade80;
-        }
-
-        /* ===== MODO ZEN ===== */
-        .zen-toggle {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: var(--text-muted);
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 999px;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all var(--t);
-        }
-
-        .zen-toggle.active {
-            background: rgba(74, 222, 128, 0.2);
-            border-color: rgba(74, 222, 128, 0.5);
-            color: #4ade80;
-        }
-
-        /* Responsivo */
-        @media (max-width: 600px) {
-            .tube { width: 36px; height: 160px; }
-            .ball { width: 26px; height: 26px; }
-            .tubes-container { gap: 10px 6px; }
-            .game-area { padding: 12px; gap: 16px; }
-            .btn { padding: 10px 18px; font-size: 13px; }
-            .btn-icon { width: 42px; height: 42px; font-size: 18px; }
-        }
-
-        @media (max-height: 700px) {
-            .tube { height: 140px; }
-            .game-area { gap: 12px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a0b2e">
+<title>Ball Sort Puzzle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-1:#1a0b2e;--bg-2:#2d1b4e;--bg-3:#0f0520;
+  --text:#f5f0ff;--text-muted:#a78bfa;
+  --tube-border:rgba(255,255,255,.85);
+  --tube-bg:rgba(255,255,255,.06);
+  --tube-shadow:inset 0 0 20px rgba(255,255,255,.15),inset 0 -10px 30px rgba(0,0,0,.4);
+  --btn-bg:linear-gradient(135deg,#a855f7,#ec4899);
+  --btn-accent:linear-gradient(135deg,#06b6d4,#3b82f6);
+  --radius:16px;
+  --t:.25s cubic-bezier(.16,1,.3,1);
+}
+[data-theme="light"]{
+  --bg-1:#f5f0ff;--bg-2:#e0e7ff;--bg-3:#fff;
+  --text:#1a0b2e;--text-muted:#7c3aed;
+  --tube-border:rgba(30,20,60,.9);
+  --tube-bg:rgba(30,20,60,.04);
+  --tube-shadow:inset 0 0 20px rgba(0,0,0,.05),inset 0 -10px 30px rgba(0,0,0,.08);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);overflow:hidden;user-select:none;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(circle at 30% 20%,var(--bg-2) 0%,var(--bg-1) 45%,var(--bg-3) 100%);display:flex;flex-direction:column;min-height:100dvh}
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;gap:12px}
+.btn-icon{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:var(--text);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--t);backdrop-filter:blur(10px)}
+.btn-icon:hover{background:rgba(255,255,255,.18);transform:translateY(-2px)}
+.btn-icon:active{transform:translateY(0) scale(.95)}
+.stats{display:flex;gap:16px;align-items:center}
+.stat{display:flex;flex-direction:column;align-items:center;gap:2px}
+.stat-value{font-family:'Plus Jakarta Sans',monospace;font-size:20px;font-weight:800;color:var(--text)}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)}
+.game-area{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;gap:24px;overflow:hidden}
+.tubes-container{display:grid;grid-template-columns:repeat(7,1fr);gap:12px 8px;max-width:720px;width:100%;justify-items:center;align-items:end}
+.tube{position:relative;width:42px;height:190px;background:var(--tube-bg);border:2px solid var(--tube-border);border-top:none;border-radius:0 0 21px 21px;box-shadow:var(--tube-shadow);display:flex;flex-direction:column-reverse;align-items:center;padding:4px 4px 0;cursor:pointer;transition:transform var(--t),filter var(--t);backdrop-filter:blur(4px);overflow:hidden}
+.tube::before{content:'';position:absolute;top:0;left:4px;right:4px;height:8px;background:linear-gradient(to bottom,rgba(255,255,255,.3),transparent);border-radius:0 0 50% 50%;pointer-events:none;z-index:5}
+.tube.selected{transform:translateY(-12px);filter:drop-shadow(0 0 20px rgba(168,85,247,.8))}
+.tube.destination{filter:drop-shadow(0 0 16px rgba(74,222,128,.7))}
+.tube.destination::before{background:linear-gradient(to bottom,rgba(74,222,128,.6),transparent)}
+.tube.complete{border-color:#4ade80;filter:drop-shadow(0 0 12px rgba(74,222,128,.5))}
+.tube.complete::after{content:'✓';position:absolute;top:-14px;left:50%;transform:translateX(-50%);color:#4ade80;font-size:14px;font-weight:800}
+.tube.invalid{animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.ball{width:32px;height:32px;border-radius:50%;margin-bottom:2px;position:relative;box-shadow:inset -3px -3px 8px rgba(0,0,0,.4),inset 3px 3px 8px rgba(255,255,255,.4),0 2px 6px rgba(0,0,0,.4);flex-shrink:0;transition:transform var(--t)}
+.ball::before{content:'';position:absolute;top:12%;left:18%;width:30%;height:30%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.9),transparent 70%);pointer-events:none}
+.ball.red{background:radial-gradient(circle at 35% 30%,#ff6b6b,#dc2626 60%,#991b1b)}
+.ball.green{background:radial-gradient(circle at 35% 30%,#86efac,#22c55e 60%,#15803d)}
+.ball.blue{background:radial-gradient(circle at 35% 30%,#93c5fd,#3b82f6 60%,#1e40af)}
+.ball.yellow{background:radial-gradient(circle at 35% 30%,#fde68a,#eab308 60%,#a16207)}
+.ball.purple{background:radial-gradient(circle at 35% 30%,#d8b4fe,#a855f7 60%,#6b21a8)}
+.ball.orange{background:radial-gradient(circle at 35% 30%,#fdba74,#f97316 60%,#c2410c)}
+.ball.pink{background:radial-gradient(circle at 35% 30%,#f9a8d4,#ec4899 60%,#9d174d)}
+.ball.cyan{background:radial-gradient(circle at 35% 30%,#a5f3fc,#06b6d4 60%,#0e7490)}
+.ball.brown{background:radial-gradient(circle at 35% 30%,#d6b896,#8b5a2b 60%,#5a3a17)}
+.ball.gray{background:radial-gradient(circle at 35% 30%,#d4d4d8,#71717a 60%,#3f3f46)}
+.ball.lime{background:radial-gradient(circle at 35% 30%,#d9f99d,#84cc16 60%,#3f6212)}
+.ball.pop{animation:ballJump .3s cubic-bezier(.16,1,.3,1)}
+@keyframes ballJump{0%{transform:scale(1) translateY(0)}50%{transform:scale(1.15) translateY(-8px)}100%{transform:scale(1) translateY(0)}}
+.bottom-bar{display:flex;justify-content:center;gap:12px;padding:20px;flex-wrap:wrap}
+.btn{padding:12px 24px;border-radius:999px;border:none;background:var(--btn-bg);color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all var(--t);box-shadow:0 8px 24px rgba(168,85,247,.4)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(168,85,247,.55)}
+.btn:active{transform:translateY(0)}
+.btn.secondary{background:var(--btn-accent);box-shadow:0 8px 24px rgba(59,130,246,.4)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .3s;padding:20px}
+.modal-overlay.active{opacity:1;pointer-events:auto}
+.modal-card{background:linear-gradient(135deg,rgba(45,27,78,.98),rgba(26,11,46,.98));border:1px solid rgba(168,85,247,.4);border-radius:24px;padding:32px 24px;max-width:380px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 60px rgba(168,85,247,.3);animation:modalIn .4s cubic-bezier(.16,1,.3,1)}
+[data-theme="light"] .modal-card{background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(245,240,255,.98));border:1px solid rgba(168,85,247,.3)}
+@keyframes modalIn{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-emoji{font-size:64px;margin-bottom:12px;animation:bounceIn .6s cubic-bezier(.16,1,.3,1)}
+@keyframes bounceIn{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.modal-title{font-size:24px;font-weight:800;margin:0 0 8px;background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.modal-message{color:var(--text-muted);font-size:14px;margin:0 0 20px;line-height:1.5}
+.modal-stats{display:flex;justify-content:space-around;padding:16px;background:rgba(168,85,247,.1);border-radius:12px;margin-bottom:20px}
+.modal-stat-value{font-size:22px;font-weight:800;color:#a855f7}
+.modal-stat-label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:1px}
+.level-selector{display:flex;gap:8px;padding:12px 20px;overflow-x:auto;justify-content:center;flex-wrap:wrap;scrollbar-width:none}
+.level-selector::-webkit-scrollbar{display:none}
+.level-btn{min-width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all var(--t);flex-shrink:0}
+.level-btn:hover{background:rgba(255,255,255,.15)}
+.level-btn.active{background:var(--btn-bg);border-color:transparent;box-shadow:0 0 20px rgba(168,85,247,.6)}
+.level-btn.completed::after{content:'✓';margin-left:4px;color:#4ade80}
+.zen-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);padding:8px 16px;background:rgba(255,255,255,.06);border-radius:999px;cursor:pointer;border:1px solid rgba(255,255,255,.1);transition:all var(--t)}
+.zen-toggle.active{background:rgba(74,222,128,.2);border-color:rgba(74,222,128,.5);color:#4ade80}
+@media (max-width:600px){
+  .tube{width:36px;height:160px}
+  .ball{width:26px;height:26px}
+  .tubes-container{gap:10px 6px}
+  .game-area{padding:12px;gap:16px}
+  .btn{padding:10px 18px;font-size:13px}
+  .btn-icon{width:42px;height:42px;font-size:18px}
+}
+@media (max-height:700px){
+  .tube{height:140px}
+  .game-area{gap:12px}
+}
+</style>
 </head>
 <body>
 
-    <!-- Barra superior -->
-    <div class="top-bar">
-        <button class="btn-icon" id="btn-theme" type="button" title="Tema">🌙</button>
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-value" id="stat-moves">0</div>
-                <div class="stat-label">Movimentos</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value" id="stat-level">1</div>
-                <div class="stat-label">Nível</div>
-            </div>
-        </div>
-        <button class="btn-icon" id="btn-restart" type="button" title="Reiniciar">🔄</button>
+<div class="top-bar">
+  <button class="btn-icon" id="btn-theme" type="button" title="Tema">🌙</button>
+  <div class="stats">
+    <div class="stat"><div class="stat-value" id="stat-moves">0</div><div class="stat-label">Movimentos</div></div>
+    <div class="stat"><div class="stat-value" id="stat-level">1</div><div class="stat-label">Nível</div></div>
+  </div>
+  <button class="btn-icon" id="btn-restart" type="button" title="Reiniciar">🔄</button>
+</div>
+
+<div class="level-selector" id="level-selector"></div>
+
+<div class="game-area">
+  <div class="tubes-container" id="tubes-container"></div>
+</div>
+
+<div class="bottom-bar">
+  <button class="btn secondary" id="btn-undo" type="button">↶ Desfazer</button>
+  <button class="btn secondary" id="btn-add-tube" type="button">➕ Tubo Extra</button>
+  <div class="zen-toggle" id="btn-zen">🧘 Zen</div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-emoji">🎉</div>
+    <h2 class="modal-title">Nível Completo!</h2>
+    <p class="modal-message">Parabéns! Conseguiste ordenar todas as bolas.</p>
+    <div class="modal-stats">
+      <div><div class="modal-stat-value" id="modal-moves">0</div><div class="modal-stat-label">Movimentos</div></div>
+      <div><div class="modal-stat-value" id="modal-level">1</div><div class="modal-stat-label">Nível</div></div>
     </div>
-
-    <!-- Selector de nível -->
-    <div class="level-selector" id="level-selector"></div>
-
-    <!-- Área do jogo -->
-    <div class="game-area">
-        <div class="tubes-container" id="tubes-container"></div>
-    </div>
-
-    <!-- Botões inferiores -->
-    <div class="bottom-bar">
-        <button class="btn secondary" id="btn-undo" type="button">↶ Desfazer</button>
-        <button class="btn secondary" id="btn-add-tube" type="button">➕ Tubo Extra</button>
-        <div class="zen-toggle" id="btn-zen">🧘 Zen</div>
-    </div>
-
-    <!-- Modal de vitória -->
-    <div class="modal-overlay" id="modal-overlay">
-        <div class="modal-card">
-            <div class="modal-emoji">🎉</div>
-            <h2 class="modal-title">Nível Completo!</h2>
-            <p class="modal-message">Parabéns! Conseguiste ordenar todas as bolas.</p>
-            <div class="modal-stats">
-                <div>
-                    <div class="modal-stat-value" id="modal-moves">0</div>
-                    <div class="modal-stat-label">Movimentos</div>
-                </div>
-                <div>
-                    <div class="modal-stat-value" id="modal-level">1</div>
-                    <div class="modal-stat-label">Nível</div>
-                </div>
-            </div>
-            <button class="btn" id="btn-next-level" type="button" style="width: 100%;">▶️ Próximo Nível</button>
-        </div>
-    </div>
-
-    <script>
-        // ============================================================
-        // BALL SORT PUZZLE — Motor completo
-        // ============================================================
-
-        // === CONSTANTES ===
-        const CORES = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'pink', 'cyan', 'brown', 'gray', 'lime'];
-        const BOLAS_POR_TUBO = 4;
-
-        // === ESTADO ===
-        let estado = {
-            nivel: 1,
-            nivelMaximo: 20,
-            movimentos: 0,
-            tubos: [],           // Array de arrays: cada tubo é um array de cores (do fundo para o topo)
-            tubosExtras: 0,      // Quantos tubos extras foram adicionados nesta sessão
-            selecionado: null,   // Índice do tubo selecionado (ou null)
-            historico: [],       // Stack de estados anteriores (para undo)
-            modoZen: false,      // Modo relax (sem perder)
-            completo: false,     // Se o nível atual está completo
-            tema: 'dark',
-            niveisCompletos: JSON.parse(localStorage.getItem('ballsort_completos') || '[]')
-        };
-
-        // === GERADOR DE NÍVEIS ===
-        // Nível N → N tubos com cores diferentes
-        // Nível 1 → 3 cores, Nível 2 → 4 cores, etc.
-        function gerarNivel(nivel) {
-            const numCores = Math.min(2 + Math.floor(nivel / 1.5), 8); // máx 8 cores
-            const cores = CORES.slice(0, numCores);
-
-            // Cria a lista de todas as bolas (cada cor 4 vezes)
-            let bolas = [];
-            cores.forEach(cor => {
-                for (let i = 0; i < BOLAS_POR_TUBO; i++) bolas.push(cor);
-            });
-
-            // Baralha
-            bolas = baralhar(bolas);
-
-            // Cria os tubos com as bolas baralhadas
-            const tubos = [];
-            for (let i = 0; i < cores.length; i++) {
-                tubos.push(bolas.slice(i * BOLAS_POR_TUBO, (i + 1) * BOLAS_POR_TUBO));
-            }
-
-            // Adiciona 1 tubo vazio (comum no início)
-            tubos.push([]);
-
-            // Verifica se o puzzle tem solução; se não, tenta de novo
-            if (!temSolucao(tubos)) {
-                return gerarNivel(nivel);
-            }
-
-            return tubos;
-        }
-
-        function baralhar(arr) {
-            const a = arr.slice();
-            for (let i = a.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [a[i], a[j]] = [a[j], a[i]];
-            }
-            return a;
-        }
-
-        // Verifica se o puzzle é resolvível com o número atual de tubos vazios
-        // (heurística simples: tenta resolver por BFS com profundidade limitada)
-        function temSolucao(tubos) {
-            // Simplificação: considera solúvel se cada cor tem 4 bolas e há pelo menos 1 tubo vazio
-            // A maioria dos puzzles gerados aleatoriamente é solúvel
-            return true;
-        }
-
-        // === LÓGICA DO JOGO ===
-        function tuboEstaCompleto(tubo) {
-            if (tubo.length !== BOLAS_POR_TUBO) return false;
-            return tubo.every(cor => cor === tubo[0]);
-        }
-
-        function topoDoTubo(tubo) {
-            if (tubo.length === 0) return null;
-            return tubo[tubo.length - 1];
-        }
-
-        function podeColocarBola(tuboDestino, cor) {
-            // Tubo cheio → não pode
-            if (tuboDestino.length >= BOLAS_POR_TUBO) return false;
-            // Tubo vazio → pode
-            if (tuboDestino.length === 0) return true;
-            // Topo tem a mesma cor → pode
-            return topoDoTubo(tuboDestino) === cor;
-        }
-
-        function selecionarTubo(idx) {
-            if (estado.completo) return;
-
-            // Se já há um selecionado e clicou noutro → tenta mover
-            if (estado.selecionado !== null && estado.selecionado !== idx) {
-                const origem = estado.tubos[estado.selecionado];
-                const destino = estado.tubos[idx];
-
-                // Não pode mover de tubo completo
-                if (tuboEstaCompleto(origem)) {
-                    toast('Este tubo já está completo', 'warn');
-                    estado.selecionado = null;
-                    renderizar();
-                    return;
-                }
-
-                // Não pode mover de tubo vazio
-                if (origem.length === 0) {
-                    estado.selecionado = null;
-                    renderizar();
-                    return;
-                }
-
-                const cor = topoDoTubo(origem);
-
-                // Modo Zen: permite mover 1 bola de cada vez, mas só se destino vazio OU mesma cor
-                if (!podeColocarBola(destino, cor)) {
-                    // Tenta novo selecionado (o jogador pode querer selecionar outro)
-                    estado.selecionado = idx;
-                    renderizar();
-                    return;
-                }
-
-                // Guarda estado no histórico (para undo)
-                guardarHistorico();
-
-                // Move TODAS as bolas iguais consecutivas do topo
-                let bolasMovidas = 0;
-                while (origem.length > 0 && topoDoTubo(origem) === cor && podeColocarBola(destino, cor)) {
-                    destino.push(origem.pop());
-                    bolasMovidas++;
-                }
-
-                estado.movimentos++;
-                estado.selecionado = null;
-
-                // Toca som
-                tocarSom('move');
-
-                // Verifica vitória
-                verificarVitoria();
-
-                renderizar();
-                return;
-            }
-
-            // Se clicou no mesmo → deseleciona
-            if (estado.selecionado === idx) {
-                estado.selecionado = null;
-                renderizar();
-                return;
-            }
-
-            // Seleciona
-            if (estado.tubos[idx].length === 0 || tuboEstaCompleto(estado.tubos[idx])) {
-                // Não faz sentido selecionar tubo vazio ou completo
-                return;
-            }
-
-            estado.selecionado = idx;
-            tocarSom('select');
-            renderizar();
-        }
-
-        function verificarVitoria() {
-            const todosCompletos = estado.tubos.every(tubo => tubo.length === 0 || tuboEstaCompleto(tubo));
-            if (todosCompletos && estado.tubos.some(t => t.length > 0)) {
-                estado.completo = true;
-                tocarSom('win');
-
-                // Marca nível como completo
-                if (!estado.niveisCompletos.includes(estado.nivel)) {
-                    estado.niveisCompletos.push(estado.nivel);
-                    localStorage.setItem('ballsort_completos', JSON.stringify(estado.niveisCompletos));
-                }
-
-                // Mostra modal (atrasado para a animação terminar)
-                setTimeout(() => {
-                    document.getElementById('modal-moves').textContent = estado.movimentos;
-                    document.getElementById('modal-level').textContent = estado.nivel;
-                    document.getElementById('modal-overlay').classList.add('active');
-                }, 400);
-            }
-        }
-
-        // === HISTÓRICO (DESFAZER) ===
-        function guardarHistorico() {
-            estado.historico.push({
-                tubos: estado.tubos.map(t => t.slice()),
-                movimentos: estado.movimentos,
-                selecionado: estado.selecionado
-            });
-            // Limita o histórico a 50 estados
-            if (estado.historico.length > 50) estado.historico.shift();
-        }
-
-        function desfazer() {
-            if (estado.historico.length === 0) {
-                toast('Nada para desfazer', 'info');
-                return;
-            }
-            const anterior = estado.historico.pop();
-            estado.tubos = anterior.tubos.map(t => t.slice());
-            estado.movimentos = anterior.movimentos;
-            estado.selecionado = null;
-            estado.completo = false;
-            tocarSom('select');
-            renderizar();
-        }
-
-        // === RENDERIZAÇÃO ===
-        function renderizar() {
-            const container = document.getElementById('tubes-container');
-            container.innerHTML = '';
-
-            estado.tubos.forEach((tubo, idx) => {
-                const tubeEl = document.createElement('div');
-                tubeEl.className = 'tube';
-
-                if (estado.selecionado === idx) tubeEl.classList.add('selected');
-                if (tuboEstaCompleto(tubo)) tubeEl.classList.add('complete');
-
-                // Verifica se é destino válido do selecionado
-                if (estado.selecionado !== null && estado.selecionado !== idx) {
-                    const origem = estado.tubos[estado.selecionado];
-                    if (origem.length > 0 && !tuboEstaCompleto(origem)) {
-                        const cor = topoDoTubo(origem);
-                        if (podeColocarBola(tubo, cor)) {
-                            tubeEl.classList.add('destination');
-                        }
-                    }
-                }
-
-                // Adiciona as bolas (do fundo para o topo)
-                tubo.forEach(cor => {
-                    const ballEl = document.createElement('div');
-                    ballEl.className = `ball ${cor}`;
-                    tubeEl.appendChild(ballEl);
-                });
-
-                tubeEl.addEventListener('click', () => selecionarTubo(idx));
-                container.appendChild(tubeEl);
-            });
-
-            // Atualiza stats
-            document.getElementById('stat-moves').textContent = estado.movimentos;
-            document.getElementById('stat-level').textContent = estado.nivel;
-
-            // Atualiza botão undo
-            document.getElementById('btn-undo').disabled = estado.historico.length === 0;
-
-            // Atualiza selector de níveis
-            atualizarSelectorNiveis();
-        }
-
-        function atualizarSelectorNiveis() {
-            const selector = document.getElementById('level-selector');
-            if (selector.children.length !== estado.nivelMaximo) {
-                selector.innerHTML = '';
-                for (let i = 1; i <= estado.nivelMaximo; i++) {
-                    const btn = document.createElement('button');
-                    btn.className = 'level-btn';
-                    btn.textContent = i;
-                    btn.addEventListener('click', () => carregarNivel(i));
-                    selector.appendChild(btn);
-                }
-            }
-            // Atualiza estados
-            Array.from(selector.children).forEach((btn, i) => {
-                const nivel = i + 1;
-                btn.classList.toggle('active', nivel === estado.nivel);
-                btn.classList.toggle('completed', estado.niveisCompletos.includes(nivel));
-            });
-        }
-
-        // === CARREGAR NÍVEL ===
-        function carregarNivel(nivel) {
-            estado.nivel = nivel;
-            estado.movimentos = 0;
-            estado.tubos = gerarNivel(nivel);
-            estado.tubosExtras = 0;
-            estado.selecionado = null;
-            estado.historico = [];
-            estado.completo = false;
-
-            document.getElementById('btn-add-tube').disabled = false;
-            document.getElementById('modal-overlay').classList.remove('active');
-
-            renderizar();
-        }
-
-        function reiniciarNivel() {
-            carregarNivel(estado.nivel);
-            toast('Nível reiniciado', 'info');
-        }
-
-        // === TUBO EXTRA ===
-        function adicionarTuboExtra() {
-            if (estado.tubosExtras >= 2) {
-                toast('Máximo de 2 tubos extras', 'warn');
-                return;
-            }
-            guardarHistorico();
-            estado.tubos.push([]);
-            estado.tubosExtras++;
-            tocarSom('select');
-            renderizar();
-
-            if (estado.tubosExtras >= 2) {
-                document.getElementById('btn-add-tube').disabled = true;
-            }
-        }
-
-        // === MODO ZEN ===
-        function toggleZen() {
-            estado.modoZen = !estado.modoZen;
-            document.getElementById('btn-zen').classList.toggle('active', estado.modoZen);
-            toast(estado.modoZen ? '🧘 Modo Zen ativado' : 'Modo Zen desativado', 'info');
-        }
-
-        // === TEMA ===
-        function toggleTema() {
-            estado.tema = estado.tema === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', estado.tema);
-            document.getElementById('btn-theme').textContent = estado.tema === 'dark' ? '🌙' : '☀️';
-            localStorage.setItem('ballsort_tema', estado.tema);
-        }
-
-        // === SOM ===
-        let audioCtx = null;
-        function tocarSom(tipo) {
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-
-                const now = audioCtx.currentTime;
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-
-                if (tipo === 'select') {
-                    osc.frequency.value = 600;
-                    osc.type = 'sine';
-                    gain.gain.setValueAtTime(0.08, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                    osc.start(now);
-                    osc.stop(now + 0.1);
-                } else if (tipo === 'move') {
-                    osc.frequency.value = 400;
-                    osc.type = 'triangle';
-                    gain.gain.setValueAtTime(0.1, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-                    osc.start(now);
-                    osc.stop(now + 0.15);
-                } else if (tipo === 'win') {
-                    // Acorde de vitória
-                    [523, 659, 784, 1046].forEach((freq, i) => {
-                        const o = audioCtx.createOscillator();
-                        const g = audioCtx.createGain();
-                        o.frequency.value = freq;
-                        o.type = 'sine';
-                        g.gain.setValueAtTime(0.001, now + i * 0.12);
-                        g.gain.exponentialRampToValueAtTime(0.15, now + i * 0.12 + 0.02);
-                        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.4);
-                        o.connect(g);
-                        g.connect(audioCtx.destination);
-                        o.start(now + i * 0.12);
-                        o.stop(now + i * 0.12 + 0.4);
-                    });
-                    return;
-                }
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-            } catch (e) {
-                // Silencioso se falhar
-            }
-        }
-
-        // === TOAST ===
-        function toast(msg, tipo = 'info') {
-            const el = document.createElement('div');
-            el.textContent = msg;
-            el.style.cssText = `
-                position: fixed;
-                top: 80px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: ${tipo === 'warn' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'linear-gradient(135deg, #a855f7, #ec4899)'};
-                color: white;
-                padding: 12px 20px;
-                border-radius: 999px;
-                font-family: 'Plus Jakarta Sans', sans-serif;
-                font-weight: 700;
-                font-size: 13px;
-                z-index: 2000;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-                animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-                pointer-events: none;
-            `;
-            document.body.appendChild(el);
-            setTimeout(() => {
-                el.style.animation = 'toastOut 0.3s ease forwards';
-                setTimeout(() => el.remove(), 300);
-            }, 1800);
-        }
-
-        // Adiciona keyframes do toast dinamicamente
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes toastIn {
-                from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-                to { opacity: 1; transform: translateX(-50%) translateY(0); }
-            }
-            @keyframes toastOut {
-                from { opacity: 1; transform: translateX(-50%) translateY(0); }
-                to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // === EVENTOS ===
-        document.getElementById('btn-restart').addEventListener('click', reiniciarNivel);
-        document.getElementById('btn-undo').addEventListener('click', desfazer);
-        document.getElementById('btn-add-tube').addEventListener('click', adicionarTuboExtra);
-        document.getElementById('btn-zen').addEventListener('click', toggleZen);
-        document.getElementById('btn-theme').addEventListener('click', toggleTema);
-        document.getElementById('btn-next-level').addEventListener('click', () => {
-            const proximo = Math.min(estado.nivel + 1, estado.nivelMaximo);
-            carregarNivel(proximo);
-        });
-
-        // Atalhos de teclado
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                desfazer();
-            }
-            if (e.key === 'r') reiniciarNivel();
-            if (e.key === 't') adicionarTuboExtra();
-        });
-
-        // === INICIALIZAÇÃO ===
-        (function init() {
-            // Carrega tema
-            const temaSalvo = localStorage.getItem('ballsort_tema') || 'dark';
-            estado.tema = temaSalvo;
-            document.documentElement.setAttribute('data-theme', temaSalvo);
-            document.getElementById('btn-theme').textContent = temaSalvo === 'dark' ? '🌙' : '☀️';
-
-            // Carrega nível salvo
-            const nivelSalvo = parseInt(localStorage.getItem('ballsort_nivel') || '1');
-            carregarNivel(nivelSalvo);
-
-            console.log('[Ball Sort] Carregado — Nível', nivelSalvo);
-        })();
-
-        // Salva nível ao mudar
-        const _carregarNivel = carregarNivel;
-        carregarNivel = function(nivel) {
-            _carregarNivel(nivel);
-            localStorage.setItem('ballsort_nivel', String(nivel));
-        };
-    </script>
+    <button class="btn" id="btn-next-level" type="button" style="width:100%">▶️ Próximo Nível</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// BALL SORT PUZZLE — Motor v2 (corrigido e aprimorado)
+// ============================================================
+
+const CORES = ['red','green','blue','yellow','purple','orange','pink','cyan','brown','gray','lime'];
+const BOLAS_POR_TUBO = 4;
+const NIVEL_MAXIMO = 12;
+
+// ---------- Estado ----------
+const estado = {
+  nivel: 1,
+  movimentos: 0,
+  tubos: [],
+  tubosExtras: 0,
+  selecionado: null,
+  historico: [],
+  modoZen: false,
+  completo: false,
+  tema: 'dark',
+  niveisCompletos: []
+};
+
+// ---------- Storage seguro ----------
+const storage = {
+  get(k, fallback) {
+    try { const v = localStorage.getItem(k); return v === null ? fallback : v; }
+    catch { return fallback; }
+  },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+};
+
+// ---------- Configuração por nível ----------
+// Níveis 1-2: 3 cores | 3-4: 4 | 5-6: 5 | 7-8: 6 | 9-10: 7 | 11-12: 8
+function configNivel(nivel) {
+  const numCores = Math.min(3 + Math.floor((nivel - 1) / 2), 8);
+  // Tubos vazios: níveis baixos → 2 (mais fácil), altos → 1 (desafio)
+  const tubosVazios = nivel <= 2 ? 2 : 1;
+  return { numCores, tubosVazios };
+}
+
+// ---------- Geração por construção reversa (sempre solúvel) ----------
+// Estratégia: começa com o estado RESOLVIDO e faz movimentos reversos aleatórios.
+// Resultado: puzzle garantidamente solúvel.
+function gerarNivel(nivel) {
+  const { numCores, tubosVazios } = configNivel(nivel);
+  const cores = CORES.slice(0, numCores);
+
+  // Estado resolvido: cada tubo cheio de uma cor + N tubos vazios
+  let tubos = [];
+  cores.forEach(cor => tubos.push(Array(BOLAS_POR_TUBO).fill(cor)));
+  for (let i = 0; i < tubosVazios; i++) tubos.push([]);
+
+  // Embaralha a ordem dos tubos cheios para não ficar óbvio
+  // (mantém os vazios por último)
+  const cheios = tubos.slice(0, numCores);
+  for (let i = cheios.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cheios[i], cheios[j]] = [cheios[j], cheios[i]];
+  }
+  tubos = [...cheios, ...tubos.slice(numCores)];
+
+  // Aplica movimentos reversos para embaralhar mantendo solubilidade
+  const numPassos = numCores * 8 + nivel * 4;
+  let ultimoMovimento = null;
+
+  for (let passo = 0; passo < numPassos; passo++) {
+    const movimentos = movimentosReversosValidos(tubos, ultimoMovimento);
+    if (movimentos.length === 0) break;
+    const m = movimentos[Math.floor(Math.random() * movimentos.length)];
+    // Executa movimento reverso: move topo de A → B (mesmas regras do jogo)
+    tubos[m.para].push(tubos[m.de].pop());
+    ultimoMovimento = m;
+  }
+
+  // Verificação final: se por acaso ficou já resolvido, re-gera
+  if (estaResolvido(tubos)) return gerarNivel(nivel);
+
+  return tubos;
+}
+
+// Movimentos válidos para embaralhar (reverso = mesmo que forward no ball sort,
+// já que qualquer movimento válido pode ser desfeito)
+function movimentosReversosValidos(tubos, ultimo) {
+  const movs = [];
+  for (let de = 0; de < tubos.length; de++) {
+    if (tubos[de].length === 0) continue;
+    const cor = tubos[de][tubos[de].length - 1];
+    for (let para = 0; para < tubos.length; para++) {
+      if (de === para) continue;
+      if (tubos[para].length >= BOLAS_POR_TUBO) continue;
+      if (tubos[para].length > 0 && tubos[para][tubos[para].length - 1] !== cor) continue;
+      // Evita desfazer o último movimento
+      if (ultimo && ultimo.de === para && ultimo.para === de) continue;
+      // Prefere não mover para tubo vazio se já tiver opção (evita voltar ao estado inicial)
+      movs.push({ de, para });
+    }
+  }
+  return movs;
+}
+
+function estaResolvido(tubos) {
+  return tubos.every(t => t.length === 0 || (t.length === BOLAS_POR_TUBO && t.every(c => c === t[0])));
+}
+
+// ---------- Regras ----------
+function tuboEstaCompleto(t) {
+  return t.length === BOLAS_POR_TUBO && t.every(c => c === t[0]);
+}
+function topoDoTubo(t) { return t.length ? t[t.length - 1] : null; }
+function podeColocarBola(destino, cor) {
+  if (destino.length >= BOLAS_POR_TUBO) return false;
+  if (destino.length === 0) return true;
+  return topoDoTubo(destino) === cor;
+}
+
+// ---------- Interação ----------
+function selecionarTubo(idx) {
+  if (estado.completo) return;
+
+  // Clique no mesmo tubo → deseleciona
+  if (estado.selecionado === idx) {
+    estado.selecionado = null;
+    renderizar();
+    return;
+  }
+
+  // Se há selecionado → tenta mover
+  if (estado.selecionado !== null) {
+    const origem = estado.tubos[estado.selecionado];
+    const destino = estado.tubos[idx];
+
+    if (tuboEstaCompleto(origem)) {
+      toast('Este tubo já está completo', 'warn');
+      estado.selecionado = null;
+      renderizar();
+      return;
+    }
+    if (origem.length === 0) {
+      estado.selecionado = null;
+      renderizar();
+      return;
+    }
+
+    const cor = topoDoTubo(origem);
+
+    if (!podeColocarBola(destino, cor)) {
+      // Movimento inválido → tenta selecionar o novo tubo (se aplicável)
+      if (estado.tubos[idx].length > 0 && !tuboEstaCompleto(estado.tubos[idx])) {
+        estado.selecionado = idx;
+        tocarSom('select');
+      } else {
+        estado.selecionado = null;
+        piscarInvalido(idx);
+      }
+      renderizar();
+      return;
+    }
+
+    // Move TODAS as bolas iguais consecutivas (comportamento clássico)
+    guardarHistorico();
+    let movidas = 0;
+    while (origem.length > 0 && topoDoTubo(origem) === cor && podeColocarBola(destino, cor)) {
+      destino.push(origem.pop());
+      movidas++;
+    }
+
+    if (movidas > 0) {
+      estado.movimentos++;
+      tocarSom('move');
+    }
+    estado.selecionado = null;
+    verificarVitoria();
+    renderizar();
+    return;
+  }
+
+  // Seleciona novo tubo
+  if (estado.tubos[idx].length === 0 || tuboEstaCompleto(estado.tubos[idx])) {
+    piscarInvalido(idx);
+    return;
+  }
+  estado.selecionado = idx;
+  tocarSom('select');
+  renderizar();
+}
+
+function piscarInvalido(idx) {
+  const el = document.querySelectorAll('.tube')[idx];
+  if (!el) return;
+  el.classList.add('invalid');
+  setTimeout(() => el.classList.remove('invalid'), 300);
+}
+
+// ---------- Vitória ----------
+function verificarVitoria() {
+  if (!estaResolvido(estado.tubos)) return;
+  if (estado.tubos.every(t => t.length === 0)) return;
+
+  estado.completo = true;
+  tocarSom('win');
+
+  if (!estado.niveisCompletos.includes(estado.nivel)) {
+    estado.niveisCompletos.push(estado.nivel);
+    storage.set('ballsort_completos', JSON.stringify(estado.niveisCompletos));
+  }
+
+  setTimeout(() => {
+    document.getElementById('modal-moves').textContent = estado.movimentos;
+    document.getElementById('modal-level').textContent = estado.nivel;
+    document.getElementById('modal-overlay').classList.add('active');
+  }, 400);
+}
+
+// ---------- Histórico ----------
+function guardarHistorico() {
+  estado.historico.push({
+    tubos: estado.tubos.map(t => t.slice()),
+    movimentos: estado.movimentos,
+    selecionado: estado.selecionado,
+    tubosExtras: estado.tubosExtras
+  });
+  if (estado.historico.length > 100) estado.historico.shift();
+}
+
+function desfazer() {
+  if (estado.historico.length === 0) {
+    toast('Nada para desfazer', 'info');
+    return;
+  }
+  const ant = estado.historico.pop();
+  estado.tubos = ant.tubos.map(t => t.slice());
+  estado.movimentos = ant.movimentos;
+  estado.selecionado = null;
+  estado.tubosExtras = ant.tubosExtras;
+  estado.completo = false;
+  document.getElementById('modal-overlay').classList.remove('active');
+  document.getElementById('btn-add-tube').disabled = estado.tubosExtras >= 2;
+  tocarSom('select');
+  renderizar();
+}
+
+// ---------- Render ----------
+function renderizar() {
+  const container = document.getElementById('tubes-container');
+  container.innerHTML = '';
+
+  estado.tubos.forEach((tubo, idx) => {
+    const tubeEl = document.createElement('div');
+    tubeEl.className = 'tube';
+
+    if (estado.selecionado === idx) tubeEl.classList.add('selected');
+    if (tuboEstaCompleto(tubo)) tubeEl.classList.add('complete');
+
+    if (estado.selecionado !== null && estado.selecionado !== idx) {
+      const origem = estado.tubos[estado.selecionado];
+      if (origem.length > 0 && !tuboEstaCompleto(origem)) {
+        const cor = topoDoTubo(origem);
+        if (podeColocarBola(tubo, cor)) tubeEl.classList.add('destination');
+      }
+    }
+
+    tubo.forEach(cor => {
+      const ballEl = document.createElement('div');
+      ballEl.className = `ball ${cor}`;
+      tubeEl.appendChild(ballEl);
+    });
+
+    tubeEl.addEventListener('click', () => selecionarTubo(idx));
+    container.appendChild(tubeEl);
+  });
+
+  document.getElementById('stat-moves').textContent = estado.movimentos;
+  document.getElementById('stat-level').textContent = estado.nivel;
+  document.getElementById('btn-undo').disabled = estado.historico.length === 0;
+  document.getElementById('btn-add-tube').disabled = estado.tubosExtras >= 2;
+
+  atualizarSelectorNiveis();
+}
+
+function atualizarSelectorNiveis() {
+  const selector = document.getElementById('level-selector');
+  if (selector.children.length !== NIVEL_MAXIMO) {
+    selector.innerHTML = '';
+    for (let i = 1; i <= NIVEL_MAXIMO; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'level-btn';
+      btn.textContent = i;
+      btn.addEventListener('click', () => carregarNivel(i));
+      selector.appendChild(btn);
+    }
+  }
+  Array.from(selector.children).forEach((btn, i) => {
+    const nivel = i + 1;
+    btn.classList.toggle('active', nivel === estado.nivel);
+    btn.classList.toggle('completed', estado.niveisCompletos.includes(nivel));
+  });
+}
+
+// ---------- Carregar nível ----------
+function carregarNivel(nivel, opcoes = {}) {
+  estado.nivel = nivel;
+  estado.movimentos = 0;
+  estado.tubos = gerarNivel(nivel);
+  estado.tubosExtras = 0;
+  estado.selecionado = null;
+  estado.historico = [];
+  estado.completo = false;
+
+  document.getElementById('modal-overlay').classList.remove('active');
+
+  if (!opcoes.silencioso) {
+    storage.set('ballsort_nivel', String(nivel));
+  }
+
+  renderizar();
+}
+
+function reiniciarNivel() {
+  carregarNivel(estado.nivel, { silencioso: true });
+  toast('Nível reiniciado', 'info');
+}
+
+// ---------- Tubo extra ----------
+function adicionarTuboExtra() {
+  if (estado.tubosExtras >= 2) {
+    toast('Máximo de 2 tubos extras', 'warn');
+    return;
+  }
+  guardarHistorico();
+  estado.tubos.push([]);
+  estado.tubosExtras++;
+  tocarSom('select');
+  renderizar();
+}
+
+// ---------- Zen ----------
+function toggleZen() {
+  estado.modoZen = !estado.modoZen;
+  document.getElementById('btn-zen').classList.toggle('active', estado.modoZen);
+  toast(estado.modoZen ? '🧘 Modo Zen ativado' : 'Modo Zen desativado', 'info');
+}
+
+// ---------- Tema ----------
+function toggleTema() {
+  estado.tema = estado.tema === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', estado.tema);
+  document.getElementById('btn-theme').textContent = estado.tema === 'dark' ? '🌙' : '☀️';
+  storage.set('ballsort_tema', estado.tema);
+}
+
+// ---------- Som ----------
+let audioCtx = null;
+function tocarSom(tipo) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+
+    if (tipo === 'win') {
+      [523, 659, 784, 1046].forEach((freq, i) => {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.frequency.value = freq;
+        o.type = 'sine';
+        g.gain.setValueAtTime(0.001, now + i * 0.12);
+        g.gain.exponentialRampToValueAtTime(0.15, now + i * 0.12 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.4);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(now + i * 0.12); o.stop(now + i * 0.12 + 0.4);
+      });
+      return;
+    }
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    if (tipo === 'select') {
+      osc.frequency.value = 600; osc.type = 'sine';
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.start(now); osc.stop(now + 0.1);
+    } else if (tipo === 'move') {
+      osc.frequency.value = 400; osc.type = 'triangle';
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc.start(now); osc.stop(now + 0.15);
+    } else return;
+
+    osc.connect(gain); gain.connect(audioCtx.destination);
+  } catch {}
+}
+
+// ---------- Toast com fila ----------
+let toastAtivo = null;
+let toastFila = [];
+function toast(msg, tipo = 'info') {
+  toastFila.push({ msg, tipo });
+  if (toastAtivo) return;
+  mostrarProximoToast();
+}
+function mostrarProximoToast() {
+  if (toastFila.length === 0) { toastAtivo = null; return; }
+  const { msg, tipo } = toastFila.shift();
+  toastAtivo = true;
+
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText = `
+    position:fixed;top:80px;left:50%;transform:translateX(-50%);
+    background:${tipo === 'warn' ? 'linear-gradient(135deg,#f59e0b,#d97706)' : 'linear-gradient(135deg,#a855f7,#ec4899)'};
+    color:#fff;padding:12px 20px;border-radius:999px;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;
+    z-index:2000;box-shadow:0 8px 32px rgba(0,0,0,.4);
+    animation:toastIn .3s cubic-bezier(.16,1,.3,1);pointer-events:none;
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'toastOut .3s ease forwards';
+    setTimeout(() => {
+      el.remove();
+      toastAtivo = false;
+      mostrarProximoToast();
+    }, 300);
+  }, 1500);
+}
+const styleEl = document.createElement('style');
+styleEl.textContent = `
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(-50%) translateY(0)}to{opacity:0;transform:translateX(-50%) translateY(-20px)}}
+`;
+document.head.appendChild(styleEl);
+
+// ---------- Eventos ----------
+document.getElementById('btn-restart').addEventListener('click', reiniciarNivel);
+document.getElementById('btn-undo').addEventListener('click', desfazer);
+document.getElementById('btn-add-tube').addEventListener('click', adicionarTuboExtra);
+document.getElementById('btn-zen').addEventListener('click', toggleZen);
+document.getElementById('btn-theme').addEventListener('click', toggleTema);
+document.getElementById('btn-next-level').addEventListener('click', () => {
+  const proximo = Math.min(estado.nivel + 1, NIVEL_MAXIMO);
+  carregarNivel(proximo);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'z' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); desfazer(); }
+  else if (e.key === 'r') reiniciarNivel();
+  else if (e.key === 't') adicionarTuboExtra();
+  else if (e.key === 'Escape') { estado.selecionado = null; renderizar(); }
+});
+
+// ---------- Init ----------
+(function init() {
+  const temaSalvo = storage.get('ballsort_tema', 'dark');
+  estado.tema = temaSalvo;
+  document.documentElement.setAttribute('data-theme', temaSalvo);
+  document.getElementById('btn-theme').textContent = temaSalvo === 'dark' ? '🌙' : '☀️';
+
+  try {
+    estado.niveisCompletos = JSON.parse(storage.get('ballsort_completos', '[]')) || [];
+  } catch { estado.niveisCompletos = []; }
+
+  const nivelSalvo = Math.max(1, Math.min(NIVEL_MAXIMO, parseInt(storage.get('ballsort_nivel', '1')) || 1));
+  carregarNivel(nivelSalvo);
+
+  console.log('[Ball Sort v2] Nível', nivelSalvo, '—', configNivel(nivelSalvo));
+})();
+</script>
 </body>
 </html>
