@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1a0b2e">
-<title>Ball Sort Puzzle — Continuous Navbar</title>
+<title>Ball Sort Puzzle</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,49 +76,41 @@ body{
 }
 
 /* ============================================================
-   CONTINUOUS NAVBAR (Linha Contínua + Três Pontinhos)
+   NAVBAR
    ============================================================ */
 .navbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:8px 12px;
+  display:flex; flex-direction:column;
   background:var(--surface);
   border-bottom:1px solid var(--border);
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
   box-shadow:var(--shadow-sm);
   z-index:100;
-  gap:8px;
-  overflow-x:auto;
-  scrollbar-width:none;
 }
-.navbar::-webkit-scrollbar{display:none}
-
-.nav-group{
-  display:flex;
+.nav-top-row{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
   align-items:center;
-  gap:6px;
-  flex-shrink:0;
+  padding:10px 16px;
+  gap:12px;
 }
-
+.nav-actions{display:flex; gap:8px; align-items:center}
 .btn-icon{
-  width:36px; height:36px;
+  width:38px; height:38px;
   border-radius:50%;
   background:var(--surface);
   border:1px solid var(--border);
-  font-size:15px;
+  font-size:16px;
   display:flex; align-items:center; justify-content:center;
   transition:all var(--t-base);
-  flex-shrink:0;
 }
 .btn-icon:hover{background:var(--surface-hover); transform:translateY(-2px)}
 .btn-icon:active{transform:translateY(0) scale(.95)}
 
-.stats{display:flex; gap:12px; align-items:center; justify-content:center; flex-shrink:0}
-.stat{display:flex; flex-direction:column; align-items:center; gap:1px; min-width:32px}
+.stats{display:flex; gap:16px; align-items:center; justify-content:center}
+.stat{display:flex; flex-direction:column; align-items:center; gap:1px; min-width:36px}
 .stat-value{
-  font-size:14px; font-weight:800;
+  font-size:15px; font-weight:800;
   font-variant-numeric:tabular-nums;
   color:var(--text);
 }
@@ -127,39 +119,44 @@ body{
   letter-spacing:1px; color:var(--text-muted); font-weight:600;
 }
 
-/* Menu Dropdown dos Três Pontinhos (...) */
-.nav-dropdown-wrapper{
-  position:relative;
-  flex-shrink:0;
+.nav-dropdown-toggle{
+  display:flex; align-items:center; justify-content:center; gap:4px;
+  font-size:10px; font-weight:700;
+  color:var(--text-muted);
+  padding:4px 10px;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  cursor:pointer;
+  transition:all var(--t-base);
+  text-transform:uppercase;
+  letter-spacing:.5px;
 }
-.nav-dropdown-menu{
-  position:absolute;
-  top:calc(100% + 8px);
-  right:0;
-  background:linear-gradient(135deg,rgba(45,27,78,.98),rgba(26,11,46,.98));
-  border:1px solid rgba(168,85,247,.4);
-  border-radius:var(--radius-lg);
-  padding:10px;
-  display:none;
-  flex-direction:column;
-  gap:8px;
-  box-shadow:var(--shadow-lg);
-  z-index:1000;
-  min-width:180px;
-}
-.nav-dropdown-menu.open{display:flex}
+.nav-dropdown-toggle:hover{background:var(--surface-hover); color:var(--text)}
 
-.mode-bar{
-  display:flex; flex-direction:column; gap:4px;
+.nav-collapse-content{
+  display:flex;
+  flex-direction:column;
+  gap:8px; padding:0 16px;
+  max-height:0;
+  overflow:hidden;
+  background:rgba(15, 5, 32, 0.4);
+  border-top:1px solid transparent;
+  transition:max-height var(--t-slow), padding var(--t-slow), border-color var(--t-slow);
 }
+.nav-collapse-content.open{
+  max-height:220px;
+  padding:10px 16px;
+  border-top-color:var(--border);
+}
+
+.mode-bar{display:flex; gap:6px; justify-content:center; flex-wrap:wrap}
 .mode-btn{
   font-size:10px; font-weight:700;
-  padding:6px 10px;
-  border-radius:var(--radius-md);
+  padding:4px 10px;
+  border-radius:var(--radius-full);
   background:var(--surface);
   border:1px solid var(--border);
   color:var(--text-muted);
-  text-align:left;
   transition:all var(--t-base);
   text-transform:uppercase;
 }
@@ -167,19 +164,34 @@ body{
   background:var(--btn-bg);
   border-color:transparent;
   color:#fff;
+  box-shadow:0 4px 12px rgba(168,85,247,.4);
 }
 
 .seed-bar{
-  display:flex; gap:4px; align-items:center;
-  font-size:10px; color:var(--text-dim); justify-content:space-between;
+  display:flex; gap:6px; justify-content:center; align-items:center;
+  font-size:10px; color:var(--text-dim);
 }
 .seed-display{
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  padding:2px 6px;
+  padding:2px 8px;
   background:var(--surface);
-  border-radius:var(--radius-sm);
+  border-radius:var(--radius-full);
   border:1px solid var(--border);
   cursor:pointer;
+  transition:background var(--t-base);
+}
+.seed-display:hover{background:var(--surface-hover)}
+.seed-display.copied{background:rgba(74,222,128,.2); border-color:rgba(74,222,128,.5)}
+
+.modifier-bar{display:flex; gap:4px; justify-content:center; flex-wrap:wrap}
+.mod-pill{
+  font-size:9px; font-weight:700;
+  padding:2px 8px;
+  border-radius:var(--radius-full);
+  background:rgba(168,85,247,.15);
+  border:1px solid rgba(168,85,247,.4);
+  color:var(--text-muted);
+  text-transform:uppercase;
 }
 
 /* ============================================================
@@ -193,14 +205,17 @@ body{
   border-bottom:1px solid var(--border);
 }
 .level-selector-arrow{
-  width:28px; height:28px; flex-shrink:0;
+  width:30px; height:30px; flex-shrink:0;
   border-radius:50%;
   background:var(--surface);
   border:1px solid var(--border);
-  color:var(--text); font-size:13px; font-weight:800;
+  color:var(--text); font-size:14px; font-weight:800;
   display:flex; align-items:center; justify-content:center;
   cursor:pointer;
+  transition:all var(--t-base);
 }
+.level-selector-arrow:hover:not(:disabled){background:var(--surface-hover)}
+.level-selector-arrow:disabled{opacity:.35; cursor:not-allowed}
 .level-selector{
   display:flex; gap:6px;
   overflow-x:auto; overflow-y:hidden;
@@ -212,12 +227,13 @@ body{
 .level-selector::-webkit-scrollbar{display:none}
 
 .level-btn{
-  min-width:32px; height:32px;
+  min-width:34px; height:34px;
   border-radius:var(--radius-md);
   background:var(--surface);
   border:2px solid var(--border);
   font-size:11px; font-weight:700;
   flex-shrink:0; position:relative; color:var(--text);
+  transition:all var(--t-base);
 }
 .level-btn.active{
   background:var(--btn-bg); border-color:transparent;
@@ -239,7 +255,6 @@ body{
   overflow:hidden;
   min-height:0;
 }
-
 .tubes-container{
   display:flex; flex-wrap:wrap;
   gap:10px 6px;
@@ -252,12 +267,12 @@ body{
    ============================================================ */
 .tube{
   position:relative;
-  width:var(--tw,38px);
-  height:var(--th,160px);
+  width:var(--tw,40px);
+  height:var(--th,170px);
   background:var(--tube-bg);
   border:2px solid var(--tube-border);
   border-top:none;
-  border-radius:0 0 19px 19px;
+  border-radius:0 0 20px 20px;
   box-shadow:var(--tube-shadow);
   display:flex; flex-direction:column-reverse; align-items:center;
   padding:4px 4px 0;
@@ -288,7 +303,7 @@ body{
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
 
 .ball{
-  width:var(--bw,28px); height:var(--bw,28px);
+  width:var(--bw,30px); height:var(--bw,30px);
   border-radius:50%; margin-bottom:2px;
   position:relative;
   box-shadow:inset -2px -2px 6px rgba(0,0,0,.4),inset 2px 2px 6px rgba(255,255,255,.4),0 2px 5px rgba(0,0,0,.4);
@@ -317,10 +332,10 @@ body{
 .ball.rainbow{background:conic-gradient(from 0deg,#ff6b6b, #fde68a, #86efac, #93c5fd, #d8b4fe, #f9a8d4, #ff6b6b); animation:rainbowSpin 4s linear infinite;}
 @keyframes rainbowSpin{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
 .ball.blind{background:radial-gradient(circle at 35% 30%,#4a4a4a,#1a1a1a 60%,#000)}
-.ball.blind::after{content:'?'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fbbf24; font-weight:900; font-size:13px;}
+.ball.blind::after{content:'?'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fbbf24; font-weight:900; font-size:14px;}
 
 /* ============================================================
-   BOTTOM BAR (Com o botão Sair que fecha o jogo)
+   BOTTOM BAR
    ============================================================ */
 .bottom-bar{
   display:flex; justify-content:center; gap:8px;
@@ -331,7 +346,7 @@ body{
   -webkit-backdrop-filter:blur(12px);
 }
 .btn{
-  padding:8px 14px;
+  padding:9px 14px;
   border-radius:var(--radius-full);
   background:var(--btn-bg);
   color:#fff; font-size:11px; font-weight:700;
@@ -348,8 +363,9 @@ body{
 .zen-toggle{
   display:flex; align-items:center; gap:5px;
   font-size:11px; font-weight:600; color:var(--text-muted);
-  padding:6px 12px; background:var(--surface); border-radius:var(--radius-full);
+  padding:7px 12px; background:var(--surface); border-radius:var(--radius-full);
   border:1px solid var(--border);
+  transition:all var(--t-base);
 }
 .zen-toggle.active{background:rgba(74,222,128,.2); border-color:rgba(74,222,128,.5); color:var(--success)}
 
@@ -381,7 +397,7 @@ body{
 .modal-stat-label{font-size:9px; text-transform:uppercase; color:var(--text-muted)}
 
 .toast-container{
-  position:fixed; top:60px; left:50%; transform:translateX(-50%);
+  position:fixed; top:65px; left:50%; transform:translateX(-50%);
   z-index:2000; display:flex; flex-direction:column; gap:6px; align-items:center; pointer-events:none;
 }
 .toast{
@@ -392,48 +408,55 @@ body{
 .toast.warn{background:linear-gradient(135deg,var(--warning),#d97706)}
 .toast.success{background:linear-gradient(135deg,var(--success),#15803d)}
 @keyframes toastIn{from{opacity:0;transform:translateY(-15px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============================================================
+   EXIT SCREEN
+   ============================================================ */
+.exit-screen{
+  position:fixed; inset:0; z-index:5000;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:radial-gradient(circle at 50% 30%,var(--bg-2),var(--bg-3));
+  color:var(--text);
+  text-align:center; padding:24px; gap:14px;
+  animation:exitFadeIn var(--t-slow);
+}
+@keyframes exitFadeIn{from{opacity:0}to{opacity:1}}
+.exit-screen h1{font-size:28px; margin:0; font-weight:800}
+.exit-screen p{color:var(--text-muted); margin:0; font-size:14px}
+.exit-screen .btn{padding:12px 24px; font-size:13px}
 </style>
 </head>
 <body>
 
-<!-- ============ NAVBAR CONTÍNUA COM TRÊS PONTINHOS (...) ============ -->
+<!-- ============ NAVBAR ============ -->
 <header class="navbar">
-  <!-- Grupo Esquerdo: Ações Rápidas -->
-  <div class="nav-group">
-    <button class="btn-icon" id="btn-theme" type="button" aria-label="Alternar tema" title="Tema">🌙</button>
-    <button class="btn-icon" id="btn-sound" type="button" aria-label="Alternar som" title="Som">🔊</button>
+  <div class="nav-top-row">
+    <div class="nav-actions">
+      <button class="btn-icon" id="btn-theme" type="button" aria-label="Alternar tema" title="Tema">🌙</button>
+      <button class="btn-icon" id="btn-sound" type="button" aria-label="Alternar som" title="Som">🔊</button>
+    </div>
+    <div class="stats" role="status" aria-live="polite">
+      <div class="stat"><div class="stat-value" id="stat-moves">0</div><div class="stat-label">Movs</div></div>
+      <div class="stat"><div class="stat-value" id="stat-level">1</div><div class="stat-label">Nível</div></div>
+      <div class="stat"><div class="stat-value" id="stat-colors">0</div><div class="stat-label">Cores</div></div>
+    </div>
     <button class="btn-icon" id="btn-restart" type="button" aria-label="Reiniciar nível" title="Reiniciar">🔄</button>
   </div>
 
-  <!-- Grupo Central: Estatísticas do Jogo -->
-  <div class="stats" role="status" aria-live="polite">
-    <div class="stat">
-      <div class="stat-value" id="stat-moves">0</div>
-      <div class="stat-label">Movs</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="stat-level">1</div>
-      <div class="stat-label">Nível</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="stat-colors">0</div>
-      <div class="stat-label">Cores</div>
-    </div>
-  </div>
+  <button class="nav-dropdown-toggle" id="btn-toggle-options" type="button" aria-expanded="false" aria-controls="options-panel">
+    <span>⚙️ Opções e Modos do Jogo</span>
+    <span id="options-chevron" aria-hidden="true">▼</span>
+  </button>
 
-  <!-- Grupo Direito: Três Pontinhos (...) com Modos e Seed -->
-  <div class="nav-group">
-    <div class="nav-dropdown-wrapper">
-      <button class="btn-icon" id="btn-menu-dots" type="button" aria-label="Mais opções" title="Opções">⋮</button>
-      <div class="nav-dropdown-menu" id="dropdown-menu">
-        <nav class="mode-bar" id="mode-bar" aria-label="Modo de jogo"></nav>
-        <div class="seed-bar">
-          <span>SEED:</span>
-          <span class="seed-display" id="seed-display" title="Clique para copiar">—</span>
-          <button class="btn-icon" id="btn-shuffle-seed" style="width:22px;height:22px;font-size:10px" title="Nova seed">🎲</button>
-        </div>
-      </div>
+  <div class="nav-collapse-content" id="options-panel">
+    <nav class="mode-bar" id="mode-bar" aria-label="Modo de jogo"></nav>
+    <div class="seed-bar">
+      <span>SEED:</span>
+      <button type="button" class="seed-display" id="seed-display" title="Clique para copiar link">—</button>
+      <button class="btn-icon" id="btn-shuffle-seed" style="width:22px;height:22px;font-size:10px" title="Nova seed">🎲</button>
     </div>
+    <div class="modifier-bar" id="modifier-bar"></div>
   </div>
 </header>
 
@@ -449,13 +472,13 @@ body{
   <div class="tubes-container" id="tubes-container" role="grid" aria-label="Tabuleiro"></div>
 </main>
 
-<!-- ============ BOTTOM BAR (COM BOTÃO FECHAR JOGO) ============ -->
+<!-- ============ BOTTOM BAR ============ -->
 <footer class="bottom-bar">
-  <button class="btn secondary" id="btn-undo" type="button" title="Desfazer" disabled>↶</button>
-  <button class="btn secondary" id="btn-hint" type="button" title="Dica">💡</button>
-  <button class="btn secondary" id="btn-add-tube" type="button" title="Adicionar Tubo">➕</button>
+  <button class="btn secondary" id="btn-undo" type="button" title="Desfazer (Ctrl+Z)" disabled>↶</button>
+  <button class="btn secondary" id="btn-hint" type="button" title="Dica (H)">💡</button>
+  <button class="btn secondary" id="btn-add-tube" type="button" title="Adicionar Tubo (T)">➕</button>
   <button class="zen-toggle" id="btn-zen" type="button" aria-pressed="false">🧘 Zen</button>
-  <button class="btn danger" id="btn-exit" type="button" title="Fechar Jogo">🚪 Sair</button>
+  <button class="btn danger" id="btn-exit" type="button" title="Sair do jogo">🚪 Sair</button>
 </footer>
 
 <!-- ============ MODAL ============ -->
@@ -465,18 +488,9 @@ body{
     <h2 class="modal-title" id="modal-title">Nível Completo!</h2>
     <p class="modal-message" id="modal-message">Parabéns! Conseguiste ordenar todas as bolas.</p>
     <div class="modal-stats">
-      <div>
-        <div class="modal-stat-value" id="modal-moves">0</div>
-        <div class="modal-stat-label">Movs</div>
-      </div>
-      <div>
-        <div class="modal-stat-value" id="modal-level">1</div>
-        <div class="modal-stat-label">Nível</div>
-      </div>
-      <div>
-        <div class="modal-stat-value" id="modal-time">0s</div>
-        <div class="modal-stat-label">Tempo</div>
-      </div>
+      <div><div class="modal-stat-value" id="modal-moves">0</div><div class="modal-stat-label">Movs</div></div>
+      <div><div class="modal-stat-value" id="modal-level">1</div><div class="modal-stat-label">Nível</div></div>
+      <div><div class="modal-stat-value" id="modal-time">0s</div><div class="modal-stat-label">Tempo</div></div>
     </div>
     <button class="btn full" id="btn-next-level" type="button">▶️ Próximo Nível</button>
   </div>
@@ -487,17 +501,33 @@ body{
 
 <script>
 /* ============================================================
-   BALL SORT PUZZLE v8 — Continuous Navbar Edition
+   BALL SORT PUZZLE v8 — Refatorado
    ============================================================ */
 'use strict';
 
+/* ---------- Configuração central ---------- */
 const CONFIG = Object.freeze({
   COLORS: ['red','green','blue','yellow','purple','orange','pink','cyan','brown','gray','lime','teal','magenta'],
   MAX_LEVEL: 30,
   MAX_EXTRA_TUBES: 2,
   MAX_HISTORY: 100,
+  MAX_GENERATION_RETRIES: 5,
   TOAST_DURATION: 1800,
+  TOAST_SAFETY_TIMEOUT: 5000,
   WIN_MODAL_DELAY: 400,
+  SAVE_DEBOUNCE: 400,
+  RESIZE_DEBOUNCE: 150,
+  SIZING: Object.freeze({
+    TUBE_BALL_GAP: 10,
+    TUBE_HEIGHT_PADDING: 12,
+    BALL_MIN: 16,
+    BALL_MAX: 38,
+    AVAIL_H_RATIO: 0.45,
+    AVAIL_W_MAX: 900,
+    AVAIL_W_RATIO: 0.95,
+    MIN_TUBES_PER_ROW: 4,
+    TUBE_MIN_WIDTH: 50
+  }),
   STORAGE_KEYS: Object.freeze({
     THEME: 'ballsort.theme',
     LEVEL: 'ballsort.level',
@@ -509,10 +539,14 @@ const CONFIG = Object.freeze({
   })
 });
 
+/* ---------- Utilitários ---------- */
+/**
+ * Gerador de números pseudo-aleatórios determinístico (mulberry32).
+ * Mesma seed → mesma sequência.
+ */
 class SeededRandom {
   constructor(seed) {
-    this._seed = (seed | 0) >>> 0;
-    this._state = this._seed;
+    this._state = (seed | 0) >>> 0;
   }
   next() {
     let t = (this._state += 0x6D2B79F5) >>> 0;
@@ -553,8 +587,7 @@ const SeedUtils = {
   toString(seed) { return (seed >>> 0).toString(36).toUpperCase().padStart(6, '0'); },
   fromURL() {
     const m = location.hash.match(/seed=([A-Z0-9]+)/i);
-    if (m) return parseInt(m[1], 36) >>> 0;
-    return null;
+    return m ? parseInt(m[1], 36) >>> 0 : null;
   },
   toURL(seed) {
     const s = SeedUtils.toString(seed);
@@ -578,19 +611,28 @@ const EventBus = (() => {
     emit(event, payload) {
       const set = listeners.get(event);
       if (!set) return;
-      set.forEach(fn => { try { fn(payload); } catch (e) { console.error(e); } });
+      set.forEach(fn => {
+        try { fn(payload); } catch (e) { console.error(`[EventBus:${event}]`, e); }
+      });
     }
   };
 })();
 
 const Storage = {
-  get(key, fallback = null) { try { const raw = localStorage.getItem(key); return raw === null ? fallback : raw; } catch { return fallback; } },
+  get(key, fallback = null) {
+    try { const raw = localStorage.getItem(key); return raw === null ? fallback : raw; }
+    catch { return fallback; }
+  },
   set(key, value) { try { localStorage.setItem(key, String(value)); } catch {} },
-  getJSON(key, fallback) { try { const raw = localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw); } catch { return fallback; } },
+  getJSON(key, fallback) {
+    try { const raw = localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw); }
+    catch { return fallback; }
+  },
   setJSON(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} },
   remove(key) { try { localStorage.removeItem(key); } catch {} }
 };
 
+/* ---------- Áudio ---------- */
 const Sound = (() => {
   let ctx = null;
   let enabled = Storage.get(CONFIG.STORAGE_KEYS.SOUND, '1') === '1';
@@ -609,7 +651,8 @@ const Sound = (() => {
     const now = ac.currentTime;
     const osc = ac.createOscillator();
     const gain = ac.createGain();
-    osc.frequency.value = freq; osc.type = type;
+    osc.frequency.value = freq;
+    osc.type = type;
     gain.gain.setValueAtTime(volume, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
     osc.connect(gain); gain.connect(ac.destination);
@@ -645,35 +688,50 @@ const Sound = (() => {
   };
 })();
 
+/* ---------- Toaster (com fila segura) ---------- */
 const Toaster = (() => {
   const container = document.getElementById('toast-container');
   const queue = [];
   let active = false;
+  let safetyTimer = null;
 
   const show = ({ msg, type }) => {
     const el = document.createElement('div');
     el.className = `toast ${type}`;
     el.textContent = msg;
     container.appendChild(el);
-    setTimeout(() => {
-      el.remove(); active = false; next();
-    }, CONFIG.TOAST_DURATION);
+
+    const finish = () => {
+      clearTimeout(safetyTimer);
+      el.remove();
+      active = false;
+      next();
+    };
+    setTimeout(finish, CONFIG.TOAST_DURATION);
+    safetyTimer = setTimeout(finish, CONFIG.TOAST_SAFETY_TIMEOUT);
   };
 
-  const next = () => { if (active || queue.length === 0) return; active = true; show(queue.shift()); };
+  const next = () => {
+    if (active || queue.length === 0) return;
+    active = true;
+    show(queue.shift());
+  };
+
+  const enqueue = (msg, type) => { queue.push({ msg, type }); next(); };
 
   return {
-    info(msg) { queue.push({ msg, type: 'info' }); next(); },
-    warn(msg) { queue.push({ msg, type: 'warn' }); next(); },
-    success(msg) { queue.push({ msg, type: 'success' }); next(); }
+    info: (msg) => enqueue(msg, 'info'),
+    warn: (msg) => enqueue(msg, 'warn'),
+    success: (msg) => enqueue(msg, 'success')
   };
 })();
 
+/* ---------- Domínio do jogo ---------- */
 const GameModes = {
-  classic: { id: 'classic', label: 'Clássico', icon: '🎯', noUndo: false, noExtraTube: false, chaos: false },
-  challenge: { id: 'challenge', label: 'Desafio', icon: '⚔️', noUndo: true, noExtraTube: true, chaos: false },
-  chaos: { id: 'chaos', label: 'Caos', icon: '🎲', noUndo: false, noExtraTube: false, chaos: true },
-  daily: { id: 'daily', label: 'Diário', icon: '📅', noUndo: false, noExtraTube: false, chaos: false, useDailySeed: true }
+  classic:   { id: 'classic',   label: 'Clássico', icon: '🎯', noUndo: false, noExtraTube: false, chaos: false },
+  challenge: { id: 'challenge', label: 'Desafio',  icon: '⚔️', noUndo: true,  noExtraTube: true,  chaos: false },
+  chaos:     { id: 'chaos',     label: 'Caos',     icon: '🎲', noUndo: false, noExtraTube: false, chaos: true },
+  daily:     { id: 'daily',     label: 'Diário',   icon: '📅', noUndo: false, noExtraTube: false, chaos: false, useDailySeed: true }
 };
 
 const Palettes = {
@@ -682,6 +740,40 @@ const Palettes = {
   cool:    { colors: ['blue','cyan','green','purple','teal'] },
   earth:   { colors: ['brown','gray','lime','yellow','orange'] },
   neon:    { colors: ['pink','cyan','lime','magenta','purple'] }
+};
+
+const RAINBOW = '__RAINBOW__';
+
+const Rules = {
+  isRainbow(color) { return color === RAINBOW; },
+  top(tube) { return tube.length ? tube[tube.length - 1] : null; },
+  isComplete(tube, bpt) {
+    if (tube.length === 0 || tube.length !== bpt) return false;
+    const first = tube[0];
+    if (Rules.isRainbow(first)) return false;
+    return tube.every(c => c === first || Rules.isRainbow(c));
+  },
+  canPlace(dest, color, bpt) {
+    if (dest.length >= bpt) return false;
+    if (dest.length === 0) return true;
+    const topColor = Rules.top(dest);
+    if (Rules.isRainbow(topColor)) return true;
+    if (Rules.isRainbow(color)) return true;
+    return topColor === color;
+  },
+  allSolved(tubes, bpt) { return tubes.every(t => t.length === 0 || Rules.isComplete(t, bpt)); },
+  hasAnyBall(tubes) { return tubes.some(t => t.length > 0); },
+  hasAnyMove(tubes, bpt) {
+    for (let from = 0; from < tubes.length; from++) {
+      const src = tubes[from];
+      if (src.length === 0 || Rules.isComplete(src, bpt)) continue;
+      const color = Rules.top(src);
+      for (let to = 0; to < tubes.length; to++) {
+        if (from !== to && Rules.canPlace(tubes[to], color, bpt)) return true;
+      }
+    }
+    return false;
+  }
 };
 
 const DifficultyCurve = {
@@ -722,86 +814,25 @@ const DifficultyCurve = {
 };
 
 const LevelGenerator = (() => {
-  const isSolved = (tubes) => tubes.every(t => t.length === 0 || (t.length > 0 && t.every(c => c === t[0])));
+  const isSolved = (tubes) => tubes.every(t => t.length === 0 || t.every(c => c === t[0]));
 
   const validReverseMoves = (tubes, bpt, last) => {
     const moves = [];
     for (let from = 0; from < tubes.length; from++) {
       if (tubes[from].length === 0) continue;
       const color = tubes[from][tubes[from].length - 1];
-      if (color === '__RAINBOW__') continue;
+      if (color === RAINBOW) continue;
       for (let to = 0; to < tubes.length; to++) {
-        if (from === to) continue;
-        if (tubes[to].length >= bpt) continue;
+        if (from === to || tubes[to].length >= bpt) continue;
         if (tubes[to].length > 0) {
           const top = tubes[to][tubes[to].length - 1];
-          if (top !== color && top !== '__RAINBOW__') continue;
+          if (top !== color && top !== RAINBOW) continue;
         }
         if (last && last.from === to && last.to === from) continue;
         moves.push({ from, to });
       }
     }
     return moves;
-  };
-
-  const generate = (level, modeId, seed) => {
-    const mode = GameModes[modeId] || GameModes.classic;
-    const rng = new SeededRandom(seed);
-    const diff = DifficultyCurve.compute(level, mode, rng);
-    const { numColors, ballsPerTube: bpt, emptyTubes, palette, isSpike, reverseMultiplier, modifiers } = diff;
-
-    const paletteColors = Palettes[palette].colors;
-    const shuffledPalette = rng.shuffle(paletteColors);
-    const usedColors = shuffledPalette.slice(0, Math.min(numColors, shuffledPalette.length));
-
-    const full = usedColors.map(c => Array(bpt).fill(c));
-    const empty = Array.from({ length: emptyTubes }, () => []);
-
-    if (modifiers.includes('rainbow')) {
-      const maxRainbows = Math.min(2, Math.floor(numColors / 3));
-      const rainbowCount = rng.int(1, Math.max(1, maxRainbows));
-      const usedTubes = new Set();
-      for (let i = 0; i < rainbowCount; i++) {
-        let idx;
-        let attempts = 0;
-        do { idx = rng.int(0, full.length - 1); attempts++; } while (usedTubes.has(idx) && attempts < 20);
-        usedTubes.add(idx);
-        const ballIdx = rng.int(0, bpt - 1);
-        full[idx][ballIdx] = '__RAINBOW__';
-      }
-    }
-
-    let tubes = [...shuffleBalls(full, rng), ...empty];
-    const steps = usedColors.length * reverseMultiplier + level * 4;
-    let last = null;
-    let stuck = 0;
-    for (let i = 0; i < steps; i++) {
-      const moves = validReverseMoves(tubes, bpt, last);
-      if (moves.length === 0) { stuck++; if (stuck > 5) break; continue; }
-      stuck = 0;
-      const m = moves[rng.int(0, moves.length - 1)];
-      tubes[m.to].push(tubes[m.from].pop());
-      last = m;
-    }
-
-    const blindIndices = [];
-    if (modifiers.includes('blind')) {
-      const candidates = tubes.map((t, i) => i).filter(i => tubes[i].length > 1);
-      const blindCount = Math.min(2, Math.floor(candidates.length / 3));
-      for (let i = 0; i < blindCount && candidates.length > 0; i++) {
-        const pickIdx = rng.int(0, candidates.length - 1);
-        blindIndices.push(candidates.splice(pickIdx, 1)[0]);
-      }
-    }
-
-    if (isSolved(tubes) && level > 1) {
-      return generate(level, modeId, (seed + 1) >>> 0);
-    }
-
-    return {
-      tubes,
-      meta: { seed, mode: modeId, level, numColors: usedColors.length, ballsPerTube: bpt, emptyTubes, palette, isSpike, modifiers, blindIndices, maxBalls: bpt }
-    };
   };
 
   const shuffleBalls = (tubes, rng) => {
@@ -818,43 +849,79 @@ const LevelGenerator = (() => {
     return result;
   };
 
+  const buildOnce = (level, modeId, seed) => {
+    const mode = GameModes[modeId] || GameModes.classic;
+    const rng = new SeededRandom(seed);
+    const diff = DifficultyCurve.compute(level, mode, rng);
+    const { numColors, ballsPerTube: bpt, emptyTubes, palette, isSpike, reverseMultiplier, modifiers } = diff;
+
+    const shuffledPalette = rng.shuffle(Palettes[palette].colors);
+    const usedColors = shuffledPalette.slice(0, Math.min(numColors, shuffledPalette.length));
+
+    const full = usedColors.map(c => Array(bpt).fill(c));
+    const empty = Array.from({ length: emptyTubes }, () => []);
+
+    if (modifiers.includes('rainbow')) {
+      const maxRainbows = Math.min(2, Math.floor(numColors / 3));
+      const rainbowCount = rng.int(1, Math.max(1, maxRainbows));
+      const usedTubes = new Set();
+      for (let i = 0; i < rainbowCount; i++) {
+        let idx, attempts = 0;
+        do { idx = rng.int(0, full.length - 1); attempts++; }
+        while (usedTubes.has(idx) && attempts < 20);
+        usedTubes.add(idx);
+        full[idx][rng.int(0, bpt - 1)] = RAINBOW;
+      }
+    }
+
+    let tubes = [...shuffleBalls(full, rng), ...empty];
+    const steps = usedColors.length * reverseMultiplier + level * 4;
+    let last = null, stuck = 0;
+    for (let i = 0; i < steps; i++) {
+      const moves = validReverseMoves(tubes, bpt, last);
+      if (moves.length === 0) {
+        if (++stuck > 5) break;
+        continue;
+      }
+      stuck = 0;
+      const m = moves[rng.int(0, moves.length - 1)];
+      tubes[m.to].push(tubes[m.from].pop());
+      last = m;
+    }
+
+    const blindIndices = [];
+    if (modifiers.includes('blind')) {
+      const candidates = tubes.map((_, i) => i).filter(i => tubes[i].length > 1);
+      const blindCount = Math.min(2, Math.floor(candidates.length / 3));
+      for (let i = 0; i < blindCount && candidates.length > 0; i++) {
+        const pickIdx = rng.int(0, candidates.length - 1);
+        blindIndices.push(candidates.splice(pickIdx, 1)[0]);
+      }
+    }
+
+    return {
+      tubes,
+      meta: {
+        seed, mode: modeId, level, numColors: usedColors.length, ballsPerTube: bpt,
+        emptyTubes, palette, isSpike, modifiers, blindIndices, maxBalls: bpt
+      }
+    };
+  };
+
+  const generate = (level, modeId, seed) => {
+    // Tentativa com retry limitado — antes era recursivo e podia estourar a pilha
+    for (let attempt = 0; attempt < CONFIG.MAX_GENERATION_RETRIES; attempt++) {
+      const result = buildOnce(level, modeId, (seed + attempt) >>> 0);
+      if (!(isSolved(result.tubes) && level > 1)) return result;
+    }
+    // Fallback: aceita mesmo se vier resolvido (improvável)
+    return buildOnce(level, modeId, seed);
+  };
+
   return { generate, isSolved };
 })();
 
-const Rules = {
-  isRainbow(color) { return color === '__RAINBOW__'; },
-  isComplete(tube, bpt) {
-    if (tube.length === 0) return false;
-    const first = tube[0];
-    if (Rules.isRainbow(first)) return false;
-    if (tube.length !== bpt) return false;
-    return tube.every(c => c === first || Rules.isRainbow(c));
-  },
-  top(tube) { return tube.length ? tube[tube.length - 1] : null; },
-  canPlace(dest, color, bpt) {
-    if (dest.length >= bpt) return false;
-    if (dest.length === 0) return true;
-    const topColor = Rules.top(dest);
-    if (Rules.isRainbow(topColor)) return true;
-    if (Rules.isRainbow(color)) return true;
-    return topColor === color;
-  },
-  allSolved(tubes, bpt) { return tubes.every(t => t.length === 0 || Rules.isComplete(t, bpt)); },
-  hasAnyBall(tubes) { return tubes.some(t => t.length > 0); },
-  hasAnyMove(tubes, bpt) {
-    for (let from = 0; from < tubes.length; from++) {
-      const src = tubes[from];
-      if (src.length === 0 || Rules.isComplete(src, bpt)) continue;
-      const color = Rules.top(src);
-      for (let to = 0; to < tubes.length; to++) {
-        if (from === to) continue;
-        if (Rules.canPlace(tubes[to], color, bpt)) return true;
-      }
-    }
-    return false;
-  }
-};
-
+/* ---------- Estado ---------- */
 class GameState {
   constructor() {
     this.level = 1;
@@ -883,12 +950,10 @@ class GameState {
       completed: this.completed
     };
   }
-
   pushHistory() {
     this.history.push(this.snapshot());
     if (this.history.length > CONFIG.MAX_HISTORY) this.history.shift();
   }
-
   popHistory() {
     const snap = this.history.pop();
     if (!snap) return false;
@@ -899,14 +964,12 @@ class GameState {
     this.completed = false;
     return true;
   }
-
   markCompleted(level) {
     if (!this.completedLevels.includes(level)) {
       this.completedLevels.push(level);
       Storage.setJSON(CONFIG.STORAGE_KEYS.COMPLETED, this.completedLevels);
     }
   }
-
   saveLevel() { Storage.set(CONFIG.STORAGE_KEYS.LEVEL, this.level); }
   saveMode() { Storage.set(CONFIG.STORAGE_KEYS.MODE, this.mode); }
 
@@ -917,7 +980,6 @@ class GameState {
       mode: this.mode, seed: this.seed
     });
   }
-
   loadSavedGame() {
     const save = Storage.getJSON(CONFIG.STORAGE_KEYS.SAVE, null);
     if (!save || !Array.isArray(save.tubes) || save.tubes.length === 0) return false;
@@ -935,24 +997,30 @@ class GameState {
     this.startTime = Date.now();
     return true;
   }
-
   clearSave() { Storage.remove(CONFIG.STORAGE_KEYS.SAVE); }
 }
 
+/* ---------- Controller ---------- */
 class GameController {
-  constructor(state) { this.state = state; }
+  constructor(state) {
+    this.state = state;
+    this._saveDebounceId = null;
+  }
 
   getMode() { return GameModes[this.state.mode] || GameModes.classic; }
+
+  /** Agenda gravação no storage — evita gravar a cada clique em mobile. */
+  _scheduleSave() {
+    clearTimeout(this._saveDebounceId);
+    this._saveDebounceId = setTimeout(() => this.state.saveGame(), CONFIG.SAVE_DEBOUNCE);
+  }
 
   loadLevel(level, { silent = false, seed = null } = {}) {
     const s = this.state;
     const mode = this.getMode();
 
-    if (mode.useDailySeed) {
-      seed = SeedUtils.daily();
-    } else if (seed === null) {
-      seed = SeedUtils.random();
-    }
+    if (mode.useDailySeed) seed = SeedUtils.daily();
+    else if (seed === null) seed = SeedUtils.random();
 
     s.level = level;
     s.moves = 0;
@@ -973,7 +1041,6 @@ class GameController {
       s.saveGame();
       SeedUtils.toURL(seed);
     }
-
     EventBus.emit('state:changed');
     EventBus.emit('level:loaded', { level, meta: s.meta, seed });
   }
@@ -981,18 +1048,6 @@ class GameController {
   restart() {
     this.loadLevel(this.state.level, { silent: true, seed: this.state.seed });
     EventBus.emit('toast:info', 'Nível reiniciado');
-  }
-
-  exitGame() {
-    Storage.remove(CONFIG.STORAGE_KEYS.SAVE);
-    try { window.close(); } catch {}
-    document.body.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0f0520;color:#f5f0ff;font-family:sans-serif;text-align:center;padding:20px;">
-        <h1 style="font-size:26px;margin-bottom:10px;">🚪 Jogo Encerrado</h1>
-        <p style="color:#a78bfa;margin-bottom:20px;">Obrigado por jogar Ball Sort Puzzle!</p>
-        <button onclick="location.reload()" style="padding:10px 20px;border-radius:999px;background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;border:none;font-weight:700;cursor:pointer;">Jogar Novamente</button>
-      </div>
-    `;
   }
 
   setMode(modeId) {
@@ -1012,6 +1067,7 @@ class GameController {
   selectTube(idx) {
     const s = this.state;
     if (s.completed) return;
+    if (!s.tubes[idx]) return;
 
     if (s.selected === idx) {
       s.selected = null;
@@ -1020,8 +1076,7 @@ class GameController {
     }
 
     if (s.selected !== null) {
-      const moved = this.tryMove(s.selected, idx);
-      if (moved) return;
+      if (this.tryMove(s.selected, idx)) return;
       const target = s.tubes[idx];
       if (target.length > 0 && !Rules.isComplete(target, s.bpt)) {
         s.selected = idx;
@@ -1083,7 +1138,7 @@ class GameController {
     }
     s.selected = null;
     this.checkWin();
-    s.saveGame();
+    this._scheduleSave();
 
     setTimeout(() => {
       if (!s.completed && Rules.hasAnyBall(s.tubes) && !Rules.hasAnyMove(s.tubes, s.bpt)) {
@@ -1098,7 +1153,6 @@ class GameController {
   checkWin() {
     const s = this.state;
     if (!Rules.allSolved(s.tubes, s.bpt) || !Rules.hasAnyBall(s.tubes)) return;
-
     s.completed = true;
     s.markCompleted(s.level);
     s.clearSave();
@@ -1111,26 +1165,26 @@ class GameController {
   }
 
   undo() {
-    const mode = this.getMode();
-    if (mode.noUndo) { Toaster.warn('Desafio não permite desfazer'); return; }
+    if (this.getMode().noUndo) { Toaster.warn('Desafio não permite desfazer'); return; }
     if (this.state.history.length === 0) { Toaster.info('Nada para desfazer'); return; }
     this.state.popHistory();
-    EventBus.emit('modal:close');
     Sound.select();
-    this.state.saveGame();
+    this._scheduleSave();
     EventBus.emit('state:changed');
   }
 
   addExtraTube() {
-    const mode = this.getMode();
-    if (mode.noExtraTube) { Toaster.warn('Desafio não permite tubo extra'); return; }
+    if (this.getMode().noExtraTube) { Toaster.warn('Desafio não permite tubo extra'); return; }
     const s = this.state;
-    if (s.extraTubes >= CONFIG.MAX_EXTRA_TUBES) { Toaster.warn(`Máximo de ${CONFIG.MAX_EXTRA_TUBES} tubos extras`); return; }
+    if (s.extraTubes >= CONFIG.MAX_EXTRA_TUBES) {
+      Toaster.warn(`Máximo de ${CONFIG.MAX_EXTRA_TUBES} tubos extras`);
+      return;
+    }
     s.pushHistory();
     s.tubes.push([]);
     s.extraTubes++;
     Sound.select();
-    s.saveGame();
+    this._scheduleSave();
     EventBus.emit('state:changed');
   }
 
@@ -1142,22 +1196,21 @@ class GameController {
 
   hint() {
     const s = this.state;
-    const tubes = s.tubes;
+    // Cancela seleção pendente — evita estado inconsistente
+    s.selected = null;
+
     const nonEmpties = [];
     const empties = [];
-
-    for (let from = 0; from < tubes.length; from++) {
-      const src = tubes[from];
+    for (let from = 0; from < s.tubes.length; from++) {
+      const src = s.tubes[from];
       if (src.length === 0 || Rules.isComplete(src, s.bpt)) continue;
       const color = Rules.top(src);
-      for (let to = 0; to < tubes.length; to++) {
+      for (let to = 0; to < s.tubes.length; to++) {
         if (from === to) continue;
-        if (!Rules.canPlace(tubes[to], color, s.bpt)) continue;
-        if (tubes[to].length === 0) empties.push({ from, to });
-        else nonEmpties.push({ from, to });
+        if (!Rules.canPlace(s.tubes[to], color, s.bpt)) continue;
+        (s.tubes[to].length === 0 ? empties : nonEmpties).push({ from, to });
       }
     }
-
     const pick = nonEmpties[0] || empties[0];
     if (pick) EventBus.emit('hint:show', pick);
     else Toaster.warn('Sem movimentos disponíveis');
@@ -1169,25 +1222,33 @@ class GameController {
   }
 }
 
+/* ---------- Renderer ---------- */
 class Renderer {
   constructor(state) {
     this.state = state;
-    this.tubesEl = document.getElementById('tubes-container');
-    this.levelSelectorEl = document.getElementById('level-selector');
-    this.modeBarEl = document.getElementById('mode-bar');
-    this.seedDisplayEl = document.getElementById('seed-display');
-    this.statsEls = {
-      moves: document.getElementById('stat-moves'),
-      level: document.getElementById('stat-level'),
-      colors: document.getElementById('stat-colors')
+    this._els = {
+      tubes:        document.getElementById('tubes-container'),
+      levelSelector:document.getElementById('level-selector'),
+      modeBar:      document.getElementById('mode-bar'),
+      modifierBar:  document.getElementById('modifier-bar'),
+      seedDisplay:  document.getElementById('seed-display'),
+      statMoves:    document.getElementById('stat-moves'),
+      statLevel:    document.getElementById('stat-level'),
+      statColors:   document.getElementById('stat-colors'),
+      btnUndo:      document.getElementById('btn-undo'),
+      btnAddTube:   document.getElementById('btn-add-tube'),
+      btnZen:       document.getElementById('btn-zen'),
+      btnTheme:     document.getElementById('btn-theme'),
+      btnSound:     document.getElementById('btn-sound'),
+      levelPrev:    document.getElementById('level-prev'),
+      levelNext:    document.getElementById('level-next'),
+      modal:        document.getElementById('modal-overlay'),
+      modalMoves:   document.getElementById('modal-moves'),
+      modalLevel:   document.getElementById('modal-level'),
+      modalTime:    document.getElementById('modal-time')
     };
-    this.btnUndo = document.getElementById('btn-undo');
-    this.btnAddTube = document.getElementById('btn-add-tube');
-    this.btnZen = document.getElementById('btn-zen');
-    this.btnTheme = document.getElementById('btn-theme');
-    this.btnSound = document.getElementById('btn-sound');
-    this.modal = document.getElementById('modal-overlay');
     this.onTubeClick = null;
+    this._lastBallSize = null;
   }
 
   bindTubeClick(handler) { this.onTubeClick = handler; }
@@ -1198,6 +1259,7 @@ class Renderer {
     this.renderControls();
     this.renderLevelSelector();
     this.renderModeBar();
+    this.renderModifierBar();
     this.renderSeed();
     this.renderTheme();
   }
@@ -1207,10 +1269,18 @@ class Renderer {
     const frag = document.createDocumentFragment();
     const maxBalls = s.meta ? s.meta.maxBalls : 6;
     const ballSize = this.computeBallSize(maxBalls, s.tubes.length);
-    const tubeH = ballSize * maxBalls + 12;
-    const tubeW = ballSize + 8;
+    const tubeH = ballSize * maxBalls + CONFIG.SIZING.TUBE_HEIGHT_PADDING;
+    const tubeW = ballSize + CONFIG.SIZING.TUBE_BALL_GAP;
 
-    document.documentElement.style.setProperty('--bw', `${ballSize}px`);
+    // Só atualiza a CSS var quando muda — evita reflow do layout inteiro
+    if (ballSize !== this._lastBallSize) {
+      document.documentElement.style.setProperty('--bw', `${ballSize}px`);
+      this._lastBallSize = ballSize;
+    }
+
+    const selectedOrigin = s.selected !== null ? s.tubes[s.selected] : null;
+    const selectedColor = selectedOrigin && selectedOrigin.length && !Rules.isComplete(selectedOrigin, s.bpt)
+      ? Rules.top(selectedOrigin) : null;
 
     s.tubes.forEach((tube, idx) => {
       const el = document.createElement('div');
@@ -1219,19 +1289,14 @@ class Renderer {
       el.style.setProperty('--th', `${tubeH}px`);
       el.style.setProperty('--tw', `${tubeW}px`);
       el.setAttribute('role', 'button');
-      el.setAttribute('aria-label', `Tubo ${idx + 1}`);
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', `Tubo ${idx + 1}, ${tube.length} bolas`);
 
       const isBlind = s.meta && s.meta.blindIndices && s.meta.blindIndices.includes(idx);
-
       if (s.selected === idx) el.classList.add('selected');
       if (Rules.isComplete(tube, s.bpt)) el.classList.add('complete');
-
-      if (s.selected !== null && s.selected !== idx) {
-        const origin = s.tubes[s.selected];
-        if (origin.length > 0 && !Rules.isComplete(origin, s.bpt)) {
-          const color = Rules.top(origin);
-          if (Rules.canPlace(tube, color, s.bpt)) el.classList.add('destination');
-        }
+      if (selectedColor !== null && idx !== s.selected && Rules.canPlace(tube, selectedColor, s.bpt)) {
+        el.classList.add('destination');
       }
 
       tube.forEach((color, ballIdx) => {
@@ -1247,100 +1312,125 @@ class Renderer {
       });
 
       el.addEventListener('click', () => this.onTubeClick && this.onTubeClick(idx));
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.onTubeClick && this.onTubeClick(idx);
+        }
+      });
       frag.appendChild(el);
     });
 
-    this.tubesEl.innerHTML = '';
-    this.tubesEl.appendChild(frag);
+    this._els.tubes.replaceChildren(frag);
   }
 
   computeBallSize(maxBalls, numTubes) {
+    const { SIZING } = CONFIG;
     const vh = window.innerHeight;
     const vw = window.innerWidth;
-    const availH = vh * 0.48;
-    const availW = Math.min(vw * 0.95, 900);
+    const availH = vh * SIZING.AVAIL_H_RATIO;
+    const availW = Math.min(vw * SIZING.AVAIL_W_RATIO, SIZING.AVAIL_W_MAX);
     const sizeByH = Math.floor((availH - 20) / maxBalls) - 4;
-    const perRow = Math.min(numTubes, Math.max(4, Math.floor(availW / 48)));
-    const sizeByW = Math.floor((availW / perRow) - 8);
-    return Math.max(16, Math.min(36, Math.min(sizeByH, sizeByW)));
+    const perRow = Math.min(numTubes, Math.max(SIZING.MIN_TUBES_PER_ROW, Math.floor(availW / SIZING.TUBE_MIN_WIDTH)));
+    const sizeByW = Math.floor((availW / perRow) - CONFIG.SIZING.TUBE_BALL_GAP);
+    return Math.max(SIZING.BALL_MIN, Math.min(SIZING.BALL_MAX, Math.min(sizeByH, sizeByW)));
   }
 
   renderStats() {
-    this.statsEls.moves.textContent = this.state.moves;
-    this.statsEls.level.textContent = this.state.level;
-    this.statsEls.colors.textContent = this.state.meta ? this.state.meta.numColors : 0;
+    this._els.statMoves.textContent = this.state.moves;
+    this._els.statLevel.textContent = this.state.level;
+    this._els.statColors.textContent = this.state.meta ? this.state.meta.numColors : 0;
   }
 
   renderControls() {
     const mode = GameModes[this.state.mode] || GameModes.classic;
-    this.btnUndo.disabled = this.state.history.length === 0 || mode.noUndo;
-    this.btnAddTube.disabled = this.state.extraTubes >= CONFIG.MAX_EXTRA_TUBES || mode.noExtraTube;
-    this.btnZen.classList.toggle('active', this.state.zenMode);
-    this.btnZen.setAttribute('aria-pressed', String(this.state.zenMode));
-    if (this.btnSound) this.btnSound.textContent = Sound.isEnabled() ? '🔊' : '🔇';
+    this._els.btnUndo.disabled = this.state.history.length === 0 || mode.noUndo;
+    this._els.btnAddTube.disabled = this.state.extraTubes >= CONFIG.MAX_EXTRA_TUBES || mode.noExtraTube;
+    this._els.btnZen.classList.toggle('active', this.state.zenMode);
+    this._els.btnZen.setAttribute('aria-pressed', String(this.state.zenMode));
+    this._els.btnSound.textContent = Sound.isEnabled() ? '🔊' : '🔇';
   }
 
   renderLevelSelector() {
     const s = this.state;
-    if (this.levelSelectorEl.children.length !== CONFIG.MAX_LEVEL) {
-      this.levelSelectorEl.innerHTML = '';
+    const container = this._els.levelSelector;
+
+    if (container.children.length !== CONFIG.MAX_LEVEL) {
+      const frag = document.createDocumentFragment();
       for (let i = 1; i <= CONFIG.MAX_LEVEL; i++) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'level-btn';
         btn.textContent = i;
         btn.dataset.level = i;
-        this.levelSelectorEl.appendChild(btn);
+        frag.appendChild(btn);
       }
+      container.replaceChildren(frag);
     }
-    Array.from(this.levelSelectorEl.children).forEach(btn => {
+
+    for (const btn of container.children) {
       const lvl = Number(btn.dataset.level);
       btn.classList.toggle('active', lvl === s.level);
       btn.classList.toggle('completed', s.completedLevels.includes(lvl));
-    });
-
-    const activeBtn = this.levelSelectorEl.querySelector('.level-btn.active');
-    if (activeBtn && this.levelSelectorEl.scrollWidth > this.levelSelectorEl.clientWidth) {
-      const btnLeft = activeBtn.offsetLeft;
-      const btnWidth = activeBtn.offsetWidth;
-      const containerWidth = this.levelSelectorEl.clientWidth;
-      this.levelSelectorEl.scrollTo({ left: btnLeft - (containerWidth / 2) + (btnWidth / 2), behavior: 'smooth' });
     }
 
-    const prevBtn = document.getElementById('level-prev');
-    const nextBtn = document.getElementById('level-next');
-    if (prevBtn) prevBtn.disabled = s.level <= 1;
-    if (nextBtn) nextBtn.disabled = s.level >= CONFIG.MAX_LEVEL;
+    const activeBtn = container.querySelector('.level-btn.active');
+    if (activeBtn && container.scrollWidth > container.clientWidth) {
+      const target = activeBtn.offsetLeft - (container.clientWidth / 2) + (activeBtn.offsetWidth / 2);
+      container.scrollTo({ left: target, behavior: 'smooth' });
+    }
+
+    this._els.levelPrev.disabled = s.level <= 1;
+    this._els.levelNext.disabled = s.level >= CONFIG.MAX_LEVEL;
   }
 
   renderModeBar() {
-    const current = this.state.mode;
-    if (this.modeBarEl.children.length === 0) {
+    const container = this._els.modeBar;
+    if (container.children.length === 0) {
+      const frag = document.createDocumentFragment();
       Object.values(GameModes).forEach(mode => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'mode-btn';
         btn.dataset.mode = mode.id;
         btn.textContent = `${mode.icon} ${mode.label}`;
-        this.modeBarEl.appendChild(btn);
+        frag.appendChild(btn);
       });
+      container.replaceChildren(frag);
     }
-    Array.from(this.modeBarEl.children).forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.mode === current);
+    for (const btn of container.children) {
+      btn.classList.toggle('active', btn.dataset.mode === this.state.mode);
+    }
+  }
+
+  renderModifierBar() {
+    const meta = this.state.meta;
+    const labels = { blind: '🕶️ Cegos', rainbow: '🌈 Rainbow' };
+    if (!meta?.modifiers?.length) {
+      this._els.modifierBar.replaceChildren();
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    meta.modifiers.forEach(m => {
+      const span = document.createElement('span');
+      span.className = 'mod-pill';
+      span.textContent = labels[m] || m;
+      frag.appendChild(span);
     });
+    this._els.modifierBar.replaceChildren(frag);
   }
 
   renderSeed() {
-    if (this.seedDisplayEl) this.seedDisplayEl.textContent = SeedUtils.toString(this.state.seed);
+    this._els.seedDisplay.textContent = SeedUtils.toString(this.state.seed);
   }
 
   renderTheme() {
     document.documentElement.setAttribute('data-theme', this.state.theme);
-    this.btnTheme.textContent = this.state.theme === 'dark' ? '🌙' : '☀️';
+    this._els.btnTheme.textContent = this.state.theme === 'dark' ? '🌙' : '☀️';
   }
 
   flashInvalid(idx) {
-    const el = this.tubesEl.children[idx];
+    const el = this._els.tubes.children[idx];
     if (!el) return;
     el.classList.remove('invalid');
     void el.offsetWidth;
@@ -1350,7 +1440,7 @@ class Renderer {
 
   flashHint(from, to) {
     [from, to].forEach(i => {
-      const el = this.tubesEl.children[i];
+      const el = this._els.tubes.children[i];
       if (!el) return;
       el.classList.remove('hint');
       void el.offsetWidth;
@@ -1360,21 +1450,46 @@ class Renderer {
   }
 
   openModal({ level, moves, time }) {
-    document.getElementById('modal-moves').textContent = moves;
-    document.getElementById('modal-level').textContent = level;
-    document.getElementById('modal-time').textContent = `${time}s`;
-    this.modal.classList.add('active');
+    this._els.modalMoves.textContent = moves;
+    this._els.modalLevel.textContent = level;
+    this._els.modalTime.textContent = `${time}s`;
+    this._els.modal.classList.add('active');
   }
 
-  closeModal() { this.modal.classList.remove('active'); }
+  closeModal() { this._els.modal.classList.remove('active'); }
 
   toggleTheme() {
     this.state.theme = this.state.theme === 'dark' ? 'light' : 'dark';
     Storage.set(CONFIG.STORAGE_KEYS.THEME, this.state.theme);
     this.renderTheme();
   }
+
+  /** Feedback visual ao copiar a seed. */
+  flashSeedCopied() {
+    const el = this._els.seedDisplay;
+    el.classList.add('copied');
+    setTimeout(() => el.classList.remove('copied'), 800);
+  }
+
+  /** Mostra a tela de encerramento sem destruir o DOM do jogo. */
+  showExitScreen() {
+    const screen = document.createElement('div');
+    screen.className = 'exit-screen';
+    screen.innerHTML = `
+      <h1>🚪 Jogo Encerrado</h1>
+      <p>Obrigado por jogar Ball Sort Puzzle!</p>
+    `;
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.type = 'button';
+    btn.textContent = '▶ Jogar Novamente';
+    btn.addEventListener('click', () => location.reload());
+    screen.appendChild(btn);
+    document.body.appendChild(screen);
+  }
 }
 
+/* ---------- Bootstrap ---------- */
 (function App() {
   const state = new GameState();
   const controller = new GameController(state);
@@ -1393,106 +1508,108 @@ class Renderer {
     setTimeout(() => renderer.openModal({ level, moves, time }), CONFIG.WIN_MODAL_DELAY);
   });
 
-  // Toggle do menu de três pontinhos (...)
-  const dotsBtn = document.getElementById('btn-menu-dots');
-  const dropdownMenu = document.getElementById('dropdown-menu');
+  /* --- Painel de opções --- */
+  const optionsBtn = document.getElementById('btn-toggle-options');
+  const optionsPanel = document.getElementById('options-panel');
+  const chevron = document.getElementById('options-chevron');
 
-  dotsBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    dropdownMenu.classList.toggle('open');
+  optionsBtn.addEventListener('click', () => {
+    const isOpen = optionsPanel.classList.toggle('open');
+    optionsBtn.setAttribute('aria-expanded', String(isOpen));
+    chevron.textContent = isOpen ? '▲' : '▼';
   });
 
-  document.addEventListener('click', (e) => {
-    if (!dropdownMenu.contains(e.target) && e.target !== dotsBtn) {
-      dropdownMenu.classList.remove('open');
-    }
-  });
-
+  /* --- Level selector --- */
   document.getElementById('level-selector').addEventListener('click', (e) => {
     const btn = e.target.closest('.level-btn');
-    if (!btn) return;
-    controller.loadLevel(Number(btn.dataset.level));
+    if (btn) controller.loadLevel(Number(btn.dataset.level));
   });
 
+  /* --- Mode bar --- */
   document.getElementById('mode-bar').addEventListener('click', (e) => {
     const btn = e.target.closest('.mode-btn');
-    if (!btn) return;
-    controller.setMode(btn.dataset.mode);
-    dropdownMenu.classList.remove('open');
+    if (btn) controller.setMode(btn.dataset.mode);
   });
 
+  /* --- Seed --- */
   document.getElementById('seed-display').addEventListener('click', () => {
     const seedStr = SeedUtils.toString(state.seed);
     const url = `${location.origin}${location.pathname}#seed=${seedStr}`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(() => Toaster.success('🔗 Link copiado!')).catch(() => {});
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url)
+        .then(() => {
+          Toaster.success('🔗 Link copiado!');
+          renderer.flashSeedCopied();
+        })
+        .catch(() => Toaster.info(`Seed: ${seedStr}`));
     } else {
       Toaster.info(`Seed: ${seedStr}`);
     }
   });
 
-  document.getElementById('btn-shuffle-seed').addEventListener('click', () => controller.newSeed());
-  document.getElementById('btn-undo').addEventListener('click', () => controller.undo());
-  document.getElementById('btn-add-tube').addEventListener('click', () => controller.addExtraTube());
-  document.getElementById('btn-zen').addEventListener('click', () => controller.toggleZen());
-  document.getElementById('btn-exit').addEventListener('click', () => controller.exitGame());
-  document.getElementById('btn-theme').addEventListener('click', () => renderer.toggleTheme());
-  document.getElementById('btn-restart').addEventListener('click', () => controller.restart());
-  document.getElementById('btn-sound').addEventListener('click', () => {
-    Sound.toggle();
-    renderer.renderControls();
-  });
-  document.getElementById('btn-hint').addEventListener('click', () => controller.hint());
+  /* --- Controles principais --- */
+  const handlers = {
+    'btn-shuffle-seed': () => controller.newSeed(),
+    'btn-undo':         () => controller.undo(),
+    'btn-add-tube':     () => controller.addExtraTube(),
+    'btn-zen':          () => controller.toggleZen(),
+    'btn-theme':        () => renderer.toggleTheme(),
+    'btn-restart':      () => controller.restart(),
+    'btn-hint':         () => controller.hint(),
+    'btn-sound':        () => { Sound.toggle(); renderer.renderControls(); },
+    'btn-next-level':   () => { renderer.closeModal(); controller.nextLevel(); },
+    'level-prev':       () => { if (state.level > 1) controller.loadLevel(state.level - 1); },
+    'level-next':       () => { if (state.level < CONFIG.MAX_LEVEL) controller.loadLevel(state.level + 1); },
+    'btn-exit':         () => {
+      state.clearSave();
+      renderer.showExitScreen();
+    }
+  };
+  for (const [id, fn] of Object.entries(handlers)) {
+    document.getElementById(id)?.addEventListener('click', fn);
+  }
 
-  document.getElementById('btn-next-level').addEventListener('click', () => {
-    renderer.closeModal();
-    controller.nextLevel();
-  });
-
-  document.getElementById('level-prev')?.addEventListener('click', () => {
-    if (state.level > 1) controller.loadLevel(state.level - 1);
-  });
-  document.getElementById('level-next')?.addEventListener('click', () => {
-    if (state.level < CONFIG.MAX_LEVEL) controller.loadLevel(state.level + 1);
-  });
-
+  /* --- Teclado --- */
   document.addEventListener('keydown', (e) => {
     if (e.target.matches('input, textarea')) return;
-    const isUndo = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z';
-    if (isUndo) { e.preventDefault(); controller.undo(); }
-    else if (e.key.toLowerCase() === 'r') controller.restart();
-    else if (e.key.toLowerCase() === 't') controller.addExtraTube();
-    else if (e.key.toLowerCase() === 'h') controller.hint();
+    const key = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && key === 'z') { e.preventDefault(); controller.undo(); }
+    else if (key === 'r') controller.restart();
+    else if (key === 't') controller.addExtraTube();
+    else if (key === 'h') controller.hint();
     else if (e.key === 'Escape') {
       if (state.selected !== null) {
         state.selected = null;
         EventBus.emit('state:changed');
       } else {
         renderer.closeModal();
-        dropdownMenu.classList.remove('open');
       }
     }
   });
 
+  /* --- Resize --- */
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => renderer.render(), 150);
+    resizeTimer = setTimeout(() => {
+      renderer._lastBallSize = null; // força recálculo
+      renderer.render();
+    }, CONFIG.RESIZE_DEBOUNCE);
   });
 
+  /* --- Inicialização --- */
   renderer.renderTheme();
   renderer.renderModeBar();
 
-  const restored = state.loadSavedGame();
-  if (!restored) {
+  if (state.loadSavedGame()) {
+    EventBus.emit('state:changed');
+    Toaster.info(`Partida restaurada · Nível ${state.level}`);
+  } else {
     const savedLevel = Math.max(1, Math.min(
       CONFIG.MAX_LEVEL,
       parseInt(Storage.get(CONFIG.STORAGE_KEYS.LEVEL, '1'), 10) || 1
     ));
     controller.loadLevel(savedLevel);
-  } else {
-    EventBus.emit('state:changed');
-    Toaster.info(`Partida restaurada · Nível ${state.level}`);
   }
 })();
 </script>
