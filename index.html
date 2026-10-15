@@ -165,7 +165,7 @@ body{
 .seed-display:hover{background:var(--surface-hover); color:var(--text)}
 
 /* ============================================================
-   LEVEL SELECTOR — Colapsável + responsivo
+   LEVEL SELECTOR
    ============================================================ */
 .level-toggle-btn{
   display:none;
@@ -222,7 +222,6 @@ body{
 }
 .level-selector::-webkit-scrollbar{display:none}
 
-/* Desktop: centraliza quando tudo cabe */
 @media (min-width:768px){
   .level-selector{
     justify-content:center;
@@ -789,9 +788,6 @@ body{
    ============================================================ */
 'use strict';
 
-/* ============================================================
-   CONFIG
-   ============================================================ */
 const CONFIG = Object.freeze({
   COLORS: ['red','green','blue','yellow','purple','orange','pink','cyan','brown','gray','lime','teal','magenta'],
   MAX_LEVEL: 30,
@@ -810,9 +806,6 @@ const CONFIG = Object.freeze({
   })
 });
 
-/* ============================================================
-   SEEDED RANDOM (Mulberry32)
-   ============================================================ */
 class SeededRandom {
   constructor(seed) {
     this._seed = (seed | 0) >>> 0;
@@ -845,9 +838,6 @@ class SeededRandom {
   }
 }
 
-/* ============================================================
-   SEED UTILS
-   ============================================================ */
 const SeedUtils = {
   fromString(str) {
     let h = 2166136261 >>> 0;
@@ -880,9 +870,6 @@ const SeedUtils = {
   }
 };
 
-/* ============================================================
-   EVENT BUS
-   ============================================================ */
 const EventBus = (() => {
   const listeners = new Map();
   return {
@@ -899,9 +886,6 @@ const EventBus = (() => {
   };
 })();
 
-/* ============================================================
-   STORAGE
-   ============================================================ */
 const Storage = {
   get(key, fallback = null) {
     try {
@@ -926,9 +910,6 @@ const Storage = {
   }
 };
 
-/* ============================================================
-   AUDIO
-   ============================================================ */
 const Sound = (() => {
   let ctx = null;
   let enabled = Storage.get(CONFIG.STORAGE_KEYS.SOUND, '1') === '1';
@@ -985,9 +966,6 @@ const Sound = (() => {
   };
 })();
 
-/* ============================================================
-   TOASTER
-   ============================================================ */
 const Toaster = (() => {
   const container = document.getElementById('toast-container');
   const queue = [];
@@ -1021,48 +999,13 @@ const Toaster = (() => {
   };
 })();
 
-/* ============================================================
-   GAME MODES
-   ============================================================ */
 const GameModes = {
-  classic: {
-    id: 'classic',
-    label: 'Clássico',
-    icon: '🎯',
-    noUndo: false,
-    noExtraTube: false,
-    chaos: false
-  },
-  challenge: {
-    id: 'challenge',
-    label: 'Desafio',
-    icon: '⚔️',
-    noUndo: true,
-    noExtraTube: true,
-    chaos: false
-  },
-  chaos: {
-    id: 'chaos',
-    label: 'Caos',
-    icon: '🎲',
-    noUndo: false,
-    noExtraTube: false,
-    chaos: true
-  },
-  daily: {
-    id: 'daily',
-    label: 'Diário',
-    icon: '📅',
-    noUndo: false,
-    noExtraTube: false,
-    chaos: false,
-    useDailySeed: true
-  }
+  classic: { id: 'classic', label: 'Clássico', icon: '🎯', noUndo: false, noExtraTube: false, chaos: false },
+  challenge: { id: 'challenge', label: 'Desafio', icon: '⚔️', noUndo: true, noExtraTube: true, chaos: false },
+  chaos: { id: 'chaos', label: 'Caos', icon: '🎲', noUndo: false, noExtraTube: false, chaos: true },
+  daily: { id: 'daily', label: 'Diário', icon: '📅', noUndo: false, noExtraTube: false, chaos: false, useDailySeed: true }
 };
 
-/* ============================================================
-   COLOR PALETTES
-   ============================================================ */
 const Palettes = {
   classic: { colors: ['red','green','blue','yellow','purple','orange','pink','cyan','brown','gray','lime','teal','magenta'] },
   warm:    { colors: ['red','orange','yellow','pink','magenta'] },
@@ -1071,9 +1014,6 @@ const Palettes = {
   neon:    { colors: ['pink','cyan','lime','magenta','purple'] }
 };
 
-/* ============================================================
-   DIFFICULTY CURVE
-   ============================================================ */
 const DifficultyCurve = {
   compute(level, mode, rng) {
     const baseColors = 4 + Math.floor((level - 1) * 0.7);
@@ -1094,9 +1034,7 @@ const DifficultyCurve = {
       { item: 3, weight: level < 5 ? 0 : 2 }
     ]);
 
-    const paletteKeys = mode.chaos
-      ? ['classic','warm','cool','earth','neon']
-      : ['classic','warm','cool','earth'];
+    const paletteKeys = mode.chaos ? ['classic','warm','cool','earth','neon'] : ['classic','warm','cool','earth'];
     const palette = rng.pick(paletteKeys);
 
     const reverseMultiplier = 8 + Math.floor(level * 0.5) + (isSpike ? 6 : 0);
@@ -1110,26 +1048,12 @@ const DifficultyCurve = {
       if (level >= 6 && rng.next() < 0.2) modifiers.push('rainbow');
     }
 
-    return {
-      numColors,
-      ballsPerTube: ballWeighted,
-      emptyTubes,
-      palette,
-      isSpike,
-      reverseMultiplier,
-      modifiers
-    };
+    return { numColors, ballsPerTube: ballWeighted, emptyTubes, palette, isSpike, reverseMultiplier, modifiers };
   }
 };
 
-/* ============================================================
-   LEVEL GENERATOR
-   ============================================================ */
 const LevelGenerator = (() => {
-
-  const isSolved = (tubes) => tubes.every(t =>
-    t.length === 0 || (t.length > 0 && t.every(c => c === t[0]))
-  );
+  const isSolved = (tubes) => tubes.every(t => t.length === 0 || (t.length > 0 && t.every(c => c === t[0])));
 
   const validReverseMoves = (tubes, bpt, last) => {
     const moves = [];
@@ -1213,19 +1137,7 @@ const LevelGenerator = (() => {
 
     return {
       tubes,
-      meta: {
-        seed,
-        mode: modeId,
-        level,
-        numColors: usedColors.length,
-        ballsPerTube: bpt,
-        emptyTubes,
-        palette,
-        isSpike,
-        modifiers,
-        blindIndices,
-        maxBalls: bpt
-      }
+      meta: { seed, mode: modeId, level, numColors: usedColors.length, ballsPerTube: bpt, emptyTubes, palette, isSpike, modifiers, blindIndices, maxBalls: bpt }
     };
   };
 
@@ -1246,12 +1158,8 @@ const LevelGenerator = (() => {
   return { generate, isSolved };
 })();
 
-/* ============================================================
-   RULES
-   ============================================================ */
 const Rules = {
   isRainbow(color) { return color === '__RAINBOW__'; },
-
   isComplete(tube, bpt) {
     if (tube.length === 0) return false;
     const first = tube[0];
@@ -1259,11 +1167,7 @@ const Rules = {
     if (tube.length !== bpt) return false;
     return tube.every(c => c === first || Rules.isRainbow(c));
   },
-
-  top(tube) {
-    return tube.length ? tube[tube.length - 1] : null;
-  },
-
+  top(tube) { return tube.length ? tube[tube.length - 1] : null; },
   canPlace(dest, color, bpt) {
     if (dest.length >= bpt) return false;
     if (dest.length === 0) return true;
@@ -1272,15 +1176,8 @@ const Rules = {
     if (Rules.isRainbow(color)) return true;
     return topColor === color;
   },
-
-  allSolved(tubes, bpt) {
-    return tubes.every(t => t.length === 0 || Rules.isComplete(t, bpt));
-  },
-
-  hasAnyBall(tubes) {
-    return tubes.some(t => t.length > 0);
-  },
-
+  allSolved(tubes, bpt) { return tubes.every(t => t.length === 0 || Rules.isComplete(t, bpt)); },
+  hasAnyBall(tubes) { return tubes.some(t => t.length > 0); },
   hasAnyMove(tubes, bpt) {
     for (let from = 0; from < tubes.length; from++) {
       const src = tubes[from];
@@ -1295,9 +1192,6 @@ const Rules = {
   }
 };
 
-/* ============================================================
-   GAME STATE
-   ============================================================ */
 class GameState {
   constructor() {
     this.level = 1;
@@ -1350,25 +1244,14 @@ class GameState {
     }
   }
 
-  saveLevel() {
-    Storage.set(CONFIG.STORAGE_KEYS.LEVEL, this.level);
-  }
-
-  saveMode() {
-    Storage.set(CONFIG.STORAGE_KEYS.MODE, this.mode);
-  }
+  saveLevel() { Storage.set(CONFIG.STORAGE_KEYS.LEVEL, this.level); }
+  saveMode() { Storage.set(CONFIG.STORAGE_KEYS.MODE, this.mode); }
 
   saveGame() {
     Storage.setJSON(CONFIG.STORAGE_KEYS.SAVE, {
-      level: this.level,
-      moves: this.moves,
-      tubes: this.tubes,
-      bpt: this.bpt,
-      meta: this.meta,
-      extraTubes: this.extraTubes,
-      history: this.history.slice(-20),
-      mode: this.mode,
-      seed: this.seed
+      level: this.level, moves: this.moves, tubes: this.tubes, bpt: this.bpt,
+      meta: this.meta, extraTubes: this.extraTubes, history: this.history.slice(-20),
+      mode: this.mode, seed: this.seed
     });
   }
 
@@ -1390,18 +1273,11 @@ class GameState {
     return true;
   }
 
-  clearSave() {
-    Storage.remove(CONFIG.STORAGE_KEYS.SAVE);
-  }
+  clearSave() { Storage.remove(CONFIG.STORAGE_KEYS.SAVE); }
 }
 
-/* ============================================================
-   GAME CONTROLLER
-   ============================================================ */
 class GameController {
-  constructor(state) {
-    this.state = state;
-  }
+  constructor(state) { this.state = state; }
 
   getMode() { return GameModes[this.state.mode] || GameModes.classic; }
 
@@ -1631,9 +1507,6 @@ class GameController {
   }
 }
 
-/* ============================================================
-   RENDERER
-   ============================================================ */
 class Renderer {
   constructor(state) {
     this.state = state;
@@ -1743,8 +1616,7 @@ class Renderer {
     const perRow = Math.min(numTubes, Math.max(4, Math.floor(availW / 60)));
     const sizeByW = Math.floor((availW / perRow) - 12);
 
-    const size = Math.max(18, Math.min(42, Math.min(sizeByH, sizeByW)));
-    return size;
+    return Math.max(18, Math.min(42, Math.min(sizeByH, sizeByW)));
   }
 
   renderStats() {
@@ -1784,7 +1656,6 @@ class Renderer {
       btn.classList.toggle('completed', s.completedLevels.includes(lvl));
     });
 
-    // Auto-scroll para o nível ativo (mobile)
     const activeBtn = this.levelSelectorEl.querySelector('.level-btn.active');
     if (activeBtn && this.levelSelectorEl.scrollWidth > this.levelSelectorEl.clientWidth) {
       const btnLeft = activeBtn.offsetLeft;
@@ -1796,7 +1667,6 @@ class Renderer {
       });
     }
 
-    // Atualiza setas
     const prevBtn = document.getElementById('level-prev');
     const nextBtn = document.getElementById('level-next');
     if (prevBtn) prevBtn.disabled = s.level <= 1;
@@ -1830,11 +1700,7 @@ class Renderer {
       this.modifierBarEl.innerHTML = '';
       return;
     }
-    const labels = {
-      blind: '🕶️ Cegos',
-      rainbow: '🌈 Rainbow',
-      locked: '🔒 Travados'
-    };
+    const labels = { blind: '🕶️ Cegos', rainbow: '🌈 Rainbow', locked: '🔒 Travados' };
     const pills = meta.modifiers.map(m => `<span class="mod-pill">${labels[m] || m}</span>`);
     if (meta.isSpike) pills.unshift('<span class="mod-pill" style="background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.5);color:#fbbf24">🔥 Spike</span>');
     this.modifierBarEl.innerHTML = pills.join('');
@@ -1879,9 +1745,7 @@ class Renderer {
     this.modal.classList.add('active');
   }
 
-  closeModal() {
-    this.modal.classList.remove('active');
-  }
+  closeModal() { this.modal.classList.remove('active'); }
 
   toggleTheme() {
     this.state.theme = this.state.theme === 'dark' ? 'light' : 'dark';
@@ -1890,9 +1754,6 @@ class Renderer {
   }
 }
 
-/* ============================================================
-   APP BOOTSTRAP
-   ============================================================ */
 (function App() {
   const state = new GameState();
   const controller = new GameController(state);
@@ -1954,7 +1815,6 @@ class Renderer {
     controller.nextLevel();
   });
 
-  // ---------- Level toggle (mobile) ----------
   const levelToggle = document.getElementById('level-toggle');
   const levelWrapper = document.getElementById('level-selector-wrapper');
 
@@ -1963,7 +1823,6 @@ class Renderer {
       const isMobile = window.matchMedia('(max-width: 767px)').matches;
       if (isMobile) {
         levelToggle.style.display = 'inline-flex';
-        // Respeita estado atual (aberto/fechado) via aria-expanded
         const isOpen = levelToggle.getAttribute('aria-expanded') === 'true';
         levelWrapper.style.display = isOpen ? 'flex' : 'none';
       } else {
@@ -1972,7 +1831,6 @@ class Renderer {
       }
     };
 
-    // Estado inicial: colapsado em mobile
     syncLevelVisibility();
 
     levelToggle.addEventListener('click', () => {
@@ -1990,7 +1848,6 @@ class Renderer {
     });
   }
 
-  // ---------- Setas de navegação de nível ----------
   document.getElementById('level-prev')?.addEventListener('click', () => {
     if (state.level > 1) controller.loadLevel(state.level - 1);
   });
@@ -2034,156 +1891,6 @@ class Renderer {
   } else {
     EventBus.emit('state:changed');
     Toaster.info(`Partida restaurada · Nível ${state.level}`);
-  }
-})();
-</script>
-
-<!-- ============ PWA BOOTSTRAP ============ -->
-<script>
-/* ============================================================
-   PWA — Registro de Service Worker + Instalação + Update
-   ============================================================ */
-(function PWA() {
-  'use strict';
-
-  // ---------- Service Worker ----------
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js', { scope: './' })
-        .then(registration => {
-          console.log('[PWA] SW registrado. Escopo:', registration.scope);
-
-          registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
-            if (!newWorker) return;
-
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                showUpdateBanner();
-              }
-            });
-          });
-        })
-        .catch(err => console.warn('[PWA] Falha ao registrar SW:', err));
-
-      let refreshing = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (refreshing) return;
-        refreshing = true;
-        window.location.reload();
-      });
-    });
-  }
-
-  // ---------- Banner de Update ----------
-  function showUpdateBanner() {
-    if (document.querySelector('.pwa-update-banner')) return;
-
-    const banner = document.createElement('div');
-    banner.className = 'pwa-update-banner';
-    banner.innerHTML = `
-      <span>🎉 Nova versão disponível!</span>
-      <button type="button" id="pwa-update-btn">Atualizar</button>
-    `;
-    document.body.appendChild(banner);
-
-    document.getElementById('pwa-update-btn').addEventListener('click', () => {
-      if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
-      }
-      banner.remove();
-    });
-
-    setTimeout(() => banner.remove(), 15000);
-  }
-
-  // ---------- Prompt de Instalação ----------
-  let deferredPrompt = null;
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-
-    setTimeout(() => {
-      if (deferredPrompt && !localStorage.getItem('ballsort.install.dismissed')) {
-        showInstallButton();
-      }
-    }, 10000);
-  });
-
-  function showInstallButton() {
-    if (document.getElementById('pwa-install-btn')) return;
-
-    const btn = document.createElement('button');
-    btn.id = 'pwa-install-btn';
-    btn.className = 'pwa-install-btn';
-    btn.innerHTML = '📲<span class="pwa-install-label" style="margin-left:6px">Instalar App</span>';
-    btn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log('[PWA] Escolha do usuário:', outcome);
-      if (outcome === 'accepted') {
-        btn.remove();
-      }
-      deferredPrompt = null;
-    });
-
-    document.body.appendChild(btn);
-  }
-
-  window.addEventListener('appinstalled', () => {
-    console.log('[PWA] App instalado!');
-    const btn = document.getElementById('pwa-install-btn');
-    if (btn) btn.remove();
-    deferredPrompt = null;
-  });
-
-  // ---------- Detectar standalone ----------
-  const isStandalone =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true;
-
-  if (isStandalone) {
-    document.documentElement.classList.add('pwa-standalone');
-    console.log('[PWA] Rodando em modo standalone');
-  }
-
-  // ---------- Detectar iOS ----------
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
-  if (isIOS && isSafari && !isStandalone) {
-    setTimeout(() => {
-      if (!localStorage.getItem('ballsort.ios.hint.dismissed')) {
-        showIOSHint();
-      }
-    }, 15000);
-  }
-
-  function showIOSHint() {
-    if (document.querySelector('.pwa-ios-hint')) return;
-
-    const hint = document.createElement('div');
-    hint.className = 'pwa-ios-hint';
-    hint.innerHTML = `
-      <div class="pwa-ios-hint-content">
-        <button class="pwa-ios-hint-close" type="button" aria-label="Fechar">✕</button>
-        <div class="pwa-ios-hint-emoji">📲</div>
-        <h3>Instale o jogo no seu iPhone!</h3>
-        <p>Toque no botão <strong>Compartilhar</strong> <span style="font-size:18px">⎙</span> do Safari e escolha <strong>"Adicionar à Tela de Início"</strong>.</p>
-        <button class="pwa-ios-hint-ok" type="button">Entendi</button>
-      </div>
-    `;
-    document.body.appendChild(hint);
-
-    const close = () => {
-      hint.remove();
-      localStorage.setItem('ballsort.ios.hint.dismissed', '1');
-    };
-    hint.querySelector('.pwa-ios-hint-close').addEventListener('click', close);
-    hint.querySelector('.pwa-ios-hint-ok').addEventListener('click', close);
-    hint.addEventListener('click', (e) => { if (e.target === hint) close(); });
   }
 })();
 </script>
