@@ -8,17 +8,6 @@
 <meta name="theme-color" content="#1a0b2e">
 <title>Ball Sort Puzzle — Chaos Edition</title>
 
-<!-- ============ PWA ============ -->
-<link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Ball Sort">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="Ball Sort">
-<meta name="description" content="Puzzle de ordenação de bolas com geração procedural e modos Caos e Diário.">
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -87,28 +76,35 @@ body{
 }
 
 /* ============================================================
-   TOP BAR
+   TOP BAR (Corrigido e Delimitado)
    ============================================================ */
 .top-bar{
-  display:flex; justify-content:space-between; align-items:center;
-  padding:12px 16px; gap:12px;
+  display:grid;
+  grid-template-columns: auto 1fr auto;
+  align-items:center;
+  padding:14px 20px;
+  gap:16px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:var(--shadow-sm);
+  z-index:100;
 }
-.top-bar-actions{display:flex; gap:8px}
+.top-bar-actions{display:flex; gap:10px; align-items:center}
 .btn-icon{
-  width:44px; height:44px;
+  width:42px; height:42px;
   border-radius:50%;
   background:var(--surface);
   border:1px solid var(--border);
-  font-size:20px;
+  font-size:18px;
   display:flex; align-items:center; justify-content:center;
   transition:all var(--t-base);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
 }
 .btn-icon:hover{background:var(--surface-hover); transform:translateY(-2px)}
 .btn-icon:active{transform:translateY(0) scale(.95)}
 
-.stats{display:flex; gap:16px; align-items:center; flex-wrap:wrap; justify-content:center}
+.stats{display:flex; gap:20px; align-items:center; justify-content:center}
 .stat{display:flex; flex-direction:column; align-items:center; gap:2px; min-width:44px}
 .stat-value{
   font-size:18px; font-weight:800;
@@ -124,7 +120,7 @@ body{
    MODE BAR
    ============================================================ */
 .mode-bar{
-  display:flex; gap:6px; padding:6px 16px 0;
+  display:flex; gap:6px; padding:10px 16px 0;
   justify-content:center; flex-wrap:wrap;
 }
 .mode-btn{
@@ -179,7 +175,7 @@ body{
   text-transform:uppercase; letter-spacing:.5px;
   cursor:pointer;
   transition:all var(--t-base);
-  margin:6px auto 0;
+  margin:8px auto 0;
 }
 .level-toggle-btn:hover{background:var(--surface-hover); color:var(--text)}
 .level-toggle-btn .chevron{
@@ -329,18 +325,6 @@ body{
   0%,100%{transform:translateY(0)}
   50%{transform:translateY(-6px)}
 }
-.tube.locked{
-  opacity:.5;
-  cursor:not-allowed;
-  border-color:var(--text-dim);
-}
-.tube.locked::after{
-  content:'🔒';
-  position:absolute; top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  font-size:32px; z-index:10;
-  filter:drop-shadow(0 0 8px rgba(0,0,0,.8));
-}
 @keyframes shake{
   0%,100%{transform:translateX(0)}
   20%{transform:translateX(-5px)}
@@ -390,29 +374,16 @@ body{
 .ball.magenta{background:radial-gradient(circle at 35% 30%,#f0abfc,#d946ef 60%,#86198f)}
 
 .ball.rainbow{
-  background:conic-gradient(from 0deg,
-    #ff6b6b, #fde68a, #86efac, #93c5fd,
-    #d8b4fe, #f9a8d4, #ff6b6b);
+  background:conic-gradient(from 0deg,#ff6b6b, #fde68a, #86efac, #93c5fd, #d8b4fe, #f9a8d4, #ff6b6b);
   animation:rainbowSpin 4s linear infinite;
-  box-shadow:
-    inset -3px -3px 8px rgba(0,0,0,.3),
-    inset 3px 3px 8px rgba(255,255,255,.6),
-    0 0 16px rgba(236,72,153,.8),
-    0 2px 6px rgba(0,0,0,.4);
+  box-shadow:inset -3px -3px 8px rgba(0,0,0,.3),inset 3px 3px 8px rgba(255,255,255,.6),0 0 16px rgba(236,72,153,.8),0 2px 6px rgba(0,0,0,.4);
 }
-@keyframes rainbowSpin{
-  from{filter:hue-rotate(0deg)}
-  to{filter:hue-rotate(360deg)}
-}
+@keyframes rainbowSpin{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
 
-.ball.blind{
-  background:radial-gradient(circle at 35% 30%,#4a4a4a,#1a1a1a 60%,#000);
-}
+.ball.blind{background:radial-gradient(circle at 35% 30%,#4a4a4a,#1a1a1a 60%,#000)}
 .ball.blind::after{
-  content:'?';
-  position:absolute; top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  color:#fbbf24; font-weight:900; font-size:16px;
+  content:'?'; position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%); color:#fbbf24; font-weight:900; font-size:16px;
   text-shadow:0 0 8px rgba(251,191,36,.8);
 }
 
@@ -422,6 +393,10 @@ body{
 .bottom-bar{
   display:flex; justify-content:center; gap:8px;
   padding:12px 16px; flex-wrap:wrap;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
 }
 .btn{
   padding:10px 18px;
@@ -540,9 +515,6 @@ body{
 @keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-20px)}}
 
-/* ============================================================
-   MODIFIER PILLS
-   ============================================================ */
 .modifier-bar{
   display:flex; gap:6px; justify-content:center;
   flex-wrap:wrap; padding:0 16px;
@@ -559,133 +531,17 @@ body{
   display:inline-flex; align-items:center; gap:4px;
 }
 
-/* ============================================================
-   PWA — Banners e hints
-   ============================================================ */
-.pwa-update-banner{
-  position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
-  background:linear-gradient(135deg,#a855f7,#ec4899);
-  color:#fff; padding:12px 20px; border-radius:var(--radius-full);
-  display:flex; align-items:center; gap:12px;
-  font-size:13px; font-weight:700;
-  box-shadow:var(--shadow-lg),0 0 40px rgba(168,85,247,.6);
-  z-index:3000;
-  animation:toastIn .4s cubic-bezier(.16,1,.3,1);
-  max-width:90vw;
-}
-.pwa-update-banner button{
-  background:rgba(255,255,255,.25);
-  border-radius:var(--radius-full);
-  padding:6px 14px;
-  font-size:12px; font-weight:800;
-  color:#fff;
-  transition:background var(--t-base);
-}
-.pwa-update-banner button:hover{background:rgba(255,255,255,.4)}
-
-.pwa-install-btn{
-  position:fixed;
-  bottom:calc(env(safe-area-inset-bottom) + 84px);
-  right:12px;
-  background:linear-gradient(135deg,#06b6d4,#3b82f6);
-  color:#fff; padding:10px 16px;
-  border-radius:var(--radius-full);
-  font-size:12px; font-weight:700;
-  box-shadow:var(--shadow-lg),0 0 30px rgba(6,182,212,.6);
-  z-index:3000;
-  animation:toastIn .4s cubic-bezier(.16,1,.3,1);
-  transition:transform var(--t-base), opacity var(--t-base);
-}
-.pwa-install-btn:hover{transform:translateY(-2px)}
-.pwa-install-btn:active{transform:translateY(0) scale(.97)}
-
-@media (max-width:600px){
-  .pwa-install-btn{
-    width:48px; height:48px; padding:0;
-    font-size:22px;
-    display:flex; align-items:center; justify-content:center;
-    bottom:calc(env(safe-area-inset-bottom) + 80px);
-    right:12px;
-  }
-  .pwa-install-btn .pwa-install-label{display:none}
-}
-
-.pwa-ios-hint{
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.85);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  display:flex; align-items:center; justify-content:center;
-  z-index:4000; padding:24px;
-  animation:toastIn .3s ease;
-}
-.pwa-ios-hint-content{
-  background:linear-gradient(135deg,rgba(45,27,78,.98),rgba(26,11,46,.98));
-  border:1px solid rgba(168,85,247,.5);
-  border-radius:var(--radius-xl);
-  padding:28px 22px;
-  max-width:340px; width:100%;
-  text-align:center; position:relative;
-  box-shadow:0 0 60px rgba(168,85,247,.4);
-}
-.pwa-ios-hint-close{
-  position:absolute; top:12px; right:12px;
-  width:32px; height:32px; border-radius:50%;
-  background:var(--surface); color:var(--text-muted);
-  font-size:16px; font-weight:700;
-  display:flex; align-items:center; justify-content:center;
-}
-.pwa-ios-hint-emoji{font-size:56px; margin-bottom:12px}
-.pwa-ios-hint h3{
-  font-size:18px; font-weight:800; margin:0 0 10px;
-  background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
-  -webkit-background-clip:text; background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-.pwa-ios-hint p{
-  color:var(--text-muted); font-size:13px; line-height:1.5; margin:0 0 18px;
-}
-.pwa-ios-hint-ok{
-  background:var(--btn-bg); color:#fff;
-  padding:10px 24px; border-radius:var(--radius-full);
-  font-size:13px; font-weight:700;
-  box-shadow:0 8px 24px rgba(168,85,247,.4);
-}
-
-.pwa-standalone .top-bar{padding-top:max(12px, env(safe-area-inset-top))}
+.pwa-standalone .top-bar{padding-top:max(14px, env(safe-area-inset-top))}
 .pwa-standalone .bottom-bar{padding-bottom:max(12px, env(safe-area-inset-bottom))}
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
 @media (max-width:600px){
-  .game-area{padding:6px 8px; gap:8px}
-  .tubes-container{gap:8px 5px}
-  .btn{padding:9px 14px; font-size:12px}
-  .btn-icon{width:38px; height:38px; font-size:17px}
+  .top-bar{padding:10px 14px; gap:8px}
+  .btn-icon{width:38px; height:38px; font-size:16px}
   .stat-value{font-size:15px}
   .stat-label{font-size:8px}
-  .stats{gap:10px}
-  .mode-bar{padding:4px 10px 0; gap:4px}
-  .mode-btn{font-size:10px; padding:5px 9px}
-  .seed-bar{font-size:10px; padding:6px 12px 0}
-  .seed-display{padding:3px 8px}
-  .top-bar{padding:10px 12px; gap:8px}
-  .bottom-bar{padding:10px 12px; gap:6px}
-}
-@media (max-height:700px){
-  .game-area{gap:6px; padding:6px}
-  .top-bar{padding:8px 12px}
-  .bottom-bar{padding:8px}
-  .mode-bar{padding:4px 10px 0}
-  .seed-bar{padding:4px 12px 0}
-}
-
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{
-    animation-duration:.01ms!important;
-    transition-duration:.01ms!important;
-  }
+  .stats{gap:12px}
+  .game-area{padding:6px 8px; gap:8px}
+  .tubes-container{gap:8px 5px}
 }
 </style>
 </head>
@@ -783,8 +639,7 @@ body{
 
 <script>
 /* ============================================================
-   BALL SORT PUZZLE v5 — Chaos Edition
-   Procedural generation · Seeds · Modifiers · Palettes · PWA
+   BALL SORT PUZZLE v5.1 — Clean Header Edition
    ============================================================ */
 'use strict';
 
@@ -857,17 +712,13 @@ const SeedUtils = {
   },
   toURL(seed) {
     const s = SeedUtils.toString(seed);
-    try {
-      history.replaceState(null, '', `#seed=${s}`);
-    } catch {}
+    try { history.replaceState(null, '', `#seed=${s}`); } catch {}
   },
   daily() {
     const d = new Date();
     return SeedUtils.fromString(`daily-${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`);
   },
-  random() {
-    return (Math.random() * 0xFFFFFFFF) >>> 0;
-  }
+  random() { return (Math.random() * 0xFFFFFFFF) >>> 0; }
 };
 
 const EventBus = (() => {
@@ -888,26 +739,14 @@ const EventBus = (() => {
 
 const Storage = {
   get(key, fallback = null) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw === null ? fallback : raw;
-    } catch { return fallback; }
+    try { const raw = localStorage.getItem(key); return raw === null ? fallback : raw; } catch { return fallback; }
   },
-  set(key, value) {
-    try { localStorage.setItem(key, String(value)); } catch {}
-  },
+  set(key, value) { try { localStorage.setItem(key, String(value)); } catch {} },
   getJSON(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw === null ? fallback : JSON.parse(raw);
-    } catch { return fallback; }
+    try { const raw = localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw); } catch { return fallback; }
   },
-  setJSON(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
-  },
-  remove(key) {
-    try { localStorage.removeItem(key); } catch {}
-  }
+  setJSON(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} },
+  remove(key) { try { localStorage.removeItem(key); } catch {} }
 };
 
 const Sound = (() => {
@@ -947,7 +786,6 @@ const Sound = (() => {
     select() { tone(600, 'sine', .08, .06); },
     move() { tone(400, 'triangle', .12, .08); },
     invalid() { tone(180, 'sawtooth', .15, .06); },
-    unlock() { tone(1200, 'sine', .2, .1); },
     win() {
       if (!enabled) return;
       const ac = ensure(); if (!ac) return;
@@ -978,19 +816,11 @@ const Toaster = (() => {
     container.appendChild(el);
     setTimeout(() => {
       el.classList.add('removing');
-      setTimeout(() => {
-        el.remove();
-        active = false;
-        next();
-      }, 300);
+      setTimeout(() => { el.remove(); active = false; next(); }, 300);
     }, CONFIG.TOAST_DURATION);
   };
 
-  const next = () => {
-    if (active || queue.length === 0) return;
-    active = true;
-    show(queue.shift());
-  };
+  const next = () => { if (active || queue.length === 0) return; active = true; show(queue.shift()); };
 
   return {
     info(msg) { queue.push({ msg, type: 'info' }); next(); },
@@ -1036,7 +866,6 @@ const DifficultyCurve = {
 
     const paletteKeys = mode.chaos ? ['classic','warm','cool','earth','neon'] : ['classic','warm','cool','earth'];
     const palette = rng.pick(paletteKeys);
-
     const reverseMultiplier = 8 + Math.floor(level * 0.5) + (isSpike ? 6 : 0);
 
     const modifiers = [];
@@ -1078,7 +907,6 @@ const LevelGenerator = (() => {
   const generate = (level, modeId, seed) => {
     const mode = GameModes[modeId] || GameModes.classic;
     const rng = new SeededRandom(seed);
-
     const diff = DifficultyCurve.compute(level, mode, rng);
     const { numColors, ballsPerTube: bpt, emptyTubes, palette, isSpike, reverseMultiplier, modifiers } = diff;
 
@@ -1104,17 +932,12 @@ const LevelGenerator = (() => {
     }
 
     let tubes = [...shuffleBalls(full, rng), ...empty];
-
     const steps = usedColors.length * reverseMultiplier + level * 4;
     let last = null;
     let stuck = 0;
     for (let i = 0; i < steps; i++) {
       const moves = validReverseMoves(tubes, bpt, last);
-      if (moves.length === 0) {
-        stuck++;
-        if (stuck > 5) break;
-        continue;
-      }
+      if (moves.length === 0) { stuck++; if (stuck > 5) break; continue; }
       stuck = 0;
       const m = moves[rng.int(0, moves.length - 1)];
       tubes[m.to].push(tubes[m.from].pop());
@@ -1438,14 +1261,8 @@ class GameController {
 
   undo() {
     const mode = this.getMode();
-    if (mode.noUndo) {
-      EventBus.emit('toast:warn', 'Desafio não permite desfazer');
-      return;
-    }
-    if (this.state.history.length === 0) {
-      EventBus.emit('toast:info', 'Nada para desfazer');
-      return;
-    }
+    if (mode.noUndo) { Toaster.warn('Desafio não permite desfazer'); return; }
+    if (this.state.history.length === 0) { Toaster.info('Nada para desfazer'); return; }
     this.state.popHistory();
     EventBus.emit('modal:close');
     Sound.select();
@@ -1455,15 +1272,9 @@ class GameController {
 
   addExtraTube() {
     const mode = this.getMode();
-    if (mode.noExtraTube) {
-      EventBus.emit('toast:warn', 'Desafio não permite tubo extra');
-      return;
-    }
+    if (mode.noExtraTube) { Toaster.warn('Desafio não permite tubo extra'); return; }
     const s = this.state;
-    if (s.extraTubes >= CONFIG.MAX_EXTRA_TUBES) {
-      EventBus.emit('toast:warn', `Máximo de ${CONFIG.MAX_EXTRA_TUBES} tubos extras`);
-      return;
-    }
+    if (s.extraTubes >= CONFIG.MAX_EXTRA_TUBES) { Toaster.warn(`Máximo de ${CONFIG.MAX_EXTRA_TUBES} tubos extras`); return; }
     s.pushHistory();
     s.tubes.push([]);
     s.extraTubes++;
@@ -1475,7 +1286,7 @@ class GameController {
   toggleZen() {
     this.state.zenMode = !this.state.zenMode;
     EventBus.emit('zen:toggled', this.state.zenMode);
-    EventBus.emit('toast:info', this.state.zenMode ? '🧘 Modo Zen ativado' : 'Modo Zen desativado');
+    Toaster.info(this.state.zenMode ? '🧘 Modo Zen ativado' : 'Modo Zen desativado');
   }
 
   hint() {
@@ -1498,7 +1309,7 @@ class GameController {
 
     const pick = nonEmpties[0] || empties[0];
     if (pick) EventBus.emit('hint:show', pick);
-    else EventBus.emit('toast:warn', 'Sem movimentos disponíveis');
+    else Toaster.warn('Sem movimentos disponíveis');
   }
 
   nextLevel() {
@@ -1580,23 +1391,16 @@ class Renderer {
         const isTop = ballIdx === tube.length - 1;
         const hideColor = isBlind && !isTop;
 
-        if (hideColor) {
-          ball.className = 'ball blind';
-        } else if (isRainbow) {
-          ball.className = 'ball rainbow';
-        } else {
-          ball.className = `ball ${color}`;
-        }
+        if (hideColor) ball.className = 'ball blind';
+        else if (isRainbow) ball.className = 'ball rainbow';
+        else ball.className = `ball ${color}`;
         el.appendChild(ball);
       });
 
       el.addEventListener('click', () => this.onTubeClick && this.onTubeClick(idx));
       el.tabIndex = 0;
       el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.onTubeClick && this.onTubeClick(idx);
-        }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.onTubeClick && this.onTubeClick(idx); }
       });
 
       frag.appendChild(el);
@@ -1611,11 +1415,9 @@ class Renderer {
     const vw = window.innerWidth;
     const availH = vh * 0.5;
     const availW = Math.min(vw * 0.95, 900);
-
     const sizeByH = Math.floor((availH - 20) / maxBalls) - 4;
     const perRow = Math.min(numTubes, Math.max(4, Math.floor(availW / 60)));
     const sizeByW = Math.floor((availW / perRow) - 12);
-
     return Math.max(18, Math.min(42, Math.min(sizeByH, sizeByW)));
   }
 
@@ -1631,9 +1433,7 @@ class Renderer {
     this.btnAddTube.disabled = this.state.extraTubes >= CONFIG.MAX_EXTRA_TUBES || mode.noExtraTube;
     this.btnZen.classList.toggle('active', this.state.zenMode);
     this.btnZen.setAttribute('aria-pressed', String(this.state.zenMode));
-    if (this.btnSound) {
-      this.btnSound.textContent = Sound.isEnabled() ? '🔊' : '🔇';
-    }
+    if (this.btnSound) this.btnSound.textContent = Sound.isEnabled() ? '🔊' : '🔇';
   }
 
   renderLevelSelector() {
@@ -1661,10 +1461,7 @@ class Renderer {
       const btnLeft = activeBtn.offsetLeft;
       const btnWidth = activeBtn.offsetWidth;
       const containerWidth = this.levelSelectorEl.clientWidth;
-      this.levelSelectorEl.scrollTo({
-        left: btnLeft - (containerWidth / 2) + (btnWidth / 2),
-        behavior: 'smooth'
-      });
+      this.levelSelectorEl.scrollTo({ left: btnLeft - (containerWidth / 2) + (btnWidth / 2), behavior: 'smooth' });
     }
 
     const prevBtn = document.getElementById('level-prev');
@@ -1707,9 +1504,7 @@ class Renderer {
   }
 
   renderSeed() {
-    if (this.seedDisplayEl) {
-      this.seedDisplayEl.textContent = SeedUtils.toString(this.state.seed);
-    }
+    if (this.seedDisplayEl) this.seedDisplayEl.textContent = SeedUtils.toString(this.state.seed);
   }
 
   renderTheme() {
@@ -1798,7 +1593,6 @@ class Renderer {
   });
 
   document.getElementById('btn-shuffle-seed').addEventListener('click', () => controller.newSeed());
-
   document.getElementById('btn-undo').addEventListener('click', () => controller.undo());
   document.getElementById('btn-add-tube').addEventListener('click', () => controller.addExtraTube());
   document.getElementById('btn-zen').addEventListener('click', () => controller.toggleZen());
