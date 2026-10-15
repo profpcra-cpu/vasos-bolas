@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1a0b2e">
-<title>Ball Sort Puzzle — Chaos Edition</title>
+<title>Ball Sort Puzzle — Clean Mobile</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,14 +76,14 @@ body{
 }
 
 /* ============================================================
-   TOP BAR (Corrigido e Delimitado)
+   TOP BAR (Estrutura em Grid Protegida)
    ============================================================ */
 .top-bar{
   display:grid;
   grid-template-columns: auto 1fr auto;
   align-items:center;
-  padding:14px 20px;
-  gap:16px;
+  padding:12px 16px;
+  gap:12px;
   background:var(--surface);
   border-bottom:1px solid var(--border);
   backdrop-filter:blur(12px);
@@ -91,9 +91,9 @@ body{
   box-shadow:var(--shadow-sm);
   z-index:100;
 }
-.top-bar-actions{display:flex; gap:10px; align-items:center}
+.top-bar-actions{display:flex; gap:8px; align-items:center}
 .btn-icon{
-  width:42px; height:42px;
+  width:40px; height:40px;
   border-radius:50%;
   background:var(--surface);
   border:1px solid var(--border);
@@ -104,10 +104,10 @@ body{
 .btn-icon:hover{background:var(--surface-hover); transform:translateY(-2px)}
 .btn-icon:active{transform:translateY(0) scale(.95)}
 
-.stats{display:flex; gap:20px; align-items:center; justify-content:center}
-.stat{display:flex; flex-direction:column; align-items:center; gap:2px; min-width:44px}
+.stats{display:flex; gap:16px; align-items:center; justify-content:center}
+.stat{display:flex; flex-direction:column; align-items:center; gap:2px; min-width:38px}
 .stat-value{
-  font-size:18px; font-weight:800;
+  font-size:16px; font-weight:800;
   font-variant-numeric:tabular-nums;
   color:var(--text);
 }
@@ -117,23 +117,52 @@ body{
 }
 
 /* ============================================================
-   MODE BAR
+   PAINEL DE CONFIGURAÇÕES COLAPSÁVEL (ORGANIZA O TOPO)
    ============================================================ */
+.menu-drawer-toggle{
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:6px 14px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-full);
+  font-size:11px; font-weight:700;
+  color:var(--text-muted);
+  margin:6px auto 0;
+  cursor:pointer;
+  transition:all var(--t-base);
+}
+.menu-drawer-toggle:hover{background:var(--surface-hover); color:var(--text)}
+
+.game-options-panel{
+  display:none;
+  flex-direction:column;
+  gap:8px; padding:10px 16px;
+  background:rgba(15, 5, 32, 0.6);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(8px);
+  animation:slideDown .25s ease;
+}
+.game-options-panel.open{display:flex}
+@keyframes slideDown{
+  from{opacity:0; transform:translateY(-10px)}
+  to{opacity:1; transform:translateY(0)}
+}
+
+/* Modo Bar & Seed Inside Panel */
 .mode-bar{
-  display:flex; gap:6px; padding:10px 16px 0;
+  display:flex; gap:6px;
   justify-content:center; flex-wrap:wrap;
 }
 .mode-btn{
-  font-size:11px; font-weight:700;
-  padding:6px 12px;
+  font-size:10px; font-weight:700;
+  padding:5px 10px;
   border-radius:var(--radius-full);
   background:var(--surface);
   border:1px solid var(--border);
   color:var(--text-muted);
   transition:all var(--t-base);
-  text-transform:uppercase; letter-spacing:.5px;
+  text-transform:uppercase;
 }
-.mode-btn:hover{background:var(--surface-hover)}
 .mode-btn.active{
   background:var(--btn-bg);
   border-color:transparent;
@@ -141,142 +170,92 @@ body{
   box-shadow:0 4px 12px rgba(168,85,247,.4);
 }
 
-/* ============================================================
-   SEED BAR
-   ============================================================ */
 .seed-bar{
-  display:flex; gap:6px; padding:8px 16px 0;
+  display:flex; gap:6px;
   justify-content:center; align-items:center;
-  font-size:11px; color:var(--text-dim);
+  font-size:10px; color:var(--text-dim);
 }
 .seed-display{
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  padding:4px 10px;
+  padding:3px 8px;
   background:var(--surface);
   border-radius:var(--radius-full);
   border:1px solid var(--border);
   cursor:pointer;
-  transition:all var(--t-base);
 }
-.seed-display:hover{background:var(--surface-hover); color:var(--text)}
+
+.modifier-bar{
+  display:flex; gap:4px; justify-content:center; flex-wrap:wrap;
+}
+.mod-pill{
+  font-size:9px; font-weight:700;
+  padding:3px 8px;
+  border-radius:var(--radius-full);
+  background:rgba(168,85,247,.15);
+  border:1px solid rgba(168,85,247,.4);
+  color:var(--text-muted);
+  text-transform:uppercase;
+}
 
 /* ============================================================
    LEVEL SELECTOR
    ============================================================ */
-.level-toggle-btn{
-  display:none;
-  align-items:center; gap:6px;
-  padding:7px 16px;
-  border-radius:var(--radius-full);
-  background:var(--surface);
-  border:1px solid var(--border);
-  font-size:11px; font-weight:700;
-  color:var(--text-muted);
-  text-transform:uppercase; letter-spacing:.5px;
-  cursor:pointer;
-  transition:all var(--t-base);
-  margin:8px auto 0;
-}
-.level-toggle-btn:hover{background:var(--surface-hover); color:var(--text)}
-.level-toggle-btn .chevron{
-  display:inline-block;
-  transition:transform var(--t-base);
-  font-size:9px;
-}
-.level-toggle-btn.open .chevron{transform:rotate(180deg)}
-
 .level-selector-wrapper{
   display:flex; align-items:center; gap:6px;
-  padding:8px 12px;
+  padding:6px 12px;
   justify-content:center;
 }
 .level-selector-arrow{
-  width:36px; height:36px; flex-shrink:0;
+  width:32px; height:32px; flex-shrink:0;
   border-radius:50%;
   background:var(--surface);
   border:1px solid var(--border);
-  color:var(--text);
-  font-size:18px; font-weight:800;
+  color:var(--text); font-size:16px; font-weight:800;
   display:flex; align-items:center; justify-content:center;
-  transition:all var(--t-base);
   cursor:pointer;
-  line-height:1;
-  padding-bottom:2px;
 }
-.level-selector-arrow:hover:not(:disabled){background:var(--surface-hover)}
-.level-selector-arrow:disabled{opacity:.3; cursor:not-allowed}
-
 .level-selector{
   display:flex; gap:6px;
   overflow-x:auto; overflow-y:hidden;
   scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;
   scroll-behavior:smooth;
   flex:1; max-width:100%;
   padding:2px 4px;
-  justify-content:flex-start;
 }
 .level-selector::-webkit-scrollbar{display:none}
 
-@media (min-width:768px){
-  .level-selector{
-    justify-content:center;
-    flex-wrap:wrap;
-    overflow-x:visible;
-  }
-  .level-selector-arrow{display:none}
-  .level-selector-wrapper{padding:8px 16px}
-}
-
 .level-btn{
-  min-width:40px; height:40px;
+  min-width:36px; height:36px;
   border-radius:var(--radius-md);
   background:var(--surface);
   border:2px solid var(--border);
-  font-size:13px; font-weight:700;
-  transition:all var(--t-base);
-  flex-shrink:0;
-  position:relative;
-  color:var(--text);
+  font-size:12px; font-weight:700;
+  flex-shrink:0; position:relative; color:var(--text);
 }
-.level-btn:hover{background:var(--surface-hover); transform:translateY(-2px)}
 .level-btn.active{
   background:var(--btn-bg); border-color:transparent;
-  box-shadow:var(--glow-purple); transform:translateY(-2px);
-  color:#fff;
+  box-shadow:var(--glow-purple); color:#fff;
 }
 .level-btn.completed::after{
   content:'✓'; position:absolute; top:-2px; right:2px;
-  color:var(--success); font-size:10px; font-weight:800;
-  background:var(--bg-1); border-radius:50%; width:14px; height:14px;
-  display:flex; align-items:center; justify-content:center;
-  line-height:1;
-}
-.level-btn.spike{border-color:var(--warning)}
-.level-btn.spike::before{
-  content:'🔥'; position:absolute; top:-8px; left:50%;
-  transform:translateX(-50%); font-size:10px;
-}
-
-@media (max-width:767px){
-  .level-toggle-btn{display:inline-flex}
+  color:var(--success); font-size:9px; font-weight:800;
 }
 
 /* ============================================================
-   GAME AREA
+   GAME AREA (Dedicado e sem interferência)
    ============================================================ */
 .game-area{
   flex:1;
   display:flex; flex-direction:column;
   justify-content:center; align-items:center;
-  padding:8px 12px; gap:12px;
+  padding:12px; gap:12px;
   overflow:hidden;
   min-height:0;
 }
 
 .tubes-container{
   display:flex; flex-wrap:wrap;
-  gap:10px 6px;
+  gap:12px 8px;
   max-width:100%; width:100%;
   justify-content:center; align-items:end;
 }
@@ -287,7 +266,7 @@ body{
 .tube{
   position:relative;
   width:var(--tw,42px);
-  height:var(--th,190px);
+  height:var(--th,180px);
   background:var(--tube-bg);
   border:2px solid var(--tube-border);
   border-top:none;
@@ -296,7 +275,7 @@ body{
   display:flex; flex-direction:column-reverse; align-items:center;
   padding:4px 4px 0;
   cursor:pointer;
-  transition:transform var(--t-base), filter var(--t-base), border-color var(--t-base);
+  transition:transform var(--t-base), filter var(--t-base);
   backdrop-filter:blur(4px);
   -webkit-backdrop-filter:blur(4px);
   overflow:hidden;
@@ -307,31 +286,19 @@ body{
   background:linear-gradient(to bottom,rgba(255,255,255,.3),transparent);
   border-radius:0 0 50% 50%;
   pointer-events:none; z-index:5;
-  transition:background var(--t-base);
 }
 .tube:not(.complete):not(.selected):hover{transform:translateY(-3px)}
 .tube.selected{transform:translateY(-12px); filter:drop-shadow(var(--glow-purple))}
 .tube.destination{filter:drop-shadow(var(--glow-green))}
-.tube.destination::before{background:linear-gradient(to bottom,rgba(74,222,128,.6),transparent)}
 .tube.complete{border-color:var(--success); filter:drop-shadow(0 0 12px rgba(74,222,128,.5))}
 .tube.complete::after{
-  content:'✓';
-  position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+  content:'✓'; position:absolute; top:-14px; left:50%; transform:translateX(-50%);
   color:var(--success); font-size:14px; font-weight:800;
 }
 .tube.invalid{animation:shake .35s cubic-bezier(.36,.07,.19,.97)}
 .tube.hint{filter:drop-shadow(0 0 16px var(--glow-gold)); animation:hintPulse .6s ease-in-out 2}
-@keyframes hintPulse{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-6px)}
-}
-@keyframes shake{
-  0%,100%{transform:translateX(0)}
-  20%{transform:translateX(-5px)}
-  40%{transform:translateX(5px)}
-  60%{transform:translateX(-3px)}
-  80%{transform:translateX(3px)}
-}
+@keyframes hintPulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
 
 /* ============================================================
    BALL
@@ -340,23 +307,15 @@ body{
   width:var(--bw,32px); height:var(--bw,32px);
   border-radius:50%; margin-bottom:2px;
   position:relative;
-  box-shadow:
-    inset -3px -3px 8px rgba(0,0,0,.4),
-    inset 3px 3px 8px rgba(255,255,255,.4),
-    0 2px 6px rgba(0,0,0,.4);
+  box-shadow:inset -3px -3px 8px rgba(0,0,0,.4),inset 3px 3px 8px rgba(255,255,255,.4),0 2px 6px rgba(0,0,0,.4);
   flex-shrink:0;
-  transition:transform var(--t-base), filter var(--t-base);
+  transition:transform var(--t-base);
   animation:ballDrop .3s cubic-bezier(.34,1.56,.64,1);
 }
-@keyframes ballDrop{
-  from{transform:translateY(-20px) scale(.8); opacity:0}
-  to{transform:translateY(0) scale(1); opacity:1}
-}
+@keyframes ballDrop{from{transform:translateY(-20px) scale(.8); opacity:0}to{transform:translateY(0) scale(1); opacity:1}}
 .ball::before{
-  content:''; position:absolute;
-  top:12%; left:18%; width:30%; height:30%;
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.9),transparent 70%);
+  content:''; position:absolute; top:12%; left:18%; width:30%; height:30%;
+  border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.9),transparent 70%);
   pointer-events:none;
 }
 .ball.red{background:radial-gradient(circle at 35% 30%,#ff6b6b,#dc2626 60%,#991b1b)}
@@ -376,19 +335,16 @@ body{
 .ball.rainbow{
   background:conic-gradient(from 0deg,#ff6b6b, #fde68a, #86efac, #93c5fd, #d8b4fe, #f9a8d4, #ff6b6b);
   animation:rainbowSpin 4s linear infinite;
-  box-shadow:inset -3px -3px 8px rgba(0,0,0,.3),inset 3px 3px 8px rgba(255,255,255,.6),0 0 16px rgba(236,72,153,.8),0 2px 6px rgba(0,0,0,.4);
 }
 @keyframes rainbowSpin{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
-
 .ball.blind{background:radial-gradient(circle at 35% 30%,#4a4a4a,#1a1a1a 60%,#000)}
 .ball.blind::after{
-  content:'?'; position:absolute; top:50%; left:50%;
-  transform:translate(-50%,-50%); color:#fbbf24; font-weight:900; font-size:16px;
-  text-shadow:0 0 8px rgba(251,191,36,.8);
+  content:'?'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  color:#fbbf24; font-weight:900; font-size:15px;
 }
 
 /* ============================================================
-   BOTTOM BAR
+   BOTTOM BAR (Com o Botão Sair / Início)
    ============================================================ */
 .bottom-bar{
   display:flex; justify-content:center; gap:8px;
@@ -399,38 +355,27 @@ body{
   -webkit-backdrop-filter:blur(12px);
 }
 .btn{
-  padding:10px 18px;
+  padding:10px 16px;
   border-radius:var(--radius-full);
   background:var(--btn-bg);
-  color:#fff; font-size:13px; font-weight:700;
+  color:#fff; font-size:12px; font-weight:700;
   display:inline-flex; align-items:center; gap:6px;
   transition:all var(--t-base);
   box-shadow:0 6px 18px rgba(168,85,247,.4);
 }
-.btn:hover:not(:disabled){transform:translateY(-2px); box-shadow:0 10px 24px rgba(168,85,247,.55)}
-.btn:active:not(:disabled){transform:translateY(0) scale(.98)}
+.btn:hover:not(:disabled){transform:translateY(-2px)}
 .btn.secondary{background:var(--btn-accent); box-shadow:0 6px 18px rgba(59,130,246,.4)}
-.btn.secondary:hover:not(:disabled){box-shadow:0 10px 24px rgba(59,130,246,.55)}
+.btn.danger{background:linear-gradient(135deg,#ef4444,#b91c1c); box-shadow:0 6px 18px rgba(239,68,68,.4)}
 .btn:disabled{opacity:.35; cursor:not-allowed; transform:none!important; box-shadow:none!important}
 .btn.full{width:100%; justify-content:center}
 
 .zen-toggle{
   display:flex; align-items:center; gap:6px;
-  font-size:11px; font-weight:600;
-  color:var(--text-muted);
-  padding:8px 14px;
-  background:var(--surface);
-  border-radius:var(--radius-full);
-  cursor:pointer;
+  font-size:11px; font-weight:600; color:var(--text-muted);
+  padding:8px 12px; background:var(--surface); border-radius:var(--radius-full);
   border:1px solid var(--border);
-  transition:all var(--t-base);
 }
-.zen-toggle:hover{background:var(--surface-hover)}
-.zen-toggle.active{
-  background:rgba(74,222,128,.2);
-  border-color:rgba(74,222,128,.5);
-  color:var(--success);
-}
+.zen-toggle.active{background:rgba(74,222,128,.2); border-color:rgba(74,222,128,.5); color:var(--success)}
 
 /* ============================================================
    MODAL
@@ -439,74 +384,44 @@ body{
   position:fixed; inset:0;
   background:rgba(0,0,0,.75);
   backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
   display:flex; align-items:center; justify-content:center;
   z-index:1000; padding:20px;
-  opacity:0; pointer-events:none;
-  transition:opacity var(--t-base);
+  opacity:0; pointer-events:none; transition:opacity var(--t-base);
 }
 .modal-overlay.active{opacity:1; pointer-events:auto}
 .modal-card{
   background:linear-gradient(135deg,rgba(45,27,78,.98),rgba(26,11,46,.98));
   border:1px solid rgba(168,85,247,.4);
   border-radius:var(--radius-xl);
-  padding:28px 22px;
-  max-width:380px; width:100%;
-  text-align:center;
-  box-shadow:var(--shadow-lg),0 0 60px rgba(168,85,247,.3);
-  transform:scale(.9);
-  transition:transform var(--t-slow);
+  padding:28px 22px; max-width:380px; width:100%; text-align:center;
+  box-shadow:var(--shadow-lg); transform:scale(.9); transition:transform var(--t-slow);
 }
 .modal-overlay.active .modal-card{transform:scale(1)}
-[data-theme="light"] .modal-card{
-  background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(245,240,255,.98));
-  border:1px solid rgba(168,85,247,.3);
-}
-.modal-emoji{font-size:56px; margin-bottom:10px; line-height:1}
-.modal-overlay.active .modal-emoji{animation:bounceIn .6s cubic-bezier(.16,1,.3,1)}
-@keyframes bounceIn{
-  0%{transform:scale(0) rotate(-20deg)}
-  60%{transform:scale(1.2) rotate(10deg)}
-  100%{transform:scale(1) rotate(0)}
-}
+.modal-emoji{font-size:56px; margin-bottom:10px}
 .modal-title{
   font-size:22px; font-weight:800; margin:0 0 8px;
   background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
-  -webkit-background-clip:text; background-clip:text;
-  -webkit-text-fill-color:transparent;
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
 }
-.modal-message{color:var(--text-muted); font-size:13px; margin:0 0 18px; line-height:1.5}
+.modal-message{color:var(--text-muted); font-size:13px; margin:0 0 18px}
 .modal-stats{
   display:flex; justify-content:space-around;
   padding:14px; background:rgba(168,85,247,.1);
   border-radius:var(--radius-md); margin-bottom:18px;
 }
-.modal-stat-value{font-size:20px; font-weight:800; color:var(--accent-1); font-variant-numeric:tabular-nums}
-.modal-stat-label{font-size:10px; text-transform:uppercase; color:var(--text-muted); letter-spacing:1px}
-.modal-badge{
-  display:inline-block; padding:4px 12px;
-  background:linear-gradient(135deg,var(--warning),#d97706);
-  border-radius:var(--radius-full);
-  font-size:10px; font-weight:800;
-  text-transform:uppercase; letter-spacing:1px;
-  color:#fff; margin-bottom:12px;
-}
+.modal-stat-value{font-size:20px; font-weight:800; color:var(--accent-1)}
+.modal-stat-label{font-size:10px; text-transform:uppercase; color:var(--text-muted)}
 
 /* ============================================================
    TOAST
    ============================================================ */
 .toast-container{
   position:fixed; top:70px; left:50%; transform:translateX(-50%);
-  z-index:2000; display:flex; flex-direction:column;
-  gap:8px; align-items:center; pointer-events:none;
+  z-index:2000; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none;
 }
 .toast{
-  color:#fff; padding:10px 18px;
-  border-radius:var(--radius-full);
-  font-weight:700; font-size:12px;
-  box-shadow:var(--shadow-md);
-  animation:toastIn .3s cubic-bezier(.16,1,.3,1);
-  white-space:nowrap;
+  color:#fff; padding:10px 18px; border-radius:var(--radius-full);
+  font-weight:700; font-size:12px; box-shadow:var(--shadow-md); animation:toastIn .3s ease;
 }
 .toast.info{background:linear-gradient(135deg,var(--accent-1),var(--accent-2))}
 .toast.warn{background:linear-gradient(135deg,var(--warning),#d97706)}
@@ -515,31 +430,12 @@ body{
 @keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-20px)}}
 
-.modifier-bar{
-  display:flex; gap:6px; justify-content:center;
-  flex-wrap:wrap; padding:0 16px;
-  min-height:0;
-}
-.mod-pill{
-  font-size:10px; font-weight:700;
-  padding:4px 10px;
-  border-radius:var(--radius-full);
-  background:rgba(168,85,247,.15);
-  border:1px solid rgba(168,85,247,.4);
-  color:var(--text-muted);
-  text-transform:uppercase; letter-spacing:.5px;
-  display:inline-flex; align-items:center; gap:4px;
-}
-
-.pwa-standalone .top-bar{padding-top:max(14px, env(safe-area-inset-top))}
-.pwa-standalone .bottom-bar{padding-bottom:max(12px, env(safe-area-inset-bottom))}
-
 @media (max-width:600px){
-  .top-bar{padding:10px 14px; gap:8px}
-  .btn-icon{width:38px; height:38px; font-size:16px}
-  .stat-value{font-size:15px}
+  .top-bar{padding:10px 12px; gap:8px}
+  .btn-icon{width:36px; height:36px; font-size:15px}
+  .stat-value{font-size:14px}
   .stat-label{font-size:8px}
-  .stats{gap:12px}
+  .stats{gap:10px}
   .game-area{padding:6px 8px; gap:8px}
   .tubes-container{gap:8px 5px}
 }
@@ -570,24 +466,26 @@ body{
   <button class="btn-icon" id="btn-restart" type="button" aria-label="Reiniciar nível" title="Reiniciar">🔄</button>
 </header>
 
-<!-- ============ MODE BAR ============ -->
-<nav class="mode-bar" id="mode-bar" aria-label="Modo de jogo"></nav>
-
-<!-- ============ SEED BAR ============ -->
-<div class="seed-bar">
-  <span>SEED:</span>
-  <span class="seed-display" id="seed-display" title="Clique para copiar">—</span>
-  <button class="btn-icon" id="btn-shuffle-seed" style="width:26px;height:26px;font-size:12px" title="Nova seed">🎲</button>
-</div>
-
-<!-- ============ MODIFIER PILLS ============ -->
-<div class="modifier-bar" id="modifier-bar"></div>
-
-<!-- ============ LEVEL TOGGLE (mobile) ============ -->
-<button class="level-toggle-btn" id="level-toggle" type="button" aria-expanded="false" aria-controls="level-selector-wrapper">
-  <span>📋 Níveis</span>
-  <span class="chevron">▼</span>
+<!-- ============ MENU EXPANSÍVEL MÓVEL ============ -->
+<button class="menu-drawer-toggle" id="btn-toggle-options" type="button">
+  <span>⚙️ Opções do Jogo</span>
+  <span id="options-chevron">▼</span>
 </button>
+
+<div class="game-options-panel" id="options-panel">
+  <!-- MODE BAR -->
+  <nav class="mode-bar" id="mode-bar" aria-label="Modo de jogo"></nav>
+
+  <!-- SEED BAR -->
+  <div class="seed-bar">
+    <span>SEED:</span>
+    <span class="seed-display" id="seed-display" title="Clique para copiar">—</span>
+    <button class="btn-icon" id="btn-shuffle-seed" style="width:24px;height:24px;font-size:11px" title="Nova seed">🎲</button>
+  </div>
+
+  <!-- MODIFIERS -->
+  <div class="modifier-bar" id="modifier-bar"></div>
+</div>
 
 <!-- ============ LEVEL SELECTOR ============ -->
 <div class="level-selector-wrapper" id="level-selector-wrapper">
@@ -601,18 +499,18 @@ body{
   <div class="tubes-container" id="tubes-container" role="grid" aria-label="Tabuleiro"></div>
 </main>
 
-<!-- ============ BOTTOM BAR ============ -->
+<!-- ============ BOTTOM BAR (COM BOTÃO SAIR) ============ -->
 <footer class="bottom-bar">
-  <button class="btn secondary" id="btn-undo" type="button" disabled>↶</button>
-  <button class="btn secondary" id="btn-hint" type="button">💡</button>
-  <button class="btn secondary" id="btn-add-tube" type="button">➕</button>
+  <button class="btn secondary" id="btn-undo" type="button" title="Desfazer" disabled>↶</button>
+  <button class="btn secondary" id="btn-hint" type="button" title="Dica">💡</button>
+  <button class="btn secondary" id="btn-add-tube" type="button" title="Adicionar Tubo">➕</button>
   <button class="zen-toggle" id="btn-zen" type="button" aria-pressed="false">🧘 Zen</button>
+  <button class="btn danger" id="btn-exit" type="button" title="Sair do Jogo">🚪 Sair</button>
 </footer>
 
 <!-- ============ MODAL ============ -->
 <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-card">
-    <div class="modal-badge" id="modal-badge" style="display:none">🔥 Spike</div>
     <div class="modal-emoji">🎉</div>
     <h2 class="modal-title" id="modal-title">Nível Completo!</h2>
     <p class="modal-message" id="modal-message">Parabéns! Conseguiste ordenar todas as bolas.</p>
@@ -639,7 +537,7 @@ body{
 
 <script>
 /* ============================================================
-   BALL SORT PUZZLE v5.1 — Clean Header Edition
+   BALL SORT PUZZLE v6 — Clean Mobile Layout Edition
    ============================================================ */
 'use strict';
 
@@ -702,9 +600,7 @@ const SeedUtils = {
     }
     return h >>> 0;
   },
-  toString(seed) {
-    return (seed >>> 0).toString(36).toUpperCase().padStart(6, '0');
-  },
+  toString(seed) { return (seed >>> 0).toString(36).toUpperCase().padStart(6, '0'); },
   fromURL() {
     const m = location.hash.match(/seed=([A-Z0-9]+)/i);
     if (m) return parseInt(m[1], 36) >>> 0;
@@ -738,13 +634,9 @@ const EventBus = (() => {
 })();
 
 const Storage = {
-  get(key, fallback = null) {
-    try { const raw = localStorage.getItem(key); return raw === null ? fallback : raw; } catch { return fallback; }
-  },
+  get(key, fallback = null) { try { const raw = localStorage.getItem(key); return raw === null ? fallback : raw; } catch { return fallback; } },
   set(key, value) { try { localStorage.setItem(key, String(value)); } catch {} },
-  getJSON(key, fallback) {
-    try { const raw = localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw); } catch { return fallback; }
-  },
+  getJSON(key, fallback) { try { const raw = localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw); } catch { return fallback; } },
   setJSON(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} },
   remove(key) { try { localStorage.removeItem(key); } catch {} }
 };
@@ -767,8 +659,7 @@ const Sound = (() => {
     const now = ac.currentTime;
     const osc = ac.createOscillator();
     const gain = ac.createGain();
-    osc.frequency.value = freq;
-    osc.type = type;
+    osc.frequency.value = freq; osc.type = type;
     gain.gain.setValueAtTime(volume, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
     osc.connect(gain); gain.connect(ac.destination);
@@ -1143,6 +1034,12 @@ class GameController {
     EventBus.emit('toast:info', 'Nível reiniciado');
   }
 
+  exitGame() {
+    this.state.clearSave();
+    this.loadLevel(1);
+    Toaster.info('Partida reiniciada no Nível 1');
+  }
+
   setMode(modeId) {
     if (!GameModes[modeId]) return;
     this.state.mode = modeId;
@@ -1198,7 +1095,7 @@ class GameController {
     const to = s.tubes[toIdx];
 
     if (Rules.isComplete(from, s.bpt)) {
-      EventBus.emit('toast:warn', 'Este tubo já está completo');
+      Toaster.warn('Este tubo já está completo');
       s.selected = null;
       EventBus.emit('state:changed');
       return false;
@@ -1413,12 +1310,12 @@ class Renderer {
   computeBallSize(maxBalls, numTubes) {
     const vh = window.innerHeight;
     const vw = window.innerWidth;
-    const availH = vh * 0.5;
+    const availH = vh * 0.45;
     const availW = Math.min(vw * 0.95, 900);
     const sizeByH = Math.floor((availH - 20) / maxBalls) - 4;
-    const perRow = Math.min(numTubes, Math.max(4, Math.floor(availW / 60)));
-    const sizeByW = Math.floor((availW / perRow) - 12);
-    return Math.max(18, Math.min(42, Math.min(sizeByH, sizeByW)));
+    const perRow = Math.min(numTubes, Math.max(4, Math.floor(availW / 55)));
+    const sizeByW = Math.floor((availW / perRow) - 10);
+    return Math.max(18, Math.min(40, Math.min(sizeByH, sizeByW)));
   }
 
   renderStats() {
@@ -1446,7 +1343,6 @@ class Renderer {
         btn.className = 'level-btn';
         btn.textContent = i;
         btn.dataset.level = i;
-        if (i % 5 === 0 && i >= 5) btn.classList.add('spike');
         this.levelSelectorEl.appendChild(btn);
       }
     }
@@ -1490,16 +1386,11 @@ class Renderer {
   renderModifierBar() {
     const meta = this.state.meta;
     if (!meta || !meta.modifiers || meta.modifiers.length === 0) {
-      if (meta && meta.isSpike) {
-        this.modifierBarEl.innerHTML = '<span class="mod-pill" style="background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.5);color:#fbbf24">🔥 Spike</span>';
-        return;
-      }
       this.modifierBarEl.innerHTML = '';
       return;
     }
-    const labels = { blind: '🕶️ Cegos', rainbow: '🌈 Rainbow', locked: '🔒 Travados' };
+    const labels = { blind: '🕶️ Cegos', rainbow: '🌈 Rainbow' };
     const pills = meta.modifiers.map(m => `<span class="mod-pill">${labels[m] || m}</span>`);
-    if (meta.isSpike) pills.unshift('<span class="mod-pill" style="background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.5);color:#fbbf24">🔥 Spike</span>');
     this.modifierBarEl.innerHTML = pills.join('');
   }
 
@@ -1532,11 +1423,10 @@ class Renderer {
     });
   }
 
-  openModal({ level, moves, time, isSpike }) {
+  openModal({ level, moves, time }) {
     document.getElementById('modal-moves').textContent = moves;
     document.getElementById('modal-level').textContent = level;
     document.getElementById('modal-time').textContent = `${time}s`;
-    document.getElementById('modal-badge').style.display = isSpike ? 'inline-block' : 'none';
     this.modal.classList.add('active');
   }
 
@@ -1563,11 +1453,18 @@ class Renderer {
   EventBus.on('toast:success', msg => Toaster.success(msg));
   EventBus.on('modal:close', () => renderer.closeModal());
   EventBus.on('hint:show', ({ from, to }) => renderer.flashHint(from, to));
-  EventBus.on('level:won', ({ level, moves, time, isSpike }) => {
-    setTimeout(() => renderer.openModal({ level, moves, time, isSpike }), CONFIG.WIN_MODAL_DELAY);
+  EventBus.on('level:won', ({ level, moves, time }) => {
+    setTimeout(() => renderer.openModal({ level, moves, time }), CONFIG.WIN_MODAL_DELAY);
   });
-  EventBus.on('game:stuck', () => {
-    if (!state.zenMode) Toaster.warn('Sem movimentos! Tenta desfazer ↶');
+
+  // --- Toggle do Painel Opções no Mobile ---
+  const toggleBtn = document.getElementById('btn-toggle-options');
+  const optionsPanel = document.getElementById('options-panel');
+  const chevron = document.getElementById('options-chevron');
+
+  toggleBtn.addEventListener('click', () => {
+    const isOpen = optionsPanel.classList.toggle('open');
+    chevron.textContent = isOpen ? '▲' : '▼';
   });
 
   document.getElementById('level-selector').addEventListener('click', (e) => {
@@ -1596,6 +1493,7 @@ class Renderer {
   document.getElementById('btn-undo').addEventListener('click', () => controller.undo());
   document.getElementById('btn-add-tube').addEventListener('click', () => controller.addExtraTube());
   document.getElementById('btn-zen').addEventListener('click', () => controller.toggleZen());
+  document.getElementById('btn-exit').addEventListener('click', () => controller.exitGame());
   document.getElementById('btn-theme').addEventListener('click', () => renderer.toggleTheme());
   document.getElementById('btn-restart').addEventListener('click', () => controller.restart());
   document.getElementById('btn-sound').addEventListener('click', () => {
@@ -1608,39 +1506,6 @@ class Renderer {
     renderer.closeModal();
     controller.nextLevel();
   });
-
-  const levelToggle = document.getElementById('level-toggle');
-  const levelWrapper = document.getElementById('level-selector-wrapper');
-
-  if (levelToggle && levelWrapper) {
-    const syncLevelVisibility = () => {
-      const isMobile = window.matchMedia('(max-width: 767px)').matches;
-      if (isMobile) {
-        levelToggle.style.display = 'inline-flex';
-        const isOpen = levelToggle.getAttribute('aria-expanded') === 'true';
-        levelWrapper.style.display = isOpen ? 'flex' : 'none';
-      } else {
-        levelToggle.style.display = 'none';
-        levelWrapper.style.display = 'flex';
-      }
-    };
-
-    syncLevelVisibility();
-
-    levelToggle.addEventListener('click', () => {
-      const isOpen = levelToggle.getAttribute('aria-expanded') === 'true';
-      const nextOpen = !isOpen;
-      levelToggle.setAttribute('aria-expanded', String(nextOpen));
-      levelToggle.classList.toggle('open', nextOpen);
-      levelWrapper.style.display = nextOpen ? 'flex' : 'none';
-    });
-
-    let resizeToggler;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeToggler);
-      resizeToggler = setTimeout(syncLevelVisibility, 150);
-    });
-  }
 
   document.getElementById('level-prev')?.addEventListener('click', () => {
     if (state.level > 1) controller.loadLevel(state.level - 1);
