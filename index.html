@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1a0b2e">
-<title>Ball Sort Puzzle — Clean Mobile</title>
+<title>Ball Sort Puzzle — Navbar Edition</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,14 +76,11 @@ body{
 }
 
 /* ============================================================
-   TOP BAR (Estrutura em Grid Protegida)
+   UNIFIED NAVBAR (Topo Organizado)
    ============================================================ */
-.top-bar{
-  display:grid;
-  grid-template-columns: auto 1fr auto;
-  align-items:center;
-  padding:12px 16px;
-  gap:12px;
+.navbar{
+  display:flex;
+  flex-direction:column;
   background:var(--surface);
   border-bottom:1px solid var(--border);
   backdrop-filter:blur(12px);
@@ -91,13 +88,20 @@ body{
   box-shadow:var(--shadow-sm);
   z-index:100;
 }
-.top-bar-actions{display:flex; gap:8px; align-items:center}
+.nav-top-row{
+  display:grid;
+  grid-template-columns: auto 1fr auto;
+  align-items:center;
+  padding:10px 16px;
+  gap:12px;
+}
+.nav-actions{display:flex; gap:8px; align-items:center}
 .btn-icon{
-  width:40px; height:40px;
+  width:38px; height:38px;
   border-radius:50%;
   background:var(--surface);
   border:1px solid var(--border);
-  font-size:18px;
+  font-size:16px;
   display:flex; align-items:center; justify-content:center;
   transition:all var(--t-base);
 }
@@ -105,57 +109,47 @@ body{
 .btn-icon:active{transform:translateY(0) scale(.95)}
 
 .stats{display:flex; gap:16px; align-items:center; justify-content:center}
-.stat{display:flex; flex-direction:column; align-items:center; gap:2px; min-width:38px}
+.stat{display:flex; flex-direction:column; align-items:center; gap:1px; min-width:36px}
 .stat-value{
-  font-size:16px; font-weight:800;
+  font-size:15px; font-weight:800;
   font-variant-numeric:tabular-nums;
   color:var(--text);
 }
 .stat-label{
-  font-size:9px; text-transform:uppercase;
+  font-size:8px; text-transform:uppercase;
   letter-spacing:1px; color:var(--text-muted); font-weight:600;
 }
 
-/* ============================================================
-   PAINEL DE CONFIGURAÇÕES COLAPSÁVEL (ORGANIZA O TOPO)
-   ============================================================ */
-.menu-drawer-toggle{
-  display:flex; align-items:center; justify-content:center; gap:6px;
-  padding:6px 14px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius-full);
-  font-size:11px; font-weight:700;
+/* Painel Retrátil de Modos e Configurações dentro da Navbar */
+.nav-dropdown-toggle{
+  display:flex; align-items:center; justify-content:center; gap:4px;
+  font-size:10px; font-weight:700;
   color:var(--text-muted);
-  margin:6px auto 0;
+  padding:4px 10px;
+  background:var(--surface);
+  border-top:1px solid var(--border);
   cursor:pointer;
   transition:all var(--t-base);
+  text-transform:uppercase;
+  letter-spacing:.5px;
 }
-.menu-drawer-toggle:hover{background:var(--surface-hover); color:var(--text)}
+.nav-dropdown-toggle:hover{background:var(--surface-hover); color:var(--text)}
 
-.game-options-panel{
+.nav-collapse-content{
   display:none;
   flex-direction:column;
   gap:8px; padding:10px 16px;
-  background:rgba(15, 5, 32, 0.6);
-  border-bottom:1px solid var(--border);
-  backdrop-filter:blur(8px);
-  animation:slideDown .25s ease;
+  background:rgba(15, 5, 32, 0.4);
+  border-top:1px solid var(--border);
 }
-.game-options-panel.open{display:flex}
-@keyframes slideDown{
-  from{opacity:0; transform:translateY(-10px)}
-  to{opacity:1; transform:translateY(0)}
-}
+.nav-collapse-content.open{display:flex}
 
-/* Modo Bar & Seed Inside Panel */
 .mode-bar{
-  display:flex; gap:6px;
-  justify-content:center; flex-wrap:wrap;
+  display:flex; gap:6px; justify-content:center; flex-wrap:wrap;
 }
 .mode-btn{
   font-size:10px; font-weight:700;
-  padding:5px 10px;
+  padding:4px 10px;
   border-radius:var(--radius-full);
   background:var(--surface);
   border:1px solid var(--border);
@@ -171,25 +165,23 @@ body{
 }
 
 .seed-bar{
-  display:flex; gap:6px;
-  justify-content:center; align-items:center;
+  display:flex; gap:6px; justify-content:center; align-items:center;
   font-size:10px; color:var(--text-dim);
 }
 .seed-display{
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  padding:3px 8px;
+  padding:2px 8px;
   background:var(--surface);
   border-radius:var(--radius-full);
   border:1px solid var(--border);
   cursor:pointer;
 }
-
 .modifier-bar{
   display:flex; gap:4px; justify-content:center; flex-wrap:wrap;
 }
 .mod-pill{
   font-size:9px; font-weight:700;
-  padding:3px 8px;
+  padding:2px 8px;
   border-radius:var(--radius-full);
   background:rgba(168,85,247,.15);
   border:1px solid rgba(168,85,247,.4);
@@ -204,13 +196,15 @@ body{
   display:flex; align-items:center; gap:6px;
   padding:6px 12px;
   justify-content:center;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
 }
 .level-selector-arrow{
-  width:32px; height:32px; flex-shrink:0;
+  width:30px; height:30px; flex-shrink:0;
   border-radius:50%;
   background:var(--surface);
   border:1px solid var(--border);
-  color:var(--text); font-size:16px; font-weight:800;
+  color:var(--text); font-size:14px; font-weight:800;
   display:flex; align-items:center; justify-content:center;
   cursor:pointer;
 }
@@ -225,11 +219,11 @@ body{
 .level-selector::-webkit-scrollbar{display:none}
 
 .level-btn{
-  min-width:36px; height:36px;
+  min-width:34px; height:34px;
   border-radius:var(--radius-md);
   background:var(--surface);
   border:2px solid var(--border);
-  font-size:12px; font-weight:700;
+  font-size:11px; font-weight:700;
   flex-shrink:0; position:relative; color:var(--text);
 }
 .level-btn.active{
@@ -238,39 +232,39 @@ body{
 }
 .level-btn.completed::after{
   content:'✓'; position:absolute; top:-2px; right:2px;
-  color:var(--success); font-size:9px; font-weight:800;
+  color:var(--success); font-size:8px; font-weight:800;
 }
 
 /* ============================================================
-   GAME AREA (Dedicado e sem interferência)
+   GAME AREA
    ============================================================ */
 .game-area{
   flex:1;
   display:flex; flex-direction:column;
   justify-content:center; align-items:center;
-  padding:12px; gap:12px;
+  padding:10px; gap:10px;
   overflow:hidden;
   min-height:0;
 }
 
 .tubes-container{
   display:flex; flex-wrap:wrap;
-  gap:12px 8px;
+  gap:10px 6px;
   max-width:100%; width:100%;
   justify-content:center; align-items:end;
 }
 
 /* ============================================================
-   TUBE
+   TUBE & BALLS
    ============================================================ */
 .tube{
   position:relative;
-  width:var(--tw,42px);
-  height:var(--th,180px);
+  width:var(--tw,40px);
+  height:var(--th,170px);
   background:var(--tube-bg);
   border:2px solid var(--tube-border);
   border-top:none;
-  border-radius:0 0 21px 21px;
+  border-radius:0 0 20px 20px;
   box-shadow:var(--tube-shadow);
   display:flex; flex-direction:column-reverse; align-items:center;
   padding:4px 4px 0;
@@ -288,31 +282,27 @@ body{
   pointer-events:none; z-index:5;
 }
 .tube:not(.complete):not(.selected):hover{transform:translateY(-3px)}
-.tube.selected{transform:translateY(-12px); filter:drop-shadow(var(--glow-purple))}
+.tube.selected{transform:translateY(-10px); filter:drop-shadow(var(--glow-purple))}
 .tube.destination{filter:drop-shadow(var(--glow-green))}
-.tube.complete{border-color:var(--success); filter:drop-shadow(0 0 12px rgba(74,222,128,.5))}
+.tube.complete{border-color:var(--success); filter:drop-shadow(0 0 10px rgba(74,222,128,.5))}
 .tube.complete::after{
-  content:'✓'; position:absolute; top:-14px; left:50%; transform:translateX(-50%);
-  color:var(--success); font-size:14px; font-weight:800;
+  content:'✓'; position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+  color:var(--success); font-size:12px; font-weight:800;
 }
 .tube.invalid{animation:shake .35s cubic-bezier(.36,.07,.19,.97)}
-.tube.hint{filter:drop-shadow(0 0 16px var(--glow-gold)); animation:hintPulse .6s ease-in-out 2}
-@keyframes hintPulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.tube.hint{filter:drop-shadow(0 0 14px var(--glow-gold)); animation:hintPulse .6s ease-in-out 2}
+@keyframes hintPulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
 
-/* ============================================================
-   BALL
-   ============================================================ */
 .ball{
-  width:var(--bw,32px); height:var(--bw,32px);
+  width:var(--bw,30px); height:var(--bw,30px);
   border-radius:50%; margin-bottom:2px;
   position:relative;
-  box-shadow:inset -3px -3px 8px rgba(0,0,0,.4),inset 3px 3px 8px rgba(255,255,255,.4),0 2px 6px rgba(0,0,0,.4);
+  box-shadow:inset -2px -2px 6px rgba(0,0,0,.4),inset 2px 2px 6px rgba(255,255,255,.4),0 2px 5px rgba(0,0,0,.4);
   flex-shrink:0;
-  transition:transform var(--t-base);
-  animation:ballDrop .3s cubic-bezier(.34,1.56,.64,1);
+  animation:ballDrop .25s cubic-bezier(.34,1.56,.64,1);
 }
-@keyframes ballDrop{from{transform:translateY(-20px) scale(.8); opacity:0}to{transform:translateY(0) scale(1); opacity:1}}
+@keyframes ballDrop{from{transform:translateY(-15px) scale(.8); opacity:0}to{transform:translateY(0) scale(1); opacity:1}}
 .ball::before{
   content:''; position:absolute; top:12%; left:18%; width:30%; height:30%;
   border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.9),transparent 70%);
@@ -331,161 +321,128 @@ body{
 .ball.lime{background:radial-gradient(circle at 35% 30%,#d9f99d,#84cc16 60%,#3f6212)}
 .ball.teal{background:radial-gradient(circle at 35% 30%,#99f6e4,#14b8a6 60%,#0f766e)}
 .ball.magenta{background:radial-gradient(circle at 35% 30%,#f0abfc,#d946ef 60%,#86198f)}
-
-.ball.rainbow{
-  background:conic-gradient(from 0deg,#ff6b6b, #fde68a, #86efac, #93c5fd, #d8b4fe, #f9a8d4, #ff6b6b);
-  animation:rainbowSpin 4s linear infinite;
-}
+.ball.rainbow{background:conic-gradient(from 0deg,#ff6b6b, #fde68a, #86efac, #93c5fd, #d8b4fe, #f9a8d4, #ff6b6b); animation:rainbowSpin 4s linear infinite;}
 @keyframes rainbowSpin{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
 .ball.blind{background:radial-gradient(circle at 35% 30%,#4a4a4a,#1a1a1a 60%,#000)}
-.ball.blind::after{
-  content:'?'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-  color:#fbbf24; font-weight:900; font-size:15px;
-}
+.ball.blind::after{content:'?'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fbbf24; font-weight:900; font-size:14px;}
 
 /* ============================================================
-   BOTTOM BAR (Com o Botão Sair / Início)
+   BOTTOM BAR (Botão Sair com função de Fechar o Jogo)
    ============================================================ */
 .bottom-bar{
   display:flex; justify-content:center; gap:8px;
-  padding:12px 16px; flex-wrap:wrap;
+  padding:10px 16px; flex-wrap:wrap;
   background:var(--surface);
   border-top:1px solid var(--border);
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
 }
 .btn{
-  padding:10px 16px;
+  padding:9px 14px;
   border-radius:var(--radius-full);
   background:var(--btn-bg);
-  color:#fff; font-size:12px; font-weight:700;
-  display:inline-flex; align-items:center; gap:6px;
+  color:#fff; font-size:11px; font-weight:700;
+  display:inline-flex; align-items:center; gap:5px;
   transition:all var(--t-base);
-  box-shadow:0 6px 18px rgba(168,85,247,.4);
+  box-shadow:0 4px 14px rgba(168,85,247,.4);
 }
 .btn:hover:not(:disabled){transform:translateY(-2px)}
-.btn.secondary{background:var(--btn-accent); box-shadow:0 6px 18px rgba(59,130,246,.4)}
-.btn.danger{background:linear-gradient(135deg,#ef4444,#b91c1c); box-shadow:0 6px 18px rgba(239,68,68,.4)}
+.btn.secondary{background:var(--btn-accent); box-shadow:0 4px 14px rgba(59,130,246,.4)}
+.btn.danger{background:linear-gradient(135deg,#ef4444,#b91c1c); box-shadow:0 4px 14px rgba(239,68,68,.4)}
 .btn:disabled{opacity:.35; cursor:not-allowed; transform:none!important; box-shadow:none!important}
 .btn.full{width:100%; justify-content:center}
 
 .zen-toggle{
-  display:flex; align-items:center; gap:6px;
+  display:flex; align-items:center; gap:5px;
   font-size:11px; font-weight:600; color:var(--text-muted);
-  padding:8px 12px; background:var(--surface); border-radius:var(--radius-full);
+  padding:7px 12px; background:var(--surface); border-radius:var(--radius-full);
   border:1px solid var(--border);
 }
 .zen-toggle.active{background:rgba(74,222,128,.2); border-color:rgba(74,222,128,.5); color:var(--success)}
 
 /* ============================================================
-   MODAL
+   MODAL & TOAST
    ============================================================ */
 .modal-overlay{
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.75);
-  backdrop-filter:blur(10px);
-  display:flex; align-items:center; justify-content:center;
-  z-index:1000; padding:20px;
-  opacity:0; pointer-events:none; transition:opacity var(--t-base);
+  position:fixed; inset:0; background:rgba(0,0,0,.75);
+  backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center;
+  z-index:1000; padding:20px; opacity:0; pointer-events:none; transition:opacity var(--t-base);
 }
 .modal-overlay.active{opacity:1; pointer-events:auto}
 .modal-card{
   background:linear-gradient(135deg,rgba(45,27,78,.98),rgba(26,11,46,.98));
-  border:1px solid rgba(168,85,247,.4);
-  border-radius:var(--radius-xl);
-  padding:28px 22px; max-width:380px; width:100%; text-align:center;
+  border:1px solid rgba(168,85,247,.4); border-radius:var(--radius-xl);
+  padding:24px 20px; max-width:360px; width:100%; text-align:center;
   box-shadow:var(--shadow-lg); transform:scale(.9); transition:transform var(--t-slow);
 }
 .modal-overlay.active .modal-card{transform:scale(1)}
-.modal-emoji{font-size:56px; margin-bottom:10px}
-.modal-title{
-  font-size:22px; font-weight:800; margin:0 0 8px;
-  background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
-  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-}
-.modal-message{color:var(--text-muted); font-size:13px; margin:0 0 18px}
+.modal-emoji{font-size:48px; margin-bottom:8px}
+.modal-title{font-size:20px; font-weight:800; margin:0 0 6px; color:var(--accent-1)}
+.modal-message{color:var(--text-muted); font-size:12px; margin:0 0 16px}
 .modal-stats{
   display:flex; justify-content:space-around;
-  padding:14px; background:rgba(168,85,247,.1);
-  border-radius:var(--radius-md); margin-bottom:18px;
+  padding:12px; background:rgba(168,85,247,.1);
+  border-radius:var(--radius-md); margin-bottom:16px;
 }
-.modal-stat-value{font-size:20px; font-weight:800; color:var(--accent-1)}
-.modal-stat-label{font-size:10px; text-transform:uppercase; color:var(--text-muted)}
+.modal-stat-value{font-size:18px; font-weight:800; color:var(--accent-1)}
+.modal-stat-label{font-size:9px; text-transform:uppercase; color:var(--text-muted)}
 
-/* ============================================================
-   TOAST
-   ============================================================ */
 .toast-container{
-  position:fixed; top:70px; left:50%; transform:translateX(-50%);
-  z-index:2000; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none;
+  position:fixed; top:65px; left:50%; transform:translateX(-50%);
+  z-index:2000; display:flex; flex-direction:column; gap:6px; align-items:center; pointer-events:none;
 }
 .toast{
-  color:#fff; padding:10px 18px; border-radius:var(--radius-full);
-  font-weight:700; font-size:12px; box-shadow:var(--shadow-md); animation:toastIn .3s ease;
+  color:#fff; padding:8px 16px; border-radius:var(--radius-full);
+  font-weight:700; font-size:11px; box-shadow:var(--shadow-md); animation:toastIn .3s ease;
 }
 .toast.info{background:linear-gradient(135deg,var(--accent-1),var(--accent-2))}
 .toast.warn{background:linear-gradient(135deg,var(--warning),#d97706)}
 .toast.success{background:linear-gradient(135deg,var(--success),#15803d)}
-.toast.removing{animation:toastOut .3s ease forwards}
-@keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-20px)}}
-
-@media (max-width:600px){
-  .top-bar{padding:10px 12px; gap:8px}
-  .btn-icon{width:36px; height:36px; font-size:15px}
-  .stat-value{font-size:14px}
-  .stat-label{font-size:8px}
-  .stats{gap:10px}
-  .game-area{padding:6px 8px; gap:8px}
-  .tubes-container{gap:8px 5px}
-}
+@keyframes toastIn{from{opacity:0;transform:translateY(-15px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
-<!-- ============ TOP BAR ============ -->
-<header class="top-bar">
-  <div class="top-bar-actions">
-    <button class="btn-icon" id="btn-theme" type="button" aria-label="Alternar tema" title="Tema">🌙</button>
-    <button class="btn-icon" id="btn-sound" type="button" aria-label="Alternar som" title="Som">🔊</button>
+<!-- ============ NAVBAR SUPERIOR UNIFICADA ============ -->
+<header class="navbar">
+  <div class="nav-top-row">
+    <div class="nav-actions">
+      <button class="btn-icon" id="btn-theme" type="button" aria-label="Alternar tema" title="Tema">🌙</button>
+      <button class="btn-icon" id="btn-sound" type="button" aria-label="Alternar som" title="Som">🔊</button>
+    </div>
+    <div class="stats" role="status" aria-live="polite">
+      <div class="stat">
+        <div class="stat-value" id="stat-moves">0</div>
+        <div class="stat-label">Movs</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="stat-level">1</div>
+        <div class="stat-label">Nível</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="stat-colors">0</div>
+        <div class="stat-label">Cores</div>
+      </div>
+    </div>
+    <button class="btn-icon" id="btn-restart" type="button" aria-label="Reiniciar nível" title="Reiniciar">🔄</button>
   </div>
-  <div class="stats" role="status" aria-live="polite">
-    <div class="stat">
-      <div class="stat-value" id="stat-moves">0</div>
-      <div class="stat-label">Movs</div>
+
+  <!-- Botão Retrátil para Modos e Opções -->
+  <button class="nav-dropdown-toggle" id="btn-toggle-options" type="button">
+    <span>⚙️ Opções e Modos do Jogo</span>
+    <span id="options-chevron">▼</span>
+  </button>
+
+  <div class="nav-collapse-content" id="options-panel">
+    <nav class="mode-bar" id="mode-bar" aria-label="Modo de jogo"></nav>
+    <div class="seed-bar">
+      <span>SEED:</span>
+      <span class="seed-display" id="seed-display" title="Clique para copiar">—</span>
+      <button class="btn-icon" id="btn-shuffle-seed" style="width:22px;height:22px;font-size:10px" title="Nova seed">🎲</button>
     </div>
-    <div class="stat">
-      <div class="stat-value" id="stat-level">1</div>
-      <div class="stat-label">Nível</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="stat-colors">0</div>
-      <div class="stat-label">Cores</div>
-    </div>
+    <div class="modifier-bar" id="modifier-bar"></div>
   </div>
-  <button class="btn-icon" id="btn-restart" type="button" aria-label="Reiniciar nível" title="Reiniciar">🔄</button>
 </header>
-
-<!-- ============ MENU EXPANSÍVEL MÓVEL ============ -->
-<button class="menu-drawer-toggle" id="btn-toggle-options" type="button">
-  <span>⚙️ Opções do Jogo</span>
-  <span id="options-chevron">▼</span>
-</button>
-
-<div class="game-options-panel" id="options-panel">
-  <!-- MODE BAR -->
-  <nav class="mode-bar" id="mode-bar" aria-label="Modo de jogo"></nav>
-
-  <!-- SEED BAR -->
-  <div class="seed-bar">
-    <span>SEED:</span>
-    <span class="seed-display" id="seed-display" title="Clique para copiar">—</span>
-    <button class="btn-icon" id="btn-shuffle-seed" style="width:24px;height:24px;font-size:11px" title="Nova seed">🎲</button>
-  </div>
-
-  <!-- MODIFIERS -->
-  <div class="modifier-bar" id="modifier-bar"></div>
-</div>
 
 <!-- ============ LEVEL SELECTOR ============ -->
 <div class="level-selector-wrapper" id="level-selector-wrapper">
@@ -499,13 +456,13 @@ body{
   <div class="tubes-container" id="tubes-container" role="grid" aria-label="Tabuleiro"></div>
 </main>
 
-<!-- ============ BOTTOM BAR (COM BOTÃO SAIR) ============ -->
+<!-- ============ BOTTOM BAR (COM BOTÃO FECHAR JOGO) ============ -->
 <footer class="bottom-bar">
   <button class="btn secondary" id="btn-undo" type="button" title="Desfazer" disabled>↶</button>
   <button class="btn secondary" id="btn-hint" type="button" title="Dica">💡</button>
   <button class="btn secondary" id="btn-add-tube" type="button" title="Adicionar Tubo">➕</button>
   <button class="zen-toggle" id="btn-zen" type="button" aria-pressed="false">🧘 Zen</button>
-  <button class="btn danger" id="btn-exit" type="button" title="Sair do Jogo">🚪 Sair</button>
+  <button class="btn danger" id="btn-exit" type="button" title="Fechar Jogo">🚪 Sair</button>
 </footer>
 
 <!-- ============ MODAL ============ -->
@@ -537,7 +494,7 @@ body{
 
 <script>
 /* ============================================================
-   BALL SORT PUZZLE v6 — Clean Mobile Layout Edition
+   BALL SORT PUZZLE v7 — Navbar & Exit Game Edition
    ============================================================ */
 'use strict';
 
@@ -706,8 +663,7 @@ const Toaster = (() => {
     el.textContent = msg;
     container.appendChild(el);
     setTimeout(() => {
-      el.classList.add('removing');
-      setTimeout(() => { el.remove(); active = false; next(); }, 300);
+      el.remove(); active = false; next();
     }, CONFIG.TOAST_DURATION);
   };
 
@@ -1035,9 +991,20 @@ class GameController {
   }
 
   exitGame() {
-    this.state.clearSave();
-    this.loadLevel(1);
-    Toaster.info('Partida reiniciada no Nível 1');
+    // Ação equivalente a fechar/sair do jogo com segurança
+    this.state.clearStorage || Storage.remove(CONFIG.STORAGE_KEYS.SAVE);
+    try {
+      // Tenta fechar a aba/janela se aberta por script
+      window.close();
+    } catch {}
+    // Se o navegador bloquear o window.close(), redireciona ou exibe tela de encerramento amigável
+    document.body.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0f0520;color:#f5f0ff;font-family:sans-serif;text-align:center;padding:20px;">
+        <h1 style="font-size:28px;margin-bottom:10px;">🚪 Jogo Encerrado</h1>
+        <p style="color:#a78bfa;margin-bottom:20px;">Obrigado por jogar Ball Sort Puzzle!</p>
+        <button onclick="location.reload()" style="padding:10px 20px;border-radius:999px;background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;border:none;font-weight:700;cursor:pointer;">Jogar Novamente</button>
+      </div>
+    `;
   }
 
   setMode(modeId) {
@@ -1151,8 +1118,7 @@ class GameController {
     EventBus.emit('level:won', {
       level: s.level,
       moves: s.moves,
-      time: Math.round((Date.now() - s.startTime) / 1000),
-      isSpike: s.meta && s.meta.isSpike
+      time: Math.round((Date.now() - s.startTime) / 1000)
     });
   }
 
@@ -1295,11 +1261,6 @@ class Renderer {
       });
 
       el.addEventListener('click', () => this.onTubeClick && this.onTubeClick(idx));
-      el.tabIndex = 0;
-      el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.onTubeClick && this.onTubeClick(idx); }
-      });
-
       frag.appendChild(el);
     });
 
@@ -1313,9 +1274,9 @@ class Renderer {
     const availH = vh * 0.45;
     const availW = Math.min(vw * 0.95, 900);
     const sizeByH = Math.floor((availH - 20) / maxBalls) - 4;
-    const perRow = Math.min(numTubes, Math.max(4, Math.floor(availW / 55)));
+    const perRow = Math.min(numTubes, Math.max(4, Math.floor(availW / 50)));
     const sizeByW = Math.floor((availW / perRow) - 10);
-    return Math.max(18, Math.min(40, Math.min(sizeByH, sizeByW)));
+    return Math.max(16, Math.min(38, Math.min(sizeByH, sizeByW)));
   }
 
   renderStats() {
@@ -1419,7 +1380,7 @@ class Renderer {
       el.classList.remove('hint');
       void el.offsetWidth;
       el.classList.add('hint');
-      setTimeout(() => el.classList.remove('hint'), 1300);
+      setTimeout(() => el.classList.remove('hint'), 1200);
     });
   }
 
@@ -1457,7 +1418,7 @@ class Renderer {
     setTimeout(() => renderer.openModal({ level, moves, time }), CONFIG.WIN_MODAL_DELAY);
   });
 
-  // --- Toggle do Painel Opções no Mobile ---
+  // Toggle do Painel de Opções na Navbar
   const toggleBtn = document.getElementById('btn-toggle-options');
   const optionsPanel = document.getElementById('options-panel');
   const chevron = document.getElementById('options-chevron');
