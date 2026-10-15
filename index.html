@@ -5,8 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ball Sort">
 <meta name="theme-color" content="#1a0b2e">
 <title>Ball Sort Puzzle</title>
+
+<!-- ===== PWA ===== -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -106,6 +113,19 @@ body{
 }
 .btn-icon:hover{background:var(--surface-hover); transform:translateY(-2px)}
 .btn-icon:active{transform:translateY(0) scale(.95)}
+.btn-icon[hidden]{display:none}
+
+/* Botão instalar — destaque sutil */
+.btn-install{
+  animation:installPulse 2.4s ease-in-out infinite;
+  background:rgba(74,222,128,.12);
+  border-color:rgba(74,222,128,.4);
+}
+.btn-install:hover{background:rgba(74,222,128,.22)}
+@keyframes installPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,.4)}
+  50%{box-shadow:0 0 0 8px rgba(74,222,128,0)}
+}
 
 .stats{display:flex; gap:16px; align-items:center; justify-content:center}
 .stat{display:flex; flex-direction:column; align-items:center; gap:1px; min-width:36px}
@@ -179,6 +199,8 @@ body{
   border:1px solid var(--border);
   cursor:pointer;
   transition:background var(--t-base);
+  color:var(--text);
+  font-size:10px;
 }
 .seed-display:hover{background:var(--surface-hover)}
 .seed-display.copied{background:rgba(74,222,128,.2); border-color:rgba(74,222,128,.5)}
@@ -403,6 +425,7 @@ body{
 .toast{
   color:#fff; padding:8px 16px; border-radius:var(--radius-full);
   font-weight:700; font-size:11px; box-shadow:var(--shadow-md); animation:toastIn .3s ease;
+  max-width:90vw; text-align:center;
 }
 .toast.info{background:linear-gradient(135deg,var(--accent-1),var(--accent-2))}
 .toast.warn{background:linear-gradient(135deg,var(--warning),#d97706)}
@@ -435,6 +458,7 @@ body{
     <div class="nav-actions">
       <button class="btn-icon" id="btn-theme" type="button" aria-label="Alternar tema" title="Tema">🌙</button>
       <button class="btn-icon" id="btn-sound" type="button" aria-label="Alternar som" title="Som">🔊</button>
+      <button class="btn-icon btn-install" id="btn-install" type="button" aria-label="Instalar aplicativo" title="Instalar como app" hidden>⬇️</button>
     </div>
     <div class="stats" role="status" aria-live="polite">
       <div class="stat"><div class="stat-value" id="stat-moves">0</div><div class="stat-label">Movs</div></div>
@@ -501,11 +525,10 @@ body{
 
 <script>
 /* ============================================================
-   BALL SORT PUZZLE v8 — Refatorado
+   BALL SORT PUZZLE v8.1 — PWA Ready
    ============================================================ */
 'use strict';
 
-/* ---------- Configuração central ---------- */
 const CONFIG = Object.freeze({
   COLORS: ['red','green','blue','yellow','purple','orange','pink','cyan','brown','gray','lime','teal','magenta'],
   MAX_LEVEL: 30,
@@ -540,14 +563,8 @@ const CONFIG = Object.freeze({
 });
 
 /* ---------- Utilitários ---------- */
-/**
- * Gerador de números pseudo-aleatórios determinístico (mulberry32).
- * Mesma seed → mesma sequência.
- */
 class SeededRandom {
-  constructor(seed) {
-    this._state = (seed | 0) >>> 0;
-  }
+  constructor(seed) { this._state = (seed | 0) >>> 0; }
   next() {
     let t = (this._state += 0x6D2B79F5) >>> 0;
     t = Math.imul(t ^ (t >>> 15), t | 1);
@@ -593,11 +610,25 @@ const SeedUtils = {
     const s = SeedUtils.toString(seed);
     try { history.replaceState(null, '', `#seed=${s}`); } catch {}
   },
+  clearURLHash() {
+    try { history.replaceState(null, '', location.pathname + location.search); } catch {}
+  },
   daily() {
     const d = new Date();
     return SeedUtils.fromString(`daily-${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`);
   },
   random() { return (Math.random() * 0xFFFFFFFF) >>> 0; }
+};
+
+/* Lê ?mode=daily|chaos|classic|challenge da URL (usado pelos shortcuts do manifest) */
+const QueryUtils = {
+  getMode() {
+    try {
+      const params = new URLSearchParams(location.search);
+      const mode = params.get('mode');
+      return mode && ['classic','challenge','chaos','daily'].includes(mode) ? mode : null;
+    } catch { return null; }
+  }
 };
 
 const EventBus = (() => {
@@ -688,12 +719,11 @@ const Sound = (() => {
   };
 })();
 
-/* ---------- Toaster (com fila segura) ---------- */
+/* ---------- Toaster ---------- */
 const Toaster = (() => {
   const container = document.getElementById('toast-container');
   const queue = [];
   let active = false;
-  let safetyTimer = null;
 
   const show = ({ msg, type }) => {
     const el = document.createElement('div');
@@ -701,14 +731,16 @@ const Toaster = (() => {
     el.textContent = msg;
     container.appendChild(el);
 
+    let finished = false;
     const finish = () => {
-      clearTimeout(safetyTimer);
+      if (finished) return;
+      finished = true;
       el.remove();
       active = false;
       next();
     };
     setTimeout(finish, CONFIG.TOAST_DURATION);
-    safetyTimer = setTimeout(finish, CONFIG.TOAST_SAFETY_TIMEOUT);
+    setTimeout(finish, CONFIG.TOAST_SAFETY_TIMEOUT);
   };
 
   const next = () => {
@@ -726,7 +758,7 @@ const Toaster = (() => {
   };
 })();
 
-/* ---------- Domínio do jogo ---------- */
+/* ---------- Domínio ---------- */
 const GameModes = {
   classic:   { id: 'classic',   label: 'Clássico', icon: '🎯', noUndo: false, noExtraTube: false, chaos: false },
   challenge: { id: 'challenge', label: 'Desafio',  icon: '⚔️', noUndo: true,  noExtraTube: true,  chaos: false },
@@ -909,12 +941,10 @@ const LevelGenerator = (() => {
   };
 
   const generate = (level, modeId, seed) => {
-    // Tentativa com retry limitado — antes era recursivo e podia estourar a pilha
     for (let attempt = 0; attempt < CONFIG.MAX_GENERATION_RETRIES; attempt++) {
       const result = buildOnce(level, modeId, (seed + attempt) >>> 0);
       if (!(isSolved(result.tubes) && level > 1)) return result;
     }
-    // Fallback: aceita mesmo se vier resolvido (improvável)
     return buildOnce(level, modeId, seed);
   };
 
@@ -935,7 +965,7 @@ class GameState {
     this.zenMode = false;
     this.completed = false;
     this.startTime = Date.now();
-    this.mode = Storage.get(CONFIG.STORAGE_KEYS.MODE, 'classic');
+    this.mode = QueryUtils.getMode() || Storage.get(CONFIG.STORAGE_KEYS.MODE, 'classic');
     this.seed = SeedUtils.fromURL() || SeedUtils.random();
     this.completedLevels = Storage.getJSON(CONFIG.STORAGE_KEYS.COMPLETED, []) || [];
     this.theme = Storage.get(CONFIG.STORAGE_KEYS.THEME, 'dark');
@@ -990,7 +1020,8 @@ class GameState {
     this.meta = save.meta || null;
     this.extraTubes = save.extraTubes || 0;
     this.history = save.history || [];
-    this.mode = save.mode || 'classic';
+    // Modo da URL tem prioridade sobre o salvo
+    this.mode = QueryUtils.getMode() || save.mode || 'classic';
     this.seed = save.seed || SeedUtils.random();
     this.selected = null;
     this.completed = false;
@@ -1009,7 +1040,6 @@ class GameController {
 
   getMode() { return GameModes[this.state.mode] || GameModes.classic; }
 
-  /** Agenda gravação no storage — evita gravar a cada clique em mobile. */
   _scheduleSave() {
     clearTimeout(this._saveDebounceId);
     this._saveDebounceId = setTimeout(() => this.state.saveGame(), CONFIG.SAVE_DEBOUNCE);
@@ -1196,7 +1226,6 @@ class GameController {
 
   hint() {
     const s = this.state;
-    // Cancela seleção pendente — evita estado inconsistente
     s.selected = null;
 
     const nonEmpties = [];
@@ -1272,7 +1301,6 @@ class Renderer {
     const tubeH = ballSize * maxBalls + CONFIG.SIZING.TUBE_HEIGHT_PADDING;
     const tubeW = ballSize + CONFIG.SIZING.TUBE_BALL_GAP;
 
-    // Só atualiza a CSS var quando muda — evita reflow do layout inteiro
     if (ballSize !== this._lastBallSize) {
       document.documentElement.style.setProperty('--bw', `${ballSize}px`);
       this._lastBallSize = ballSize;
@@ -1464,36 +1492,111 @@ class Renderer {
     this.renderTheme();
   }
 
-  /** Feedback visual ao copiar a seed. */
   flashSeedCopied() {
     const el = this._els.seedDisplay;
     el.classList.add('copied');
     setTimeout(() => el.classList.remove('copied'), 800);
   }
 
-  /** Mostra a tela de encerramento sem destruir o DOM do jogo. */
   showExitScreen() {
     const screen = document.createElement('div');
     screen.className = 'exit-screen';
-    screen.innerHTML = `
-      <h1>🚪 Jogo Encerrado</h1>
-      <p>Obrigado por jogar Ball Sort Puzzle!</p>
-    `;
+
+    const h1 = document.createElement('h1');
+    h1.textContent = '🚪 Jogo Encerrado';
+
+    const p = document.createElement('p');
+    p.textContent = 'Obrigado por jogar Ball Sort Puzzle!';
+
     const btn = document.createElement('button');
     btn.className = 'btn';
     btn.type = 'button';
     btn.textContent = '▶ Jogar Novamente';
     btn.addEventListener('click', () => location.reload());
-    screen.appendChild(btn);
+
+    screen.append(h1, p, btn);
     document.body.appendChild(screen);
   }
 }
+
+/* ---------- PWA Manager ---------- */
+const PWA = (() => {
+  let deferredPrompt = null;
+  const btnInstall = document.getElementById('btn-install');
+
+  const isStandalone = () =>
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+
+  const hideButton = () => { if (btnInstall) btnInstall.hidden = true; };
+  const showButton = () => { if (btnInstall && !isStandalone()) btnInstall.hidden = false; };
+
+  const init = () => {
+    // Já está instalado? Esconde o botão permanentemente.
+    if (isStandalone()) { hideButton(); return; }
+
+    // Chrome/Edge disparam quando o app é instalável
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      showButton();
+    });
+
+    // Instalado com sucesso
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      hideButton();
+      Toaster.success('✅ Ball Sort instalado!');
+    });
+
+    // Botão de instalação
+    btnInstall?.addEventListener('click', async () => {
+      if (!deferredPrompt) {
+        Toaster.info('Use o menu do navegador para instalar');
+        return;
+      }
+      try {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') Toaster.success('🎉 Instalando...');
+        deferredPrompt = null;
+        hideButton();
+      } catch (err) {
+        console.warn('[PWA] prompt falhou:', err);
+      }
+    });
+
+    // Registra o Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err =>
+          console.warn('[SW] Falha ao registrar:', err)
+        );
+      });
+    }
+  };
+
+  return { init, isStandalone };
+})();
 
 /* ---------- Bootstrap ---------- */
 (function App() {
   const state = new GameState();
   const controller = new GameController(state);
   const renderer = new Renderer(state);
+
+  // Se veio ?mode=... na URL, salva como modo atual e limpa a query
+  const urlMode = QueryUtils.getMode();
+  if (urlMode) {
+    state.saveMode();
+    try {
+      const cleanSearch = location.search.replace(/[?&]mode=[^&]*/g, '').replace(/^&/, '?');
+      history.replaceState(null, '', location.pathname + (cleanSearch === '?' ? '' : cleanSearch) + location.hash);
+    } catch {}
+  }
+
+  // Inicializa PWA
+  PWA.init();
 
   renderer.bindTubeClick(idx => controller.selectTube(idx));
 
@@ -1592,7 +1695,7 @@ class Renderer {
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      renderer._lastBallSize = null; // força recálculo
+      renderer._lastBallSize = null;
       renderer.render();
     }, CONFIG.RESIZE_DEBOUNCE);
   });
