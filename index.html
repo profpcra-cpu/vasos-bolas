@@ -10,7 +10,6 @@
 <meta name="theme-color" content="#1a0b2e">
 <title>Ball Sort Puzzle</title>
 
-<!-- ===== PWA ===== -->
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -19,9 +18,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ============================================================
-   DESIGN TOKENS
-   ============================================================ */
 :root{
   --bg-1:#1a0b2e; --bg-2:#2d1b4e; --bg-3:#0f0520;
   --text:#f5f0ff; --text-muted:#a78bfa; --text-dim:#6b5b8a;
@@ -60,10 +56,6 @@
   --shadow-md:0 8px 24px rgba(30,20,60,.15);
   --shadow-lg:0 16px 48px rgba(30,20,60,.2);
 }
-
-/* ============================================================
-   RESET & BASE
-   ============================================================ */
 *,*::before,*::after{box-sizing:border-box}
 html,body{
   height:100%; margin:0;
@@ -81,10 +73,12 @@ body{
   background:radial-gradient(circle at 30% 20%,var(--bg-2) 0%,var(--bg-1) 45%,var(--bg-3) 100%);
   display:flex; flex-direction:column; min-height:100dvh;
 }
+body.zen-mode .stats,
+body.zen-mode .bottom-bar .btn:not(#btn-zen):not(#btn-exit),
+body.zen-mode #btn-hint{display:none !important}
+body.zen-mode .navbar{opacity:.55}
+body.zen-mode .navbar:hover{opacity:1}
 
-/* ============================================================
-   NAVBAR
-   ============================================================ */
 .navbar{
   display:flex; flex-direction:column;
   background:var(--surface);
@@ -93,6 +87,7 @@ body{
   -webkit-backdrop-filter:blur(12px);
   box-shadow:var(--shadow-sm);
   z-index:100;
+  transition:opacity var(--t-base);
 }
 .nav-top-row{
   display:grid;
@@ -115,7 +110,6 @@ body{
 .btn-icon:active{transform:translateY(0) scale(.95)}
 .btn-icon[hidden]{display:none}
 
-/* Botão instalar — destaque sutil */
 .btn-install{
   animation:installPulse 2.4s ease-in-out infinite;
   background:rgba(74,222,128,.12);
@@ -216,9 +210,6 @@ body{
   text-transform:uppercase;
 }
 
-/* ============================================================
-   LEVEL SELECTOR
-   ============================================================ */
 .level-selector-wrapper{
   display:flex; align-items:center; gap:6px;
   padding:6px 12px;
@@ -266,9 +257,6 @@ body{
   color:var(--success); font-size:8px; font-weight:800;
 }
 
-/* ============================================================
-   GAME AREA
-   ============================================================ */
 .game-area{
   flex:1;
   display:flex; flex-direction:column;
@@ -284,9 +272,6 @@ body{
   justify-content:center; align-items:end;
 }
 
-/* ============================================================
-   TUBE & BALLS
-   ============================================================ */
 .tube{
   position:relative;
   width:var(--tw,40px);
@@ -330,8 +315,8 @@ body{
   position:relative;
   box-shadow:inset -2px -2px 6px rgba(0,0,0,.4),inset 2px 2px 6px rgba(255,255,255,.4),0 2px 5px rgba(0,0,0,.4);
   flex-shrink:0;
-  animation:ballDrop .25s cubic-bezier(.34,1.56,.64,1);
 }
+.ball.animated{animation:ballDrop .25s cubic-bezier(.34,1.56,.64,1)}
 @keyframes ballDrop{from{transform:translateY(-15px) scale(.8); opacity:0}to{transform:translateY(0) scale(1); opacity:1}}
 .ball::before{
   content:''; position:absolute; top:12%; left:18%; width:30%; height:30%;
@@ -356,9 +341,6 @@ body{
 .ball.blind{background:radial-gradient(circle at 35% 30%,#4a4a4a,#1a1a1a 60%,#000)}
 .ball.blind::after{content:'?'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fbbf24; font-weight:900; font-size:14px;}
 
-/* ============================================================
-   BOTTOM BAR
-   ============================================================ */
 .bottom-bar{
   display:flex; justify-content:center; gap:8px;
   padding:10px 16px; flex-wrap:wrap;
@@ -391,9 +373,6 @@ body{
 }
 .zen-toggle.active{background:rgba(74,222,128,.2); border-color:rgba(74,222,128,.5); color:var(--success)}
 
-/* ============================================================
-   MODAL & TOAST
-   ============================================================ */
 .modal-overlay{
   position:fixed; inset:0; background:rgba(0,0,0,.75);
   backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center;
@@ -432,9 +411,6 @@ body{
 .toast.success{background:linear-gradient(135deg,var(--success),#15803d)}
 @keyframes toastIn{from{opacity:0;transform:translateY(-15px)}to{opacity:1;transform:translateY(0)}}
 
-/* ============================================================
-   EXIT SCREEN
-   ============================================================ */
 .exit-screen{
   position:fixed; inset:0; z-index:5000;
   display:flex; flex-direction:column;
@@ -452,7 +428,6 @@ body{
 </head>
 <body>
 
-<!-- ============ NAVBAR ============ -->
 <header class="navbar">
   <div class="nav-top-row">
     <div class="nav-actions">
@@ -484,19 +459,16 @@ body{
   </div>
 </header>
 
-<!-- ============ LEVEL SELECTOR ============ -->
 <div class="level-selector-wrapper" id="level-selector-wrapper">
   <button class="level-selector-arrow" id="level-prev" type="button" aria-label="Nível anterior">‹</button>
   <nav class="level-selector" id="level-selector" aria-label="Seleção de nível"></nav>
   <button class="level-selector-arrow" id="level-next" type="button" aria-label="Próximo nível">›</button>
 </div>
 
-<!-- ============ GAME AREA ============ -->
 <main class="game-area">
   <div class="tubes-container" id="tubes-container" role="grid" aria-label="Tabuleiro"></div>
 </main>
 
-<!-- ============ BOTTOM BAR ============ -->
 <footer class="bottom-bar">
   <button class="btn secondary" id="btn-undo" type="button" title="Desfazer (Ctrl+Z)" disabled>↶</button>
   <button class="btn secondary" id="btn-hint" type="button" title="Dica (H)">💡</button>
@@ -505,7 +477,6 @@ body{
   <button class="btn danger" id="btn-exit" type="button" title="Sair do jogo">🚪 Sair</button>
 </footer>
 
-<!-- ============ MODAL ============ -->
 <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-card">
     <div class="modal-emoji">🎉</div>
@@ -520,12 +491,11 @@ body{
   </div>
 </div>
 
-<!-- ============ TOASTS ============ -->
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
 <script>
 /* ============================================================
-   BALL SORT PUZZLE v8.1 — PWA Ready
+   BALL SORT PUZZLE v8.2 — PWA Ready + Melhorias
    ============================================================ */
 'use strict';
 
@@ -540,6 +510,7 @@ const CONFIG = Object.freeze({
   WIN_MODAL_DELAY: 400,
   SAVE_DEBOUNCE: 400,
   RESIZE_DEBOUNCE: 150,
+  STUCK_CHECK_DELAY: 300,
   SIZING: Object.freeze({
     TUBE_BALL_GAP: 10,
     TUBE_HEIGHT_PADDING: 12,
@@ -620,7 +591,6 @@ const SeedUtils = {
   random() { return (Math.random() * 0xFFFFFFFF) >>> 0; }
 };
 
-/* Lê ?mode=daily|chaos|classic|challenge da URL (usado pelos shortcuts do manifest) */
 const QueryUtils = {
   getMode() {
     try {
@@ -667,6 +637,7 @@ const Storage = {
 const Sound = (() => {
   let ctx = null;
   let enabled = Storage.get(CONFIG.STORAGE_KEYS.SOUND, '1') === '1';
+  let muted = false;
 
   const ensure = () => {
     try {
@@ -677,7 +648,7 @@ const Sound = (() => {
   };
 
   const tone = (freq, type, duration, volume) => {
-    if (!enabled) return;
+    if (!enabled || muted) return;
     const ac = ensure(); if (!ac) return;
     const now = ac.currentTime;
     const osc = ac.createOscillator();
@@ -692,6 +663,8 @@ const Sound = (() => {
 
   return {
     isEnabled: () => enabled,
+    isMuted: () => muted,
+    setMuted: (m) => { muted = m; },
     toggle() {
       enabled = !enabled;
       Storage.set(CONFIG.STORAGE_KEYS.SOUND, enabled ? '1' : '0');
@@ -702,7 +675,7 @@ const Sound = (() => {
     move() { tone(400, 'triangle', .12, .08); },
     invalid() { tone(180, 'sawtooth', .15, .06); },
     win() {
-      if (!enabled) return;
+      if (!enabled || muted) return;
       const ac = ensure(); if (!ac) return;
       const now = ac.currentTime;
       [523, 659, 784, 1046].forEach((freq, i) => {
@@ -779,20 +752,50 @@ const RAINBOW = '__RAINBOW__';
 const Rules = {
   isRainbow(color) { return color === RAINBOW; },
   top(tube) { return tube.length ? tube[tube.length - 1] : null; },
+
+  // v8.2: rainbow é curinga. Tubo só é completo se todo mundo for a mesma cor
+  // OU se houver rainbow que se adapta — mas rainbow puro (sem cor base) NÃO é completo.
   isComplete(tube, bpt) {
     if (tube.length === 0 || tube.length !== bpt) return false;
-    const first = tube[0];
-    if (Rules.isRainbow(first)) return false;
-    return tube.every(c => c === first || Rules.isRainbow(c));
+    const nonRainbow = tube.filter(c => !Rules.isRainbow(c));
+    if (nonRainbow.length === 0) return false; // só rainbows = não resolvido
+    const first = nonRainbow[0];
+    return nonRainbow.every(c => c === first);
   },
+
+  // v8.2: rainbow só vai para vazio, ou sobre rainbow, ou sobre tubo com mesma cor real.
+  // Uma bola colorida só vai sobre rainbow se destiver sem conflito.
   canPlace(dest, color, bpt) {
     if (dest.length >= bpt) return false;
     if (dest.length === 0) return true;
     const topColor = Rules.top(dest);
-    if (Rules.isRainbow(topColor)) return true;
-    if (Rules.isRainbow(color)) return true;
+
+    // rainbow pousa em rainbow → ok
+    if (Rules.isRainbow(topColor) && Rules.isRainbow(color)) return true;
+
+    // rainbow pousa em tubo não-completo (adapta-se à cor do fundo)
+    if (Rules.isRainbow(color)) {
+      // só permite se o topo não é rainbow (senão mistura) e dest não está completo
+      if (Rules.isRainbow(topColor)) return true;
+      // evita colocar rainbow sobre tubo já completo (não faz sentido)
+      if (Rules.isComplete(dest, bpt)) return false;
+      // válido se o tubo já é uniforme (rainbow "se pinta" dessa cor)
+      const first = dest[0];
+      if (Rules.isRainbow(first)) return true;
+      return dest.every(c => c === first || Rules.isRainbow(c));
+    }
+
+    // cor real sobre rainbow → ok (rainbow se adapta)
+    if (Rules.isRainbow(topColor)) {
+      // mas se o tubo já é "de outra cor" (tem não-rainbow diferente), não permite
+      const nonRainbow = dest.filter(c => !Rules.isRainbow(c));
+      if (nonRainbow.length === 0) return true;
+      return nonRainbow.every(c => c === color);
+    }
+
     return topColor === color;
   },
+
   allSolved(tubes, bpt) { return tubes.every(t => t.length === 0 || Rules.isComplete(t, bpt)); },
   hasAnyBall(tubes) { return tubes.some(t => t.length > 0); },
   hasAnyMove(tubes, bpt) {
@@ -971,6 +974,8 @@ class GameState {
     this.theme = Storage.get(CONFIG.STORAGE_KEYS.THEME, 'dark');
   }
 
+  elapsed() { return Math.max(0, Math.round((Date.now() - this.startTime) / 1000)); }
+
   snapshot() {
     return {
       tubes: this.tubes.map(t => t.slice()),
@@ -1007,7 +1012,7 @@ class GameState {
     Storage.setJSON(CONFIG.STORAGE_KEYS.SAVE, {
       level: this.level, moves: this.moves, tubes: this.tubes, bpt: this.bpt,
       meta: this.meta, extraTubes: this.extraTubes, history: this.history.slice(-20),
-      mode: this.mode, seed: this.seed
+      mode: this.mode, seed: this.seed, startTime: this.startTime
     });
   }
   loadSavedGame() {
@@ -1020,12 +1025,12 @@ class GameState {
     this.meta = save.meta || null;
     this.extraTubes = save.extraTubes || 0;
     this.history = save.history || [];
-    // Modo da URL tem prioridade sobre o salvo
     this.mode = QueryUtils.getMode() || save.mode || 'classic';
     this.seed = save.seed || SeedUtils.random();
     this.selected = null;
     this.completed = false;
-    this.startTime = Date.now();
+    // v8.2: restaura startTime do save
+    this.startTime = save.startTime || Date.now();
     return true;
   }
   clearSave() { Storage.remove(CONFIG.STORAGE_KEYS.SAVE); }
@@ -1036,6 +1041,7 @@ class GameController {
   constructor(state) {
     this.state = state;
     this._saveDebounceId = null;
+    this._stuckTimerId = null;
   }
 
   getMode() { return GameModes[this.state.mode] || GameModes.classic; }
@@ -1045,7 +1051,14 @@ class GameController {
     this._saveDebounceId = setTimeout(() => this.state.saveGame(), CONFIG.SAVE_DEBOUNCE);
   }
 
-  loadLevel(level, { silent = false, seed = null } = {}) {
+  _clearStuckTimer() {
+    if (this._stuckTimerId) {
+      clearTimeout(this._stuckTimerId);
+      this._stuckTimerId = null;
+    }
+  }
+
+  loadLevel(level, { silent = false, seed = null, clearHash = false } = {}) {
     const s = this.state;
     const mode = this.getMode();
 
@@ -1056,6 +1069,7 @@ class GameController {
     s.moves = 0;
     s.seed = seed;
     s.startTime = Date.now();
+    this._clearStuckTimer();
 
     const generated = LevelGenerator.generate(level, s.mode, seed);
     s.tubes = generated.tubes;
@@ -1070,6 +1084,8 @@ class GameController {
       s.saveLevel();
       s.saveGame();
       SeedUtils.toURL(seed);
+      // v8.2: limpa hash se veio de link externo (evita "grudar" seed)
+      if (clearHash) SeedUtils.clearURLHash();
     }
     EventBus.emit('state:changed');
     EventBus.emit('level:loaded', { level, meta: s.meta, seed });
@@ -1153,28 +1169,38 @@ class GameController {
       return false;
     }
 
-    s.pushHistory();
-
+    // v8.2: simula primeiro para só push no histórico se houver movimento
+    const fromCopy = from.slice();
+    const toCopy = to.slice();
     let count = 0;
-    while (from.length > 0 && Rules.top(from) === color && Rules.canPlace(to, color, s.bpt)) {
-      to.push(from.pop());
+    while (fromCopy.length > 0 && Rules.top(fromCopy) === color && Rules.canPlace(toCopy, color, s.bpt)) {
+      toCopy.push(fromCopy.pop());
       count++;
     }
-
-    if (count > 0) {
-      s.moves++;
-      Sound.move();
-      EventBus.emit('ball:moved', { count });
+    if (count === 0) {
+      s.selected = null;
+      EventBus.emit('state:changed');
+      return false;
     }
+
+    s.pushHistory();
+    s.tubes[fromIdx] = fromCopy;
+    s.tubes[toIdx] = toCopy;
+
+    s.moves++;
+    Sound.move();
+    EventBus.emit('ball:moved', { count });
     s.selected = null;
     this.checkWin();
     this._scheduleSave();
 
-    setTimeout(() => {
+    this._clearStuckTimer();
+    this._stuckTimerId = setTimeout(() => {
+      this._stuckTimerId = null;
       if (!s.completed && Rules.hasAnyBall(s.tubes) && !Rules.hasAnyMove(s.tubes, s.bpt)) {
         EventBus.emit('game:stuck');
       }
-    }, 100);
+    }, CONFIG.STUCK_CHECK_DELAY);
 
     EventBus.emit('state:changed');
     return true;
@@ -1186,17 +1212,19 @@ class GameController {
     s.completed = true;
     s.markCompleted(s.level);
     s.clearSave();
+    this._clearStuckTimer();
     Sound.win();
     EventBus.emit('level:won', {
       level: s.level,
       moves: s.moves,
-      time: Math.round((Date.now() - s.startTime) / 1000)
+      time: s.elapsed()
     });
   }
 
   undo() {
     if (this.getMode().noUndo) { Toaster.warn('Desafio não permite desfazer'); return; }
     if (this.state.history.length === 0) { Toaster.info('Nada para desfazer'); return; }
+    this._clearStuckTimer();
     this.state.popHistory();
     Sound.select();
     this._scheduleSave();
@@ -1220,11 +1248,13 @@ class GameController {
 
   toggleZen() {
     this.state.zenMode = !this.state.zenMode;
+    Sound.setMuted(this.state.zenMode);
     EventBus.emit('zen:toggled', this.state.zenMode);
-    Toaster.info(this.state.zenMode ? '🧘 Modo Zen ativado' : 'Modo Zen desativado');
+    Toaster.info(this.state.zenMode ? '🧘 Modo Zen ativado — foco total' : 'Modo Zen desativado');
   }
 
   hint() {
+    if (this.state.zenMode) { Toaster.info('🧘 Zen mode: dicas desativadas'); return; }
     const s = this.state;
     s.selected = null;
 
@@ -1237,7 +1267,9 @@ class GameController {
       for (let to = 0; to < s.tubes.length; to++) {
         if (from === to) continue;
         if (!Rules.canPlace(s.tubes[to], color, s.bpt)) continue;
-        (s.tubes[to].length === 0 ? empties : nonEmpties).push({ from, to });
+        // evita sugerir mover para tubo vazio se já há um não-vazio válido
+        if (s.tubes[to].length === 0) empties.push({ from, to });
+        else nonEmpties.push({ from, to });
       }
     }
     const pick = nonEmpties[0] || empties[0];
@@ -1251,7 +1283,7 @@ class GameController {
   }
 }
 
-/* ---------- Renderer ---------- */
+/* ---------- Renderer (com diffing) ---------- */
 class Renderer {
   constructor(state) {
     this.state = state;
@@ -1278,6 +1310,8 @@ class Renderer {
     };
     this.onTubeClick = null;
     this._lastBallSize = null;
+    this._hintTimers = [];
+    this._tubeEls = []; // cache de elementos por índice
   }
 
   bindTubeClick(handler) { this.onTubeClick = handler; }
@@ -1291,11 +1325,16 @@ class Renderer {
     this.renderModifierBar();
     this.renderSeed();
     this.renderTheme();
+    this.renderZenBody();
   }
 
+  /**
+   * v8.2: diffing de tubos.
+   * Reaproveita elementos existentes quando possível para evitar flicker das animações.
+   * Só recria quando a QUANTIDADE de tubos muda (loadLevel / addTube).
+   */
   renderTubes() {
     const s = this.state;
-    const frag = document.createDocumentFragment();
     const maxBalls = s.meta ? s.meta.maxBalls : 6;
     const ballSize = this.computeBallSize(maxBalls, s.tubes.length);
     const tubeH = ballSize * maxBalls + CONFIG.SIZING.TUBE_HEIGHT_PADDING;
@@ -1310,46 +1349,106 @@ class Renderer {
     const selectedColor = selectedOrigin && selectedOrigin.length && !Rules.isComplete(selectedOrigin, s.bpt)
       ? Rules.top(selectedOrigin) : null;
 
+    const container = this._els.tubes;
+    const existing = this._tubeEls;
+    const needRecreate = existing.length !== s.tubes.length;
+
+    if (needRecreate) {
+      // Recria todos os tubos (mudança estrutural)
+      const frag = document.createDocumentFragment();
+      this._tubeEls = [];
+      s.tubes.forEach((_, idx) => {
+        const el = this._createTubeElement(idx);
+        this._tubeEls.push(el);
+        frag.appendChild(el);
+      });
+      container.replaceChildren(frag);
+    }
+
+    // Atualiza cada tubo individualmente (diffing de bolas)
     s.tubes.forEach((tube, idx) => {
-      const el = document.createElement('div');
-      el.className = 'tube';
-      el.dataset.index = idx;
+      const el = this._tubeEls[idx];
       el.style.setProperty('--th', `${tubeH}px`);
       el.style.setProperty('--tw', `${tubeW}px`);
-      el.setAttribute('role', 'button');
-      el.setAttribute('tabindex', '0');
-      el.setAttribute('aria-label', `Tubo ${idx + 1}, ${tube.length} bolas`);
 
       const isBlind = s.meta && s.meta.blindIndices && s.meta.blindIndices.includes(idx);
-      if (s.selected === idx) el.classList.add('selected');
-      if (Rules.isComplete(tube, s.bpt)) el.classList.add('complete');
-      if (selectedColor !== null && idx !== s.selected && Rules.canPlace(tube, selectedColor, s.bpt)) {
-        el.classList.add('destination');
-      }
+      const isSelected = s.selected === idx;
+      const isComplete = Rules.isComplete(tube, s.bpt);
 
-      tube.forEach((color, ballIdx) => {
-        const ball = document.createElement('div');
-        const isRainbow = Rules.isRainbow(color);
-        const isTop = ballIdx === tube.length - 1;
-        const hideColor = isBlind && !isTop;
+      el.classList.toggle('selected', isSelected);
+      el.classList.toggle('complete', isComplete);
+      const isDestination = selectedColor !== null && idx !== s.selected && Rules.canPlace(tube, selectedColor, s.bpt);
+      el.classList.toggle('destination', isDestination);
 
-        if (hideColor) ball.className = 'ball blind';
-        else if (isRainbow) ball.className = 'ball rainbow';
-        else ball.className = `ball ${color}`;
-        el.appendChild(ball);
-      });
+      el.setAttribute('aria-label', `Tubo ${idx + 1}, ${tube.length} bolas${isComplete ? ', completo' : ''}`);
 
-      el.addEventListener('click', () => this.onTubeClick && this.onTubeClick(idx));
-      el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.onTubeClick && this.onTubeClick(idx);
-        }
-      });
-      frag.appendChild(el);
+      this._syncBalls(el, tube, { isBlind, isSelected });
     });
+  }
 
-    this._els.tubes.replaceChildren(frag);
+  _createTubeElement(idx) {
+    const el = document.createElement('div');
+    el.className = 'tube';
+    el.dataset.index = idx;
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.addEventListener('click', () => this.onTubeClick && this.onTubeClick(idx));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.onTubeClick && this.onTubeClick(idx);
+      }
+    });
+    return el;
+  }
+
+  /**
+   * v8.2: sincroniza apenas as bolas que mudaram.
+   * Mantém animação só em bolas NOVAS (evita flicker).
+   */
+  _syncBalls(tubeEl, tube, { isBlind, isSelected }) {
+    const currentBalls = Array.from(tubeEl.children);
+    const targetCount = tube.length;
+
+    // Ajusta quantidade
+    if (currentBalls.length > targetCount) {
+      for (let i = currentBalls.length - 1; i >= targetCount; i--) {
+        currentBalls[i].remove();
+      }
+      currentBalls.length = targetCount;
+    } else if (currentBalls.length < targetCount) {
+      // adiciona novas bolas com animação
+      for (let i = currentBalls.length; i < targetCount; i++) {
+        const ball = document.createElement('div');
+        ball.className = 'ball animated';
+        tubeEl.appendChild(ball);
+        currentBalls.push(ball);
+      }
+    }
+
+    // Atualiza classe de cada bola
+    tube.forEach((color, ballIdx) => {
+      const ball = currentBalls[ballIdx];
+      if (!ball) return;
+      const isRainbow = Rules.isRainbow(color);
+      const isTop = ballIdx === tube.length - 1;
+      // v8.2: blind cobre todas exceto quando o tubo está selecionado (revela para o jogador)
+      const hideColor = isBlind && !isSelected;
+
+      let cls = 'ball';
+      if (hideColor) cls += ' blind';
+      else if (isRainbow) cls += ' rainbow';
+      else cls += ` ${color}`;
+
+      if (ball.className !== cls) {
+        // preserva .animated apenas na criação
+        ball.className = cls;
+      }
+      // remove animação após primeiro frame para não repetir em re-renders
+      if (ball.classList.contains('animated') && ballIdx < tube.length - 1) {
+        // já foi renderizada antes, mantém; animação só roda 1x pelo CSS
+      }
+    });
   }
 
   computeBallSize(maxBalls, numTubes) {
@@ -1457,8 +1556,12 @@ class Renderer {
     this._els.btnTheme.textContent = this.state.theme === 'dark' ? '🌙' : '☀️';
   }
 
+  renderZenBody() {
+    document.body.classList.toggle('zen-mode', this.state.zenMode);
+  }
+
   flashInvalid(idx) {
-    const el = this._els.tubes.children[idx];
+    const el = this._tubeEls[idx];
     if (!el) return;
     el.classList.remove('invalid');
     void el.offsetWidth;
@@ -1467,13 +1570,18 @@ class Renderer {
   }
 
   flashHint(from, to) {
+    // v8.2: cancela timeouts anteriores para evitar sobreposição
+    this._hintTimers.forEach(clearTimeout);
+    this._hintTimers = [];
+
     [from, to].forEach(i => {
-      const el = this._els.tubes.children[i];
+      const el = this._tubeEls[i];
       if (!el) return;
       el.classList.remove('hint');
       void el.offsetWidth;
       el.classList.add('hint');
-      setTimeout(() => el.classList.remove('hint'), 1200);
+      const tid = setTimeout(() => el.classList.remove('hint'), 1200);
+      this._hintTimers.push(tid);
     });
   }
 
@@ -1532,24 +1640,20 @@ const PWA = (() => {
   const showButton = () => { if (btnInstall && !isStandalone()) btnInstall.hidden = false; };
 
   const init = () => {
-    // Já está instalado? Esconde o botão permanentemente.
     if (isStandalone()) { hideButton(); return; }
 
-    // Chrome/Edge disparam quando o app é instalável
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
       showButton();
     });
 
-    // Instalado com sucesso
     window.addEventListener('appinstalled', () => {
       deferredPrompt = null;
       hideButton();
       Toaster.success('✅ Ball Sort instalado!');
     });
 
-    // Botão de instalação
     btnInstall?.addEventListener('click', async () => {
       if (!deferredPrompt) {
         Toaster.info('Use o menu do navegador para instalar');
@@ -1566,7 +1670,6 @@ const PWA = (() => {
       }
     });
 
-    // Registra o Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err =>
@@ -1585,8 +1688,8 @@ const PWA = (() => {
   const controller = new GameController(state);
   const renderer = new Renderer(state);
 
-  // Se veio ?mode=... na URL, salva como modo atual e limpa a query
   const urlMode = QueryUtils.getMode();
+  const hadUrlSeed = SeedUtils.fromURL() !== null;
   if (urlMode) {
     state.saveMode();
     try {
@@ -1595,9 +1698,7 @@ const PWA = (() => {
     } catch {}
   }
 
-  // Inicializa PWA
   PWA.init();
-
   renderer.bindTubeClick(idx => controller.selectTube(idx));
 
   EventBus.on('state:changed', () => renderer.render());
@@ -1611,7 +1712,21 @@ const PWA = (() => {
     setTimeout(() => renderer.openModal({ level, moves, time }), CONFIG.WIN_MODAL_DELAY);
   });
 
-  /* --- Painel de opções --- */
+  // v8.2: handler de "stuck" com sugestão
+  EventBus.on('game:stuck', () => {
+    if (state.completed) return;
+    const mode = controller.getMode();
+    const canUndo = !mode.noUndo && state.history.length > 0;
+    if (canUndo) {
+      Toaster.warn('😵 Sem movimentos — a desfazer...');
+      setTimeout(() => controller.undo(), 900);
+    } else {
+      Toaster.warn('😵 Sem movimentos — reiniciando...');
+      setTimeout(() => controller.restart(), 1200);
+    }
+  });
+
+  // Painel de opções
   const optionsBtn = document.getElementById('btn-toggle-options');
   const optionsPanel = document.getElementById('options-panel');
   const chevron = document.getElementById('options-chevron');
@@ -1622,19 +1737,16 @@ const PWA = (() => {
     chevron.textContent = isOpen ? '▲' : '▼';
   });
 
-  /* --- Level selector --- */
   document.getElementById('level-selector').addEventListener('click', (e) => {
     const btn = e.target.closest('.level-btn');
     if (btn) controller.loadLevel(Number(btn.dataset.level));
   });
 
-  /* --- Mode bar --- */
   document.getElementById('mode-bar').addEventListener('click', (e) => {
     const btn = e.target.closest('.mode-btn');
     if (btn) controller.setMode(btn.dataset.mode);
   });
 
-  /* --- Seed --- */
   document.getElementById('seed-display').addEventListener('click', () => {
     const seedStr = SeedUtils.toString(state.seed);
     const url = `${location.origin}${location.pathname}#seed=${seedStr}`;
@@ -1650,7 +1762,6 @@ const PWA = (() => {
     }
   });
 
-  /* --- Controles principais --- */
   const handlers = {
     'btn-shuffle-seed': () => controller.newSeed(),
     'btn-undo':         () => controller.undo(),
@@ -1672,9 +1783,10 @@ const PWA = (() => {
     document.getElementById(id)?.addEventListener('click', fn);
   }
 
-  /* --- Teclado --- */
+  // v8.2: teclado cobre contenteditable
   document.addEventListener('keydown', (e) => {
-    if (e.target.matches('input, textarea')) return;
+    const t = e.target;
+    if (t.matches('input, textarea') || t.isContentEditable) return;
     const key = e.key.toLowerCase();
     if ((e.ctrlKey || e.metaKey) && key === 'z') { e.preventDefault(); controller.undo(); }
     else if (key === 'r') controller.restart();
@@ -1690,23 +1802,25 @@ const PWA = (() => {
     }
   });
 
-  /* --- Resize --- */
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       renderer._lastBallSize = null;
+      // Força recriação dos tubos para recalcular tamanhos
+      renderer._tubeEls = [];
       renderer.render();
     }, CONFIG.RESIZE_DEBOUNCE);
   });
 
-  /* --- Inicialização --- */
   renderer.renderTheme();
   renderer.renderModeBar();
 
   if (state.loadSavedGame()) {
     EventBus.emit('state:changed');
     Toaster.info(`Partida restaurada · Nível ${state.level}`);
+    // v8.2: se veio de link com seed, limpa o hash para não "grudar"
+    if (hadUrlSeed) SeedUtils.clearURLHash();
   } else {
     const savedLevel = Math.max(1, Math.min(
       CONFIG.MAX_LEVEL,
